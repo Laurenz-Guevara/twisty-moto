@@ -27,7 +27,7 @@ export default function NavigationBar() {
         <div className="flex items-center gap-2 mr-4">
           <Link href="/">
             <span className="text-xl font-bold hidden md:block">
-              MotoRoutes
+              Twisty Moto
             </span>
           </Link>
         </div>

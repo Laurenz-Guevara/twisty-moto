@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Motoroutes",
+  title: "Twisty Moto",
   description:
     "The ultimate interactive map for motorbike enthusiasts, featuring the best twisty roads, scenic routes, and must-visit waypoints.",
 };
