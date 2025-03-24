@@ -1,40 +1,20 @@
 "use client";
 
-import * as React from "react";
-import { ChevronsUpDown, Plus } from "lucide-react";
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
 } from "@/components/ui/sidebar";
 
-export function SidebarHeaderContent({
-  teams,
-}: {
-  teams: {
-    name: string;
-    logo: React.ElementType;
-    plan: string;
-  }[];
-}) {
-  const { isMobile } = useSidebar();
-  const [activeTeam, setActiveTeam] = React.useState(teams[0]);
+import { GalleryVerticalEnd } from "lucide-react";
 
-  if (!activeTeam) {
-    return null;
-  }
+const activeTeam = {
+  name: "Twisty Moto",
+  logo: GalleryVerticalEnd,
+  plan: "Non Member",
+};
 
+export function SidebarHeaderContent() {
   return (
     <SidebarMenu>
       <SidebarMenuItem>
