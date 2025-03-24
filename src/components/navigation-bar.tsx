@@ -12,11 +12,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
-
+import { Separator } from "@/components/ui/separator";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 
 import { Button } from "@/components/ui/button";
+// import { SidebarTrigger } from "@/components/ui/sidebar";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { useEffect, useState } from "react";
@@ -32,16 +33,20 @@ export default function NavigationBar() {
   }, [user]);
 
   return (
-    <header className="border-b bg-background z-10">
+    <header className="border-b bg-background z-10 w-full">
       <div className="flex h-16 items-center px-4">
-        <div className="flex items-center gap-2 mr-4">
-          <Link href="/">
-            <span className="text-xl font-bold hidden md:block">
-              Twisty Moto
-            </span>
+        {/* <SidebarTrigger className="mr-4" /> */}
+        {/* <Separator orientation="vertical" /> */}
+        <nav className="flex items-center space-x-4 lg:space-x-6 mr-6">
+          <Link
+            href={"/discover"}
+            className={buttonVariants({
+              size: "sm",
+              variant: "ghost",
+            })}
+          >
+            Home
           </Link>
-        </div>
-        <nav className="flex items-center space-x-4 lg:space-x-6 mx-6">
           <Link
             href={"/discover"}
             className={buttonVariants({
@@ -70,13 +75,13 @@ export default function NavigationBar() {
             Community
           </Link>
           <Link
-            href={"/profile/trip-planner"}
+            href={"/route-editor"}
             className={buttonVariants({
               size: "sm",
               variant: "ghost",
             })}
           >
-            Trip Planner
+            Route Editor
           </Link>
         </nav>
 
