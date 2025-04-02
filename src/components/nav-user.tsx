@@ -1,15 +1,6 @@
 "use client";
 
-import {
-  BadgeCheck,
-  Bell,
-  ChevronsUpDown,
-  CreditCard,
-  LogOut,
-  Settings,
-  Sparkles,
-  User,
-} from "lucide-react";
+import { ChevronsUpDown, LogOut, Settings, User } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -27,17 +18,19 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { Skeleton } from "@/components/ui/skeleton";
 
-// import { useUser } from "@auth0/nextjs-auth0/client";
+import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import Link from "next/link";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
-  // const { user, error, isLoading } = useUser();
+  const { isLoading, user, error } = useKindeBrowserClient();
+  if (isLoading) {
+    return <Skeleton className="w-full h-12 rounded-md" />;
+  }
+  if (error) return <div>{error}</div>;
 
-  // if (isLoading) return <div>Loading...</div>;
-  // if (error) return <div>{error.message}</div>;
-  //
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -48,15 +41,15 @@ export function NavUser() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                {/* <AvatarImage */}
-                {/*   src={user?.picture as string} */}
-                {/*   alt={user?.name as string} */}
-                {/* /> */}
+                <AvatarImage
+                  src={user?.picture as string}
+                  alt={user?.given_name as string}
+                />
                 <AvatarFallback className="rounded-lg">CN</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                {/*   <span className="truncate font-medium">{user?.name}</span> */}
-                {/*   <span className="truncate text-xs">{user?.email}</span> */}
+                <span className="truncate font-medium">{user?.given_name}</span>
+                <span className="truncate text-xs">{user?.email}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
@@ -70,15 +63,17 @@ export function NavUser() {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  {/* <AvatarImage */}
-                  {/*   src={user?.picture as string} */}
-                  {/*   alt={user?.name as string} */}
-                  {/* /> */}
+                  <AvatarImage
+                    src={user?.picture as string}
+                    alt={user?.given_name as string}
+                  />
                   <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  {/* <span className="truncate font-medium">{user?.name}</span> */}
-                  {/* <span className="truncate text-xs">{user?.email}</span> */}
+                  <span className="truncate font-medium">
+                    {user?.given_name}
+                  </span>
+                  <span className="truncate text-xs">{user?.email}</span>
                 </div>
               </div>
             </DropdownMenuLabel>

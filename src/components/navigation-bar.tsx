@@ -1,6 +1,5 @@
 "use client";
 
-// import { useUser } from "@auth0/nextjs-auth0/client";
 import { Bell, LogOut, Settings, User } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -12,31 +11,22 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Separator } from "@/components/ui/separator";
+import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-
 import { Button } from "@/components/ui/button";
-// import { SidebarTrigger } from "@/components/ui/sidebar";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
-import { useEffect, useState } from "react";
 
 export default function NavigationBar() {
   const { setTheme } = useTheme();
-  // const { user } = useUser();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // useEffect(() => {
-  //   if (user) setIsLoggedIn(true);
-  //   else setIsLoggedIn(false);
-  // }, [user]);
+  const { user, error } = useKindeBrowserClient();
+  if (error) return <div>{error}</div>;
 
   return (
     <header className="border-b bg-background z-10 w-full">
       <div className="flex h-16 items-center px-4">
-        {/* <SidebarTrigger className="mr-4" /> */}
-        {/* <Separator orientation="vertical" /> */}
         <nav className="flex items-center space-x-4 lg:space-x-6 mr-6">
           <Link
             href={"/discover"}
@@ -86,7 +76,7 @@ export default function NavigationBar() {
         </nav>
 
         <div className="ml-auto flex items-center space-x-4">
-          {isLoggedIn &&
+          {user &&
             (
               <Button
                 variant="ghost"
@@ -120,7 +110,7 @@ export default function NavigationBar() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          {isLoggedIn
+          {user
             ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -133,26 +123,31 @@ export default function NavigationBar() {
                         src="/placeholder.svg?height=32&width=32"
                         alt="User Avatar"
                       />
-                      {/*   <AvatarFallback> */}
-                      {/*     {user && user.name && user.name[0] !== undefined */}
-                      {/*       ? user.name[0] */}
-                      {/*       : "?"} */}
-                      {/*   </AvatarFallback> */}
+                      <AvatarFallback>
+                        {user
+                          ? (
+                            <img
+                              src={user.picture as string}
+                              alt={user.given_name as string}
+                            />
+                          )
+                          : "?"}
+                      </AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56" align="end" forceMount>
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
-                      {/* {user && user.name && user.name !== undefined */}
-                      {/*   ? ( */}
-                      {/*     <p className="text-sm font-medium leading-none"> */}
-                      {/*       {user?.name} */}
-                      {/*     </p> */}
-                      {/*   ) */}
-                      {/*   : ( */}
-                      {/*     <Skeleton className="w-[100px] h-[20px] rounded-full" /> */}
-                      {/*   )} */}
+                      {user
+                        ? (
+                          <p className="text-sm font-medium leading-none">
+                            {user.given_name}
+                          </p>
+                        )
+                        : (
+                          <Skeleton className="w-[100px] h-[20px] rounded-full" />
+                        )}
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
