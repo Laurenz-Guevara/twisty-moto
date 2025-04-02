@@ -1,6 +1,6 @@
 "use client";
 
-import { useUser } from "@auth0/nextjs-auth0/client";
+// import { useUser } from "@auth0/nextjs-auth0/client";
 import { Bell, LogOut, Settings, User } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -24,13 +24,13 @@ import { useEffect, useState } from "react";
 
 export default function NavigationBar() {
   const { setTheme } = useTheme();
-  const { user } = useUser();
+  // const { user } = useUser();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  useEffect(() => {
-    if (user) setIsLoggedIn(true);
-    else setIsLoggedIn(false);
-  }, [user]);
+  // useEffect(() => {
+  //   if (user) setIsLoggedIn(true);
+  //   else setIsLoggedIn(false);
+  // }, [user]);
 
   return (
     <header className="border-b bg-background z-10 w-full">
@@ -133,26 +133,26 @@ export default function NavigationBar() {
                         src="/placeholder.svg?height=32&width=32"
                         alt="User Avatar"
                       />
-                      <AvatarFallback>
-                        {user && user.name && user.name[0] !== undefined
-                          ? user.name[0]
-                          : "?"}
-                      </AvatarFallback>
+                      {/*   <AvatarFallback> */}
+                      {/*     {user && user.name && user.name[0] !== undefined */}
+                      {/*       ? user.name[0] */}
+                      {/*       : "?"} */}
+                      {/*   </AvatarFallback> */}
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56" align="end" forceMount>
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
-                      {user && user.name && user.name !== undefined
-                        ? (
-                          <p className="text-sm font-medium leading-none">
-                            {user?.name}
-                          </p>
-                        )
-                        : (
-                          <Skeleton className="w-[100px] h-[20px] rounded-full" />
-                        )}
+                      {/* {user && user.name && user.name !== undefined */}
+                      {/*   ? ( */}
+                      {/*     <p className="text-sm font-medium leading-none"> */}
+                      {/*       {user?.name} */}
+                      {/*     </p> */}
+                      {/*   ) */}
+                      {/*   : ( */}
+                      {/*     <Skeleton className="w-[100px] h-[20px] rounded-full" /> */}
+                      {/*   )} */}
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />

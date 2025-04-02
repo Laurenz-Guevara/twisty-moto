@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { UserProvider } from "@auth0/nextjs-auth0/client";
 import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 
@@ -27,20 +26,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <UserProvider>
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
         >
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            {children}
-          </ThemeProvider>
-        </body>
-      </UserProvider>
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   );
 }
