@@ -1,6 +1,5 @@
 "use client";
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
-import { Button } from "@/components/ui/button";
 
 export default function Home() {
   const { isLoading, user, error } = useKindeBrowserClient();
@@ -8,8 +7,8 @@ export default function Home() {
   if (error) return <div>{error}</div>;
 
   return (
-    <div>
-      <h1>Twisty Moto</h1>
+    <div className="bg-muted/50 rounded-xl w-full h-full overflow-hidden">
+      <h1>Hello World</h1>
     </div>
   );
 }
