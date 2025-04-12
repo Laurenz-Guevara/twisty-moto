@@ -33,7 +33,9 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
       <div className="container mx-auto">
         <div className="space-y-6 py-10 px-7 pb-16">
           <div className="space-y-0.5">
-            <h2 className="text-2xl font-bold tracking-tight">Settings</h2>
+            <h2 className="text-2xl font-bold tracking-tight">
+              Account Management
+            </h2>
             <p className="text-muted-foreground">
               Manage your account settings and payment preferences.
             </p>

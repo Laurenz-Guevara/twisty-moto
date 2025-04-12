@@ -159,7 +159,7 @@ export default function NavigationBar() {
                   <Link href="/account/settings">
                     <DropdownMenuItem className="hover:cursor-pointer">
                       <Settings className="mr-2 h-4 w-4" />
-                      <span>Settings!!!</span>
+                      <span>Settings</span>
                     </DropdownMenuItem>
                   </Link>
                   <DropdownMenuSeparator />
