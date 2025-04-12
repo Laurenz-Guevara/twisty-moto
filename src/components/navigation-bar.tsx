@@ -21,7 +21,7 @@ import { buttonVariants } from "@/components/ui/button";
 export default function NavigationBar() {
   const { setTheme } = useTheme();
 
-  const { user, error } = useKindeBrowserClient();
+  const { user, error, isAuthenticated } = useKindeBrowserClient();
   if (error) return <div>{error}</div>;
 
   return (
@@ -47,32 +47,36 @@ export default function NavigationBar() {
             Discover
           </Link>
           <Link
-            href={"/my-routes"}
-            className={buttonVariants({
-              size: "sm",
-              variant: "ghost",
-            })}
-          >
-            My Routes
-          </Link>
-          <Link
             href={"/community"}
             className={buttonVariants({
               size: "sm",
               variant: "ghost",
             })}
           >
-            Community
+            Community Routes
           </Link>
-          <Link
-            href={"/route-editor"}
-            className={buttonVariants({
-              size: "sm",
-              variant: "ghost",
-            })}
-          >
-            Route Editor
-          </Link>
+          {isAuthenticated && (
+            <>
+              <Link
+                href={"/my-routes"}
+                className={buttonVariants({
+                  size: "sm",
+                  variant: "ghost",
+                })}
+              >
+                My Routes
+              </Link>
+              <Link
+                href={"/route-editor"}
+                className={buttonVariants({
+                  size: "sm",
+                  variant: "ghost",
+                })}
+              >
+                Route Editor
+              </Link>
+            </>
+          )}
         </nav>
 
         <div className="ml-auto flex items-center space-x-4">
@@ -110,7 +114,7 @@ export default function NavigationBar() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          {user
+          {isAuthenticated && user
             ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

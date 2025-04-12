@@ -31,7 +31,7 @@ export function NavUser() {
   }
   if (error) return <div>{error}</div>;
 
-  return (
+  return user && (
     <SidebarMenu>
       <SidebarMenuItem>
         <DropdownMenu>
@@ -42,14 +42,16 @@ export function NavUser() {
             >
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage
-                  src={user?.picture as string}
-                  alt={user?.given_name as string}
+                  src={user.picture as string}
+                  alt={user.given_name as string}
                 />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <AvatarFallback className="rounded-lg">
+                  <Skeleton className="h-12 w-12 rounded-full" />
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user?.given_name}</span>
-                <span className="truncate text-xs">{user?.email}</span>
+                <span className="truncate font-medium">{user.given_name}</span>
+                <span className="truncate text-xs">{user.email}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
@@ -64,16 +66,16 @@ export function NavUser() {
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage
-                    src={user?.picture as string}
-                    alt={user?.given_name as string}
+                    src={user.picture as string}
+                    alt={user.given_name as string}
                   />
                   <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">
-                    {user?.given_name}
+                    {user.given_name}
                   </span>
-                  <span className="truncate text-xs">{user?.email}</span>
+                  <span className="truncate text-xs">{user.email}</span>
                 </div>
               </div>
             </DropdownMenuLabel>
