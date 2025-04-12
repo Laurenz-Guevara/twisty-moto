@@ -185,7 +185,7 @@ export default function NavigationBar() {
                 </Link>
 
                 <Link
-                  href={"/api/auth/sign-up"}
+                  href={"/api/auth/register"}
                   className={buttonVariants({
                     size: "sm",
                     variant: "ghost",
