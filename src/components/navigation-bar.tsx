@@ -29,13 +29,13 @@ export default function NavigationBar() {
       <div className="flex h-16 items-center px-4">
         <nav className="flex items-center space-x-4 lg:space-x-6 mr-6">
           <Link
-            href={"/discover"}
+            href={"/"}
             className={buttonVariants({
               size: "sm",
               variant: "ghost",
             })}
           >
-            Home
+            Twisty Moto
           </Link>
           <Link
             href={"/discover"}
