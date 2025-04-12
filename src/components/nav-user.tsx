@@ -78,7 +78,7 @@ export function NavUser() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <Link href="/profile">
+            <Link href="/account/profile">
               <DropdownMenuItem className="hover:cursor-pointer">
                 <User className="mr-2 h-4 w-4" />Profile
               </DropdownMenuItem>

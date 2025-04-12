@@ -26,7 +26,7 @@ export default function NavigationBar() {
 
   return (
     <header className="border-b bg-background z-10 w-full">
-      <div className="flex h-16 items-center px-4">
+      <div className="container mx-auto flex h-16 items-center px-4">
         <nav className="flex items-center space-x-4 lg:space-x-6 mr-6">
           <Link
             href={"/"}
@@ -47,7 +47,7 @@ export default function NavigationBar() {
             Discover
           </Link>
           <Link
-            href={"/profile/my-routes"}
+            href={"/my-routes"}
             className={buttonVariants({
               size: "sm",
               variant: "ghost",
@@ -151,7 +151,7 @@ export default function NavigationBar() {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <Link href="/profile">
+                  <Link href="account/profile">
                     <DropdownMenuItem className="hover:cursor-pointer">
                       <User className="mr-2 h-4 w-4" />Profile
                     </DropdownMenuItem>
