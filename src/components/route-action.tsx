@@ -56,8 +56,8 @@ export function RouteAction() {
               >
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
-                    <SidebarMenuButton>
-                      <span>Actions</span>
+                    <SidebarMenuButton className="hover:cursor-pointer">
+                      <span>More Actions</span>
                       <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
