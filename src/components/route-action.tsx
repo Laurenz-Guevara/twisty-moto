@@ -25,15 +25,23 @@ import {
 import {
   ChevronRight,
   Flag,
-  MapPin,
+  // MapPin,
   Plus,
   RefreshCcw,
   Save,
-  Share2,
+  // Share2,
   X,
 } from "lucide-react";
 
 export function RouteAction() {
+  function setRouteName(e: string) {
+    console.log("Set Route Name", e);
+  }
+
+  function setRouteDescription(e: string) {
+    console.log("Set Route Description", e);
+  }
+
   return (
     <>
       <SidebarContent>
@@ -58,7 +66,6 @@ export function RouteAction() {
                       <SidebarMenuSubItem>
                         <SidebarMenuSubButton
                           onClick={() => console.log("Create New Route")}
-                          tooltip="Create New Route"
                         >
                           <Plus className="h-4 w-4" />
                           <span>Create New Route</span>
@@ -67,7 +74,6 @@ export function RouteAction() {
                       <SidebarMenuSubItem>
                         <SidebarMenuSubButton
                           onClick={() => console.log("Save Route")}
-                          tooltip="Save Route"
                         >
                           <Save className="h-4 w-4" />
                           <span>Save Route</span>
@@ -76,7 +82,6 @@ export function RouteAction() {
                       <SidebarMenuSubItem>
                         <SidebarMenuSubButton
                           onClick={() => console.log("Reset Route")}
-                          tooltip="Reset Route"
                         >
                           <RefreshCcw className="h-4 w-4" />
                           <span>Reset Route</span>

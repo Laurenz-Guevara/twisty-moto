@@ -11,8 +11,8 @@ export default function Home() {
             Discover Amazing Motorbike Routes
           </h1>
           <p className="max-w-[700px] text-muted-foreground md:text-xl">
-            Explore the world's most scenic roads and share your own adventures
-            with fellow riders.
+            Explore the world&apos;s most scenic roads and share your own
+            adventures with fellow riders.
           </p>
         </div>
       </section>

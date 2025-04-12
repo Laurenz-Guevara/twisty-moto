@@ -8,8 +8,8 @@ const Map = () => {
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
 
-  const [center, setCenter] = useState<LngLatLike>([-1, 51]);
-  const [zoom, setZoom] = useState(7.8);
+  const [center] = useState<LngLatLike>([-1, 51]);
+  const [zoom] = useState(7.8);
 
   useEffect(() => {
     if (mapContainerRef.current) {
@@ -38,7 +38,7 @@ const Map = () => {
         }
       };
     }
-  }, []);
+  }, [center, zoom]);
 
   return (
     <div

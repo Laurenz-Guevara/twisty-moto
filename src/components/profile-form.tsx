@@ -27,6 +27,7 @@ const formSchema = z.object({
 });
 
 function checkUsernameExists(username: string) {
+  console.log(username);
   return false;
 }
 
