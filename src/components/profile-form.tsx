@@ -15,6 +15,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { getUsername } from "@/db/database";
+import { useEffect, useState } from "react";
+import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 
 const formSchema = z.object({
   username: z.string()
@@ -32,12 +35,29 @@ function checkUsernameExists(username: string) {
 }
 
 export default function ProfileForm() {
+  const { user, isAuthenticated } = useKindeBrowserClient();
+  // TODO: Use tanstack query for db request
+  const [activeUser, setActiveUser] = useState<{ username: string | null }>();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       username: "",
     },
   });
+
+  async function getUserFromUsers() {
+    const currentUser = await getUsername(user.id);
+    if (currentUser) {
+      setActiveUser(currentUser[0]);
+    }
+  }
+
+  useEffect(() => {
+    if (user?.id && isAuthenticated) {
+      getUserFromUsers();
+    }
+  }, [user]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
@@ -53,7 +73,7 @@ export default function ProfileForm() {
             <FormItem>
               <FormLabel>Username</FormLabel>
               <FormControl>
-                <Input placeholder="shadcn" {...field} />
+                <Input placeholder={activeUser?.username!} {...field} />
               </FormControl>
               <FormDescription>
                 This is your public display name.
