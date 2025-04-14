@@ -146,7 +146,7 @@ export default function NavigationBar() {
                       {user
                         ? (
                           <p className="text-sm font-medium leading-none">
-                            {user.given_name}
+                            {user.given_name || user.email}
                           </p>
                         )
                         : (
