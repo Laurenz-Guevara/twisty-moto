@@ -52,7 +52,7 @@ export default async function RootLayout({
     );
 }
 
-export function BreadcrumbNavigation() {
+function BreadcrumbNavigation() {
   return (
     <Breadcrumb>
       <BreadcrumbList>

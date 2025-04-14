@@ -57,7 +57,7 @@ export default function ProfileForm() {
     if (user?.id && isAuthenticated) {
       getUserFromUsers();
     }
-  }, [user]);
+  }, [user, isAuthenticated]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
@@ -73,7 +73,12 @@ export default function ProfileForm() {
             <FormItem>
               <FormLabel>Username</FormLabel>
               <FormControl>
-                <Input placeholder={activeUser?.username!} {...field} />
+                <Input
+                  placeholder={activeUser?.username
+                    ? activeUser.username
+                    : "username"}
+                  {...field}
+                />
               </FormControl>
               <FormDescription>
                 This is your public display name.
