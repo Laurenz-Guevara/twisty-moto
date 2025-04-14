@@ -167,7 +167,7 @@ export default function NavigationBar() {
                     </DropdownMenuItem>
                   </Link>
                   <DropdownMenuSeparator />
-                  <Link href="/api/auth/logout">
+                  <Link prefetch={false} href="/api/auth/logout">
                     <DropdownMenuItem className="hover:cursor-pointer">
                       <LogOut className="mr-2 h-4 w-4" />
                       Logout
@@ -179,7 +179,8 @@ export default function NavigationBar() {
             : (
               <>
                 <Link
-                  href={"/api/auth/login"}
+                  prefetch={false}
+                  href={"/api/auth/register"}
                   className={buttonVariants({
                     size: "sm",
                     variant: "ghost",
@@ -189,6 +190,7 @@ export default function NavigationBar() {
                 </Link>
 
                 <Link
+                  prefetch={false}
                   href={"/api/auth/register"}
                   className={buttonVariants({
                     size: "sm",

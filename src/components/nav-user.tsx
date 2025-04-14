@@ -94,7 +94,7 @@ export function NavUser() {
               </DropdownMenuItem>
             </Link>
             <DropdownMenuSeparator />
-            <Link href="/api/auth/logout">
+            <Link prefetch={false} href="/api/auth/logout">
               <DropdownMenuItem className="hover:cursor-pointer">
                 <LogOut className="mr-2 h-4 w-4" />
                 Logout
