@@ -134,7 +134,7 @@ export default function ProfileForm() {
                 />
               </FormControl>
               <FormDescription>
-                This is your real First Name.
+                This is your first name (this won’t be publicly shown)
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -158,7 +158,7 @@ export default function ProfileForm() {
                 />
               </FormControl>
               <FormDescription>
-                This is your real First Name.
+                This is your last name (this won’t be publicly shown)
               </FormDescription>
               <FormMessage />
             </FormItem>
