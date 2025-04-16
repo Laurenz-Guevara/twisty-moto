@@ -153,7 +153,7 @@ export default function ProfileForm() {
               </FormLabel>
               <FormControl>
                 <Input
-                  placeholder={"First Name"}
+                  placeholder={"Last Name"}
                   {...field}
                 />
               </FormControl>
