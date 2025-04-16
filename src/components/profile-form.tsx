@@ -86,7 +86,9 @@ export default function ProfileForm() {
   }, [data]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (data?.username !== values.username) {
+    if (isLoading || !data) return;
+
+    if (data.username.toLowerCase() !== values.username.toLowerCase()) {
       const usernameExists = await checkUsernameExists(values.username)
         .then(
           (exists) => {

@@ -2,7 +2,7 @@
 
 import { db } from "@/db";
 import { users } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { ToastVariant } from "./enums";
 import { NeonDbError } from "@neondatabase/serverless";
 
@@ -25,10 +25,10 @@ export const checkUsernameExists = async (username: string) => {
   const user = await db
     .select({ username: users.username })
     .from(users)
-    .where(eq(users.username, username))
+    .where(sql`LOWER(${users.username}) = LOWER(${username})`)
     .limit(1);
 
-  if (user[0]?.username === username) return true;
+  if (user[0]?.username.toLowerCase() === username.toLowerCase()) return true;
   return false;
 };
 
