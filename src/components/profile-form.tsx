@@ -16,9 +16,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { getUsername } from "@/db/database";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 const formSchema = z.object({
   username: z.string()
@@ -70,12 +70,14 @@ export default function ProfileForm() {
   const { data } = useQuery({
     queryKey: ["user"],
     queryFn: async (): Promise<User> => {
-      let response = await getUsername(user.id);
+      const response = await getUsername(user.id);
       console.log(response);
       setActiveUser(activeUser);
       return response;
     },
   });
+
+  console.log(["data"], data);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
