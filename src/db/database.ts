@@ -18,3 +18,17 @@ export const getUsername = async (kindeId: string) => {
 
   return user[0] || null;
 };
+
+export const updateProfileInfo = async (
+  kindeId: string,
+  values: { username?: string; firstName?: string; lastName?: string },
+) => {
+  await db
+    .update(users)
+    .set({
+      username: values.username,
+      firstName: values.firstName,
+      lastName: values.lastName,
+    })
+    .where(eq(users.kindeId, kindeId));
+};

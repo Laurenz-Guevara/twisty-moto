@@ -15,7 +15,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { getUsername } from "@/db/database";
+import { getUsername, updateProfileInfo } from "@/db/database";
 import { useEffect, useState } from "react";
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { useQuery } from "@tanstack/react-query";
@@ -87,7 +87,7 @@ export default function ProfileForm() {
   }, [data]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+    updateProfileInfo(user.id, values);
   }
 
   return (
