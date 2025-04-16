@@ -18,15 +18,22 @@ import { Input } from "@/components/ui/input";
 import { getUsername } from "@/db/database";
 import { useEffect, useState } from "react";
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const formSchema = z.object({
   username: z.string()
     .min(2, { message: "Username must be at least 2 characters." })
     .refine((username) => {
-      return checkUsernameExists(username);
+      return !checkUsernameExists(username);
     }, {
       message: "Save name already exists.",
     }),
+  firstName: z.string()
+    .min(2, { message: "First name must be at least 1 characters." }),
+  lastName: z.string()
+    .min(2, { message: "First name must be at least 1 characters." }),
+  email: z.string()
+    .min(2, { message: "First name must be at least 1 characters." }),
 });
 
 function checkUsernameExists(username: string) {
@@ -34,30 +41,41 @@ function checkUsernameExists(username: string) {
   return false;
 }
 
+interface User {
+  username: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
 export default function ProfileForm() {
-  const { user, isAuthenticated } = useKindeBrowserClient();
-  // TODO: Use tanstack query for db request
-  const [activeUser, setActiveUser] = useState<{ username: string | null }>();
+  const { user } = useKindeBrowserClient();
+  const [activeUser, setActiveUser] = useState<User>({
+    username: "",
+    firstName: "",
+    lastName: "",
+    email: "",
+  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       username: "",
+      firstName: "",
+      lastName: "",
+      email: "",
     },
   });
 
-  async function getUserFromUsers() {
-    const currentUser = await getUsername(user.id);
-    if (currentUser) {
-      setActiveUser(currentUser[0]);
-    }
-  }
-
-  useEffect(() => {
-    if (user?.id && isAuthenticated) {
-      getUserFromUsers();
-    }
-  }, [user, isAuthenticated]);
+  const { data } = useQuery({
+    queryKey: ["user"],
+    queryFn: async (): Promise<User> => {
+      let response = await getUsername(user.id);
+      console.log(response);
+      setActiveUser(activeUser);
+      return response;
+    },
+  });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
@@ -71,12 +89,14 @@ export default function ProfileForm() {
           name="username"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Username</FormLabel>
+              <FormLabel>
+                Username*<span className="text-muted-foreground">
+                  (required)
+                </span>
+              </FormLabel>
               <FormControl>
                 <Input
-                  placeholder={activeUser?.username
-                    ? activeUser.username
-                    : "username"}
+                  placeholder={"Username"}
                   {...field}
                 />
               </FormControl>
@@ -87,6 +107,31 @@ export default function ProfileForm() {
             </FormItem>
           )}
         />
+        <FormField
+          control={form.control}
+          name="firstName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                First Name
+                <span className="text-muted-foreground">
+                  (optional)
+                </span>
+              </FormLabel>
+              <FormControl>
+                <Input
+                  placeholder={"First Name"}
+                  {...field}
+                />
+              </FormControl>
+              <FormDescription>
+                This is your real First Name.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <Button type="submit">Submit</Button>
       </form>
     </Form>

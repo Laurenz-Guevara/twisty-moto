@@ -16,9 +16,18 @@ export const users = createTable("user", {
 
   email: varchar("email", { length: 255 })
     .notNull()
-    .unique(),
+    .unique()
+    .default(""),
 
-  username: varchar("username", { length: 255 }),
-  firstName: varchar("first_name", { length: 255 }),
-  lastName: varchar("last_name", { length: 255 }),
+  username: varchar("username", { length: 255 })
+    .notNull()
+    .default(""),
+
+  firstName: varchar("first_name", { length: 255 })
+    .notNull()
+    .default(""),
+
+  lastName: varchar("last_name", { length: 255 })
+    .notNull()
+    .default(""),
 });
