@@ -17,7 +17,11 @@ import {
 } from "@/components/ui/form";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
-import { getUsername, updateProfileInfo } from "@/db/database";
+import {
+  checkUsernameExists,
+  getUsername,
+  updateProfileInfo,
+} from "@/db/database";
 import { useEffect, useState } from "react";
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { useQuery } from "@tanstack/react-query";
@@ -26,12 +30,7 @@ const formSchema = z.object({
   username: z.string()
     .min(2, { message: "Username must be at least 2 characters." })
     .max(32, { message: "Username cannot exceed 32 characters." })
-    .regex(/^\S+$/, { message: "Username cannot contain spaces." })
-    .refine((username) => {
-      return !checkUsernameExists(username);
-    }, {
-      message: "Save name already exists.",
-    }),
+    .regex(/^\S+$/, { message: "Username cannot contain spaces." }),
 
   firstName: z.string()
     .min(2, { message: "First name must be at least 1 characters." })
@@ -45,11 +44,6 @@ const formSchema = z.object({
     .optional()
     .or(z.literal("")),
 });
-
-function checkUsernameExists(username: string) {
-  console.log(username);
-  return false;
-}
 
 interface User {
   username: string;
@@ -78,7 +72,6 @@ export default function ProfileForm() {
     queryKey: ["user"],
     queryFn: async (): Promise<User> => {
       const response = await getUsername(user.id);
-      console.log(response);
       setActiveUser(activeUser);
       return response;
     },
@@ -93,7 +86,24 @@ export default function ProfileForm() {
   }, [data]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    let request = await updateProfileInfo(user.id, values);
+    if (data?.username !== values.username) {
+      const usernameExists = await checkUsernameExists(values.username)
+        .then(
+          (exists) => {
+            return exists;
+          },
+        );
+
+      if (usernameExists) {
+        form.setError("username", {
+          type: "manual",
+          message: "Username already exists. Please choose a different one.",
+        });
+        return;
+      }
+    }
+
+    const request = await updateProfileInfo(user.id, values);
 
     switch (request.variant) {
       case ToastVariant.Success:

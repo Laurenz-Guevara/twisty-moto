@@ -21,6 +21,17 @@ export const getUsername = async (kindeId: string) => {
   return user[0] || null;
 };
 
+export const checkUsernameExists = async (username: string) => {
+  const user = await db
+    .select({ username: users.username })
+    .from(users)
+    .where(eq(users.username, username))
+    .limit(1);
+
+  if (user[0]?.username === username) return true;
+  return false;
+};
+
 export const updateProfileInfo = async (
   kindeId: string,
   values: {
