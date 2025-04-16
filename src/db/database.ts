@@ -3,6 +3,8 @@
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { ToastVariant } from "./enums";
+import { NeonDbError } from "@neondatabase/serverless";
 
 export const getUsername = async (kindeId: string) => {
   const user = await db
@@ -21,14 +23,58 @@ export const getUsername = async (kindeId: string) => {
 
 export const updateProfileInfo = async (
   kindeId: string,
-  values: { username?: string; firstName?: string; lastName?: string },
+  values: {
+    username: string;
+    firstName?: string;
+    lastName?: string;
+  },
 ) => {
-  await db
-    .update(users)
-    .set({
-      username: values.username,
-      firstName: values.firstName,
-      lastName: values.lastName,
-    })
-    .where(eq(users.kindeId, kindeId));
+  if (values.username === null || values.username.length < 1) {
+    return {
+      title: "Error",
+      description: "You cannot have an empty username.",
+      variant: ToastVariant.Destructive,
+    };
+  }
+
+  if (values.username.toLowerCase().includes("admin")) {
+    return {
+      title: "Error",
+      description: "You cannot have 'Admin' in your username.",
+      variant: ToastVariant.Destructive,
+    };
+  }
+
+  try {
+    await db
+      .update(users)
+      .set({
+        username: values.username,
+        firstName: values.firstName,
+        lastName: values.lastName,
+      })
+      .where(eq(users.kindeId, kindeId));
+
+    return {
+      title: "Success",
+      description: "Your profile has been updated sucessfully.",
+      variant: ToastVariant.Success,
+    };
+  } catch (error) {
+    if (error instanceof NeonDbError) {
+      if (error.constraint === "tm_user_username_unique") {
+        return {
+          title: "Error",
+          description: "This username already exists.",
+          variant: ToastVariant.Destructive,
+        };
+      }
+    }
+
+    return {
+      title: "Error",
+      description: "An unexpected error has occured",
+      variant: ToastVariant.Destructive,
+    };
+  }
 };

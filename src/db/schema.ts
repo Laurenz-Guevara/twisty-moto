@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import { pgTableCreator, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import { nanoid } from "nanoid";
 
 export const createTable = pgTableCreator((name) => `tm_${name}`);
 
@@ -16,12 +17,12 @@ export const users = createTable("user", {
 
   email: varchar("email", { length: 255 })
     .notNull()
-    .unique()
-    .default(""),
+    .unique(),
 
   username: varchar("username", { length: 255 })
+    .unique()
     .notNull()
-    .default(""),
+    .default(`User_${nanoid()}`),
 
   firstName: varchar("first_name", { length: 255 })
     .notNull()

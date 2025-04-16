@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { ToastVariant } from "@/db/enums";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -14,6 +15,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { getUsername, updateProfileInfo } from "@/db/database";
 import { useEffect, useState } from "react";
@@ -23,6 +25,8 @@ import { useQuery } from "@tanstack/react-query";
 const formSchema = z.object({
   username: z.string()
     .min(2, { message: "Username must be at least 2 characters." })
+    .max(32, { message: "Username cannot exceed 32 characters." })
+    .regex(/^\S+$/, { message: "Username cannot contain spaces." })
     .refine((username) => {
       return !checkUsernameExists(username);
     }, {
@@ -31,11 +35,13 @@ const formSchema = z.object({
 
   firstName: z.string()
     .min(2, { message: "First name must be at least 1 characters." })
+    .max(32, { message: "First name cannot exceed 64 characters." })
     .optional()
     .or(z.literal("")),
 
   lastName: z.string()
     .min(2, { message: "First name must be at least 1 characters." })
+    .max(32, { message: "Last name cannot exceed 64 characters." })
     .optional()
     .or(z.literal("")),
 });
@@ -86,8 +92,26 @@ export default function ProfileForm() {
     }
   }, [data]);
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    updateProfileInfo(user.id, values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    let request = await updateProfileInfo(user.id, values);
+
+    switch (request.variant) {
+      case ToastVariant.Success:
+        toast.success(
+          request.title,
+          {
+            description: request.description,
+          },
+        );
+        break;
+      default:
+        toast.error(
+          request.title,
+          {
+            description: request.description,
+          },
+        );
+    }
   }
 
   return (
