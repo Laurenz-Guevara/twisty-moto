@@ -200,7 +200,9 @@ export default function ProfileForm() {
                   </FormItem>
                 )}
               />
-              <Button type="submit">Submit</Button>
+              <Button className="hover:cursor-pointer" type="submit">
+                Submit
+              </Button>
             </>
           )
           : (
