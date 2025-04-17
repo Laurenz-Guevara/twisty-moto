@@ -21,8 +21,7 @@ import { buttonVariants } from "@/components/ui/button";
 export default function NavigationBar() {
   const { setTheme } = useTheme();
 
-  const { user, error, isAuthenticated } = useKindeBrowserClient();
-  if (error) return <div>{error}</div>;
+  const { user, isAuthenticated } = useKindeBrowserClient();
 
   return (
     <header className="border-b bg-background z-10 w-full">
@@ -80,7 +79,7 @@ export default function NavigationBar() {
         </nav>
 
         <div className="ml-auto flex items-center space-x-4">
-          {user &&
+          {isAuthenticated && user &&
             (
               <Button
                 variant="ghost"
