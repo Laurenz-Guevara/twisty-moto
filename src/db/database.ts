@@ -7,12 +7,14 @@ import { ToastVariant } from "./enums";
 import { NeonDbError } from "@neondatabase/serverless";
 
 export const getUsername = async (kindeId: string) => {
+  console.log("FIRE");
   const user = await db
     .select({
       username: users.username,
       firstName: users.firstName,
       lastName: users.lastName,
       email: users.email,
+      avatarUrl: users.avatarUrl,
     })
     .from(users)
     .where(eq(users.kindeId, kindeId))

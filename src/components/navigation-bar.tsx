@@ -17,11 +17,21 @@ import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
+import { getUsername } from "@/db/database";
+import { User as UserType } from "@/db/types";
 
 export default function NavigationBar() {
   const { setTheme } = useTheme();
-
   const { user, isAuthenticated } = useKindeBrowserClient();
+
+  const { data, isLoading: queryIsLoading } = useQuery({
+    queryKey: ["user"],
+    queryFn: async (): Promise<UserType> => {
+      const response = await getUsername(user.id);
+      return response;
+    },
+  });
 
   return (
     <header className="border-b bg-background z-10 w-full">
@@ -122,19 +132,20 @@ export default function NavigationBar() {
                     className="relative h-8 w-8 rounded-full hover:cursor-pointer"
                   >
                     <Avatar className="h-8 w-8">
-                      <AvatarImage
-                        src="/placeholder.svg?height=32&width=32"
-                        alt="User Avatar"
-                      />
+                      {!queryIsLoading && data && data.avatarUrl !== null
+                        ? (
+                          <AvatarImage
+                            src={data.avatarUrl}
+                            alt="User Avatar"
+                          />
+                        )
+                        : (
+                          <AvatarImage
+                            src="/placeholder.png?height=32&width=32"
+                            alt="User Avatar"
+                          />
+                        )}
                       <AvatarFallback>
-                        {user
-                          ? (
-                            <img
-                              src={user.picture as string}
-                              alt={user.given_name as string}
-                            />
-                          )
-                          : "?"}
                       </AvatarFallback>
                     </Avatar>
                   </Button>
@@ -142,10 +153,10 @@ export default function NavigationBar() {
                 <DropdownMenuContent className="w-56" align="end" forceMount>
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
-                      {user
+                      {data
                         ? (
                           <p className="text-sm font-medium leading-none">
-                            {user.given_name || user.email}
+                            {data.username}
                           </p>
                         )
                         : (

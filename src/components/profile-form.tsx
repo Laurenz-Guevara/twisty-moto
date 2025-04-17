@@ -26,6 +26,7 @@ import { useEffect, useState } from "react";
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
+import { User as UserType } from "@/db/types";
 
 const formSchema = z.object({
   username: z.string()
@@ -46,18 +47,13 @@ const formSchema = z.object({
     .or(z.literal("")),
 });
 
-interface User {
-  username: string;
-  firstName: string;
-  lastName: string;
-}
-
 export default function ProfileForm() {
   const { user } = useKindeBrowserClient();
-  const [activeUser, setActiveUser] = useState<User>({
+  const [activeUser, setActiveUser] = useState<UserType>({
     username: "",
     firstName: "",
     lastName: "",
+    avatarUrl: "",
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -71,7 +67,7 @@ export default function ProfileForm() {
 
   const { data, isLoading } = useQuery({
     queryKey: ["user"],
-    queryFn: async (): Promise<User> => {
+    queryFn: async (): Promise<UserType> => {
       const response = await getUsername(user.id);
       setActiveUser(activeUser);
       return response;

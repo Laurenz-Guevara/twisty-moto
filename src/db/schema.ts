@@ -31,4 +31,6 @@ export const users = createTable("user", {
   lastName: varchar("last_name", { length: 255 })
     .notNull()
     .default(""),
+
+  avatarUrl: varchar("avatar_url", { length: 255 }),
 });
