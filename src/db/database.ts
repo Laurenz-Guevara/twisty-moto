@@ -7,7 +7,6 @@ import { ToastVariant } from "./enums";
 import { NeonDbError } from "@neondatabase/serverless";
 
 export const getUsername = async (kindeId: string) => {
-  console.log("FIRE");
   const user = await db
     .select({
       username: users.username,
@@ -84,6 +83,28 @@ export const updateProfileInfo = async (
       }
     }
 
+    return {
+      title: "Error",
+      description: "An unexpected error has occured",
+      variant: ToastVariant.Destructive,
+    };
+  }
+};
+
+export const updateAvatarUrl = async (kindeId: string, imageUrl: string) => {
+  try {
+    await db
+      .update(users)
+      .set({
+        avatarUrl: imageUrl,
+      })
+      .where(eq(users.kindeId, kindeId));
+    return {
+      title: "Sucess",
+      description: "Your avatar has been updated.",
+      variant: ToastVariant.Success,
+    };
+  } catch {
     return {
       title: "Error",
       description: "An unexpected error has occured",
