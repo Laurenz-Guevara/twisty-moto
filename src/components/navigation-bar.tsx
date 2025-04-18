@@ -141,7 +141,7 @@ export default function NavigationBar() {
                         )
                         : (
                           <AvatarImage
-                            src="/placeholder.png?height=32&width=32"
+                            src="/placeholder-avatar.png?height=32&width=32"
                             alt="User Avatar"
                           />
                         )}

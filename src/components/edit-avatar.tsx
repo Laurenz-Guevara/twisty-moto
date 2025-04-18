@@ -106,10 +106,10 @@ const EditAvatar = () => {
                     <MousePointerSquareDashed className="h-6 w-6 text-zinc-500 mb-2" />
                   )
                   : isUploading || isPending
-                  ? (
-                    <Loader2 className="animate-spin h-6 w-6 text-zinc-500 mb-2" />
-                  )
-                  : <ImageIcon className="h-6 w-6 text-zinc-500 mb-2" />}
+                    ? (
+                      <Loader2 className="animate-spin h-6 w-6 text-zinc-500 mb-2" />
+                    )
+                    : <ImageIcon className="h-6 w-6 text-zinc-500 mb-2" />}
                 <div className="flex flex-col justify-center mb-2 text-sm text-zinc-700">
                   {isUploading
                     ? (
@@ -122,32 +122,32 @@ const EditAvatar = () => {
                       </div>
                     )
                     : isPending
-                    ? (
-                      <div className="flex flex-col items-center">
-                        <p>Redirecting, please wait...</p>
-                      </div>
-                    )
-                    : isDragOver
-                    ? (
-                      <p>
-                        <span className="font-semibold text-zinc-500">
-                          Drop file&nbsp;
-                        </span>
-                        <span className="text-zinc-500">
-                          to upload
-                        </span>
-                      </p>
-                    )
-                    : (
-                      <p>
-                        <span className="font-semibold text-zinc-500">
-                          Click to upload
-                        </span>
-                        &nbsp;<span className="text-zinc-500">
-                          or drag and drop
-                        </span>
-                      </p>
-                    )}
+                      ? (
+                        <div className="flex flex-col items-center">
+                          <p>Redirecting, please wait...</p>
+                        </div>
+                      )
+                      : isDragOver
+                        ? (
+                          <p>
+                            <span className="font-semibold text-zinc-500">
+                              Drop file&nbsp;
+                            </span>
+                            <span className="text-zinc-500">
+                              to upload
+                            </span>
+                          </p>
+                        )
+                        : (
+                          <p>
+                            <span className="font-semibold text-zinc-500">
+                              Click to upload
+                            </span>
+                            &nbsp;<span className="text-zinc-500">
+                              or drag and drop
+                            </span>
+                          </p>
+                        )}
                 </div>
                 {isPending
                   ? null
