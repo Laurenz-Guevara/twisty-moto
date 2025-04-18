@@ -31,17 +31,17 @@ import { User as UserType } from "@/db/types";
 const formSchema = z.object({
   username: z.string()
     .min(2, { message: "Username must be at least 2 characters." })
-    .max(32, { message: "Username cannot exceed 32 characters." })
-    .regex(/^\S+$/, { message: "Username cannot contain spaces." }),
+    .max(32, { message: "Username cannot exceed 32 characters." }),
+  // .regex(/^\S+$/, { message: "Username cannot contain spaces." }),
 
   firstName: z.string()
-    .min(2, { message: "First name must be at least 1 characters." })
+    .min(2, { message: "First name must be at least 2 characters." })
     .max(32, { message: "First name cannot exceed 64 characters." })
     .optional()
     .or(z.literal("")),
 
   lastName: z.string()
-    .min(2, { message: "First name must be at least 1 characters." })
+    .min(2, { message: "First name must be at least 2 characters." })
     .max(32, { message: "Last name cannot exceed 64 characters." })
     .optional()
     .or(z.literal("")),

@@ -7,6 +7,7 @@ import { ToastVariant } from "./enums";
 import { NeonDbError } from "@neondatabase/serverless";
 
 export const getUsername = async (kindeId: string) => {
+  console.log("getUsername", kindeId);
   const user = await db
     .select({
       username: users.username,
@@ -23,6 +24,7 @@ export const getUsername = async (kindeId: string) => {
 };
 
 export const checkUsernameExists = async (username: string) => {
+  console.log("checkUsernameExists", username);
   const user = await db
     .select({ username: users.username })
     .from(users)
@@ -41,6 +43,7 @@ export const updateProfileInfo = async (
     lastName?: string;
   },
 ) => {
+  console.log("updateProfileInfo", kindeId, values);
   if (values.username === null || values.username.length < 1) {
     return {
       title: "Error",
@@ -92,6 +95,7 @@ export const updateProfileInfo = async (
 };
 
 export const updateAvatarUrl = async (kindeId: string, imageUrl: string) => {
+  console.log("updateAvatarUrl", kindeId, imageUrl);
   try {
     await db
       .update(users)
