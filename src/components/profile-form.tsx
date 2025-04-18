@@ -124,97 +124,99 @@ export default function ProfileForm() {
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        {!isLoading
-          ? (
-            <>
-              <FormField
-                control={form.control}
-                name="username"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Username*<span className="text-muted-foreground">
-                        (required)
-                      </span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder={"Username"}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      This is your public display name.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="firstName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      First Name
-                      <span className="text-muted-foreground">
-                        (optional)
-                      </span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder={"First Name"}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      This is your first name (this won’t be publicly shown)
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="lastName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Last Name
-                      <span className="text-muted-foreground">
-                        (optional)
-                      </span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder={"Last Name"}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      This is your last name (this won’t be publicly shown)
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button className="hover:cursor-pointer" type="submit">
-                Submit
-              </Button>
-            </>
-          )
-          : (
-            <>
-              <SkeletonForm />
-              <SkeletonForm />
-              <SkeletonForm />
-              <Skeleton className="w-full max-w-[80px] h-[38px] rounded-md" />
-            </>
-          )}
-      </form>
-    </Form>
+    <>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          {!isLoading
+            ? (
+              <>
+                <FormField
+                  control={form.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Username*<span className="text-muted-foreground">
+                          (required)
+                        </span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder={"Username"}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        This is your public display name.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="firstName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        First Name
+                        <span className="text-muted-foreground">
+                          (optional)
+                        </span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder={"First Name"}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        This is your first name (this won’t be publicly shown)
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="lastName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Last Name
+                        <span className="text-muted-foreground">
+                          (optional)
+                        </span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder={"Last Name"}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        This is your last name (this won’t be publicly shown)
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button className="hover:cursor-pointer" type="submit">
+                  Submit
+                </Button>
+              </>
+            )
+            : (
+              <>
+                <SkeletonForm />
+                <SkeletonForm />
+                <SkeletonForm />
+                <Skeleton className="w-full max-w-[80px] h-[38px] rounded-md" />
+              </>
+            )}
+        </form>
+      </Form>
+    </>
   );
 }
 

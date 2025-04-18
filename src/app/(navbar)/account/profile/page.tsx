@@ -1,5 +1,6 @@
 import { Separator } from "@/components/ui/separator";
 import ProfileForm from "@/components/profile-form";
+import EditAvatar from "@/components/edit-avatar";
 
 export default function SettingsProfilePage() {
   return (
@@ -12,6 +13,8 @@ export default function SettingsProfilePage() {
       </div>
       <Separator />
       <ProfileForm />
+      <Separator />
+      <EditAvatar />
     </div>
   );
 }
