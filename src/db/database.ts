@@ -30,18 +30,23 @@ export const getUsername = async () => {
 };
 
 export const checkUsernameExists = async (username: string) => {
+  let accessToken = await getAccessToken();
+
   const user = await db
-    .select({ username: users.username })
+    .select({ username: users.username, kindeId: users.kindeId })
     .from(users)
     .where(sql`LOWER(${users.username}) = LOWER(${username})`)
     .limit(1);
 
-  if (user[0]?.username.toLowerCase() === username.toLowerCase()) return true;
+  let usernameAlreadyExists =
+    user[0]?.username.toLowerCase() === username.toLowerCase();
+  let usernameOwnedBySameUser = user[0]?.kindeId === accessToken?.sub;
+
+  if (usernameAlreadyExists && !usernameOwnedBySameUser) return true;
   return false;
 };
 
 export const updateProfileInfo = async (
-  kindeId: string,
   values: {
     username: string;
     firstName?: string;
@@ -64,6 +69,16 @@ export const updateProfileInfo = async (
     };
   }
 
+  let accessToken = await getAccessToken();
+
+  if (!accessToken?.sub) {
+    return {
+      title: "Error",
+      description: "Unable to authenticate user. Please log in again.",
+      variant: ToastVariant.Destructive,
+    };
+  }
+
   try {
     await db
       .update(users)
@@ -72,7 +87,7 @@ export const updateProfileInfo = async (
         firstName: values.firstName,
         lastName: values.lastName,
       })
-      .where(eq(users.kindeId, kindeId));
+      .where(eq(users.kindeId, accessToken.sub));
 
     return {
       title: "Success",
@@ -98,14 +113,24 @@ export const updateProfileInfo = async (
   }
 };
 
-export const updateAvatarUrl = async (kindeId: string, imageUrl: string) => {
+export const updateAvatarUrl = async (uploaderId: string, imageUrl: string) => {
+  let accessToken = await getAccessToken();
+
+  if (!accessToken?.sub && accessToken?.sub !== uploaderId) {
+    return {
+      title: "Error",
+      description: "Unable to authenticate user. Please log in again.",
+      variant: ToastVariant.Destructive,
+    };
+  }
+
   try {
     await db
       .update(users)
       .set({
         avatarUrl: imageUrl,
       })
-      .where(eq(users.kindeId, kindeId));
+      .where(eq(users.kindeId, accessToken.sub));
     return {
       title: "Sucess",
       description: "Your avatar has been updated.",

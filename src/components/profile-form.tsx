@@ -22,8 +22,7 @@ import {
   getUsername,
   updateProfileInfo,
 } from "@/db/database";
-import { useEffect, useState } from "react";
-import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
+import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { User as UserType } from "@/db/types";
@@ -31,25 +30,23 @@ import { User as UserType } from "@/db/types";
 const formSchema = z.object({
   username: z.string()
     .min(2, { message: "Username must be at least 2 characters." })
-    .max(32, { message: "Username cannot exceed 32 characters." }),
-  // .regex(/^\S+$/, { message: "Username cannot contain spaces." }),
+    .max(16, { message: "Username cannot exceed 16 characters." })
+    .regex(/^\S+$/, { message: "Username cannot contain spaces." }),
 
   firstName: z.string()
-    .min(2, { message: "First name must be at least 2 characters." })
+    .min(1, { message: "First name must be at least 1 characters." })
     .max(32, { message: "First name cannot exceed 64 characters." })
     .optional()
     .or(z.literal("")),
 
   lastName: z.string()
-    .min(2, { message: "First name must be at least 2 characters." })
+    .min(1, { message: "First name must be at least 2 characters." })
     .max(32, { message: "Last name cannot exceed 64 characters." })
     .optional()
     .or(z.literal("")),
 });
 
 export default function ProfileForm() {
-  const { user } = useKindeBrowserClient();
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -59,7 +56,7 @@ export default function ProfileForm() {
     },
   });
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, refetch } = useQuery({
     queryKey: ["user"],
     queryFn: async (): Promise<UserType | undefined> => {
       const response = await getUsername();
@@ -80,43 +77,43 @@ export default function ProfileForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (isLoading || !data) return;
+    await refetch().then(async () => {
+      if (data.username.toLowerCase() !== values.username.toLowerCase()) {
+        const usernameExists = await checkUsernameExists(values.username)
+          .then(
+            (exists) => {
+              return exists;
+            },
+          );
 
-    if (data.username.toLowerCase() !== values.username.toLowerCase()) {
-      const usernameExists = await checkUsernameExists(values.username)
-        .then(
-          (exists) => {
-            return exists;
-          },
-        );
-
-      if (usernameExists) {
-        form.setError("username", {
-          type: "manual",
-          message: "Username already exists. Please choose a different one.",
-        });
-        return;
+        if (usernameExists) {
+          form.setError("username", {
+            type: "manual",
+            message: "Username already exists. Please choose a different one.",
+          });
+          return;
+        }
       }
-    }
+      const request = await updateProfileInfo(values);
 
-    const request = await updateProfileInfo(user.id, values);
-
-    switch (request.variant) {
-      case ToastVariant.Success:
-        toast.success(
-          request.title,
-          {
-            description: request.description,
-          },
-        );
-        break;
-      default:
-        toast.error(
-          request.title,
-          {
-            description: request.description,
-          },
-        );
-    }
+      switch (request.variant) {
+        case ToastVariant.Success:
+          toast.success(
+            request.title,
+            {
+              description: request.description,
+            },
+          );
+          break;
+        default:
+          toast.error(
+            request.title,
+            {
+              description: request.description,
+            },
+          );
+      }
+    });
   }
 
   return (
