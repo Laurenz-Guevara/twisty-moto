@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, LogOut, Settings, User } from "lucide-react";
+import { LogOut, Settings, User } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -20,6 +20,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { getUsername } from "@/db/database";
 import { User as UserType } from "@/db/types";
+import NotificationBell from "./notification-bell";
 
 export default function NavigationBar() {
   const { setTheme } = useTheme();
@@ -27,10 +28,17 @@ export default function NavigationBar() {
 
   const { data, isLoading: queryIsLoading } = useQuery({
     queryKey: ["user"],
-    queryFn: async (): Promise<UserType | undefined> => {
+    queryFn: async (): Promise<UserType> => {
       const response = await getUsername();
       if (response !== undefined) {
         return response;
+      } else {
+        return {
+          username: "",
+          firstName: "",
+          lastName: "",
+          avatarUrl: "",
+        };
       }
     },
   });
@@ -90,17 +98,16 @@ export default function NavigationBar() {
           )}
         </nav>
 
+        {/* <Button */}
+        {/*   variant="ghost" */}
+        {/*   className="hover:cursor-pointer" */}
+        {/*   size="icon" */}
+        {/* > */}
+        {/*   <Bell className="h-5 w-5" /> */}
+        {/* </Button> */}
         <div className="ml-auto flex items-center space-x-4">
           {isAuthenticated && user &&
-            (
-              <Button
-                variant="ghost"
-                className="hover:cursor-pointer"
-                size="icon"
-              >
-                <Bell className="h-5 w-5" />
-              </Button>
-            )}
+            <NotificationBell />}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button

@@ -22,6 +22,10 @@ const sidebarNavItems = [
     title: "Manage Payments",
     href: "/account/manage-payments",
   },
+  {
+    title: "Notifications",
+    href: "/account/notifications",
+  },
 ];
 
 interface SettingsLayoutProps {

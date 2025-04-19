@@ -58,11 +58,18 @@ export default function ProfileForm() {
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["user"],
-    queryFn: async (): Promise<UserType | undefined> => {
+    queryFn: async (): Promise<UserType> => {
       const response = await getUsername();
 
       if (response) {
         return response;
+      } else {
+        return {
+          username: "",
+          firstName: "",
+          lastName: "",
+          avatarUrl: "",
+        };
       }
     },
   });
