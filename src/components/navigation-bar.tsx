@@ -27,9 +27,11 @@ export default function NavigationBar() {
 
   const { data, isLoading: queryIsLoading } = useQuery({
     queryKey: ["user"],
-    queryFn: async (): Promise<UserType> => {
-      const response = await getUsername(user.id);
-      return response;
+    queryFn: async (): Promise<UserType | undefined> => {
+      const response = await getUsername();
+      if (response !== undefined) {
+        return response;
+      }
     },
   });
 

@@ -49,12 +49,6 @@ const formSchema = z.object({
 
 export default function ProfileForm() {
   const { user } = useKindeBrowserClient();
-  const [activeUser, setActiveUser] = useState<UserType>({
-    username: "",
-    firstName: "",
-    lastName: "",
-    avatarUrl: "",
-  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -67,10 +61,12 @@ export default function ProfileForm() {
 
   const { data, isLoading } = useQuery({
     queryKey: ["user"],
-    queryFn: async (): Promise<UserType> => {
-      const response = await getUsername(user.id);
-      setActiveUser(activeUser);
-      return response;
+    queryFn: async (): Promise<UserType | undefined> => {
+      const response = await getUsername();
+
+      if (response) {
+        return response;
+      }
     },
   });
 

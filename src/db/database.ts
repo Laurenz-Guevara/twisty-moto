@@ -5,26 +5,31 @@ import { users } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { ToastVariant } from "./enums";
 import { NeonDbError } from "@neondatabase/serverless";
+import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 
-export const getUsername = async (kindeId: string) => {
-  console.log("getUsername", kindeId);
-  const user = await db
-    .select({
-      username: users.username,
-      firstName: users.firstName,
-      lastName: users.lastName,
-      email: users.email,
-      avatarUrl: users.avatarUrl,
-    })
-    .from(users)
-    .where(eq(users.kindeId, kindeId))
-    .limit(1);
+const { getAccessToken } = getKindeServerSession();
 
-  return user[0] || null;
+export const getUsername = async () => {
+  let accessToken = await getAccessToken();
+
+  if (accessToken) {
+    const user = await db
+      .select({
+        username: users.username,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        email: users.email,
+        avatarUrl: users.avatarUrl,
+      })
+      .from(users)
+      .where(eq(users.kindeId, accessToken.sub))
+      .limit(1);
+
+    return user[0] || null;
+  }
 };
 
 export const checkUsernameExists = async (username: string) => {
-  console.log("checkUsernameExists", username);
   const user = await db
     .select({ username: users.username })
     .from(users)
@@ -43,7 +48,6 @@ export const updateProfileInfo = async (
     lastName?: string;
   },
 ) => {
-  console.log("updateProfileInfo", kindeId, values);
   if (values.username === null || values.username.length < 1) {
     return {
       title: "Error",
@@ -95,7 +99,6 @@ export const updateProfileInfo = async (
 };
 
 export const updateAvatarUrl = async (kindeId: string, imageUrl: string) => {
-  console.log("updateAvatarUrl", kindeId, imageUrl);
   try {
     await db
       .update(users)
