@@ -10,7 +10,7 @@ import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 const { getAccessToken } = getKindeServerSession();
 
 export const getUsername = async () => {
-  let accessToken = await getAccessToken();
+  const accessToken = await getAccessToken();
 
   if (accessToken) {
     const user = await db
@@ -30,7 +30,7 @@ export const getUsername = async () => {
 };
 
 export const checkUsernameExists = async (username: string) => {
-  let accessToken = await getAccessToken();
+  const accessToken = await getAccessToken();
 
   const user = await db
     .select({ username: users.username, kindeId: users.kindeId })
@@ -38,9 +38,9 @@ export const checkUsernameExists = async (username: string) => {
     .where(sql`LOWER(${users.username}) = LOWER(${username})`)
     .limit(1);
 
-  let usernameAlreadyExists =
+  const usernameAlreadyExists =
     user[0]?.username.toLowerCase() === username.toLowerCase();
-  let usernameOwnedBySameUser = user[0]?.kindeId === accessToken?.sub;
+  const usernameOwnedBySameUser = user[0]?.kindeId === accessToken?.sub;
 
   if (usernameAlreadyExists && !usernameOwnedBySameUser) return true;
   return false;
@@ -69,7 +69,7 @@ export const updateProfileInfo = async (
     };
   }
 
-  let accessToken = await getAccessToken();
+  const accessToken = await getAccessToken();
 
   if (!accessToken?.sub) {
     return {
@@ -114,7 +114,7 @@ export const updateProfileInfo = async (
 };
 
 export const updateAvatarUrl = async (uploaderId: string, imageUrl: string) => {
-  let accessToken = await getAccessToken();
+  const accessToken = await getAccessToken();
 
   if (!accessToken?.sub && accessToken?.sub !== uploaderId) {
     return {
