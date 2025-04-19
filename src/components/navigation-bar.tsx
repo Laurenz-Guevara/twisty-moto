@@ -58,7 +58,7 @@ export default function NavigationBar() {
             Discover
           </Link>
           <Link
-            href={"/community"}
+            href={"/community-routes"}
             className={buttonVariants({
               size: "sm",
               variant: "ghost",
@@ -157,7 +157,7 @@ export default function NavigationBar() {
                     <div className="flex flex-col space-y-1">
                       {data
                         ? (
-                          <p className="text-sm font-medium leading-none">
+                          <p className="text-sm font-medium leading-none overflow-hidden overflow-ellipsis">
                             {data.username}
                           </p>
                         )

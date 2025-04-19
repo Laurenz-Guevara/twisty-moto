@@ -57,13 +57,13 @@ function BreadcrumbNavigation() {
     <Breadcrumb>
       <BreadcrumbList>
         <BreadcrumbItem>
-          <BreadcrumbLink href="/my-routes">Dashboard</BreadcrumbLink>
+          <BreadcrumbLink href="/my-routes">My Routes</BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>
-          <BreadcrumbLink href="/route-editor">
+          <BreadcrumbPage>
             Route Editor
-          </BreadcrumbLink>
+          </BreadcrumbPage>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>
