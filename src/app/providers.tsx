@@ -1,11 +1,19 @@
 "use client";
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQuery,
+} from "@tanstack/react-query";
 import { ThemeProvider } from "@/components/theme-provider";
+
+import { create } from "zustand";
+import { useEffect } from "react";
+import { getUsername } from "@/db/database";
+import { User as UserType } from "@/db/types";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const queryClient = new QueryClient();
-
   return (
     <>
       <ThemeProvider
@@ -15,9 +23,54 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         disableTransitionOnChange
       >
         <QueryClientProvider client={queryClient}>
-          {children}
+          <ZustandStore>
+            {children}
+          </ZustandStore>
         </QueryClientProvider>
       </ThemeProvider>
     </>
   );
+}
+
+type PartialUser = Partial<UserType>;
+
+export const useStore = create<{
+  displayProfile: UserType;
+  updateDisplayProfile: (newDisplayProfile: PartialUser) => void;
+}>((set) => ({
+  displayProfile: { username: "", firstName: "", lastName: "", avatarUrl: "" },
+  updateDisplayProfile: (newDisplayProfile) =>
+    set((state) => ({
+      displayProfile: {
+        ...state.displayProfile,
+        ...newDisplayProfile,
+      },
+    })),
+}));
+
+function ZustandStore({ children }: { children: React.ReactNode }) {
+  const updateDisplayProfile = useStore((state) => state.updateDisplayProfile);
+
+  const { data: displayProfile } = useQuery({
+    queryKey: ["user"],
+    queryFn: async (): Promise<UserType> => {
+      const response = await getUsername();
+      return (
+        response || {
+          username: "",
+          firstName: "",
+          lastName: "",
+          avatarUrl: "",
+        }
+      );
+    },
+  });
+
+  useEffect(() => {
+    if (displayProfile) {
+      updateDisplayProfile(displayProfile);
+    }
+  }, [displayProfile, updateDisplayProfile]);
+
+  return <>{children}</>;
 }

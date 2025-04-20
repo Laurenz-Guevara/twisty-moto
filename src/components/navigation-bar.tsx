@@ -17,31 +17,13 @@ import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
-import { getUsername } from "@/db/database";
-import { User as UserType } from "@/db/types";
 import NotificationBell from "./notification-bell";
+import { useStore } from "@/app/providers";
 
 export default function NavigationBar() {
   const { setTheme } = useTheme();
   const { user, isAuthenticated } = useKindeBrowserClient();
-
-  const { data, isLoading: queryIsLoading } = useQuery({
-    queryKey: ["user"],
-    queryFn: async (): Promise<UserType> => {
-      const response = await getUsername();
-      if (response !== undefined) {
-        return response;
-      } else {
-        return {
-          username: "",
-          firstName: "",
-          lastName: "",
-          avatarUrl: "",
-        };
-      }
-    },
-  });
+  const displayProfile = useStore((state) => state.displayProfile);
 
   return (
     <header className="border-b bg-background z-10 w-full">
@@ -97,14 +79,6 @@ export default function NavigationBar() {
             </>
           )}
         </nav>
-
-        {/* <Button */}
-        {/*   variant="ghost" */}
-        {/*   className="hover:cursor-pointer" */}
-        {/*   size="icon" */}
-        {/* > */}
-        {/*   <Bell className="h-5 w-5" /> */}
-        {/* </Button> */}
         <div className="ml-auto flex items-center space-x-4">
           {isAuthenticated && user &&
             <NotificationBell />}
@@ -141,10 +115,10 @@ export default function NavigationBar() {
                     className="relative h-8 w-8 rounded-full hover:cursor-pointer"
                   >
                     <Avatar className="h-8 w-8">
-                      {!queryIsLoading && data && data.avatarUrl !== null
+                      {displayProfile && displayProfile.avatarUrl !== null
                         ? (
                           <AvatarImage
-                            src={data.avatarUrl}
+                            src={displayProfile.avatarUrl}
                             alt="User Avatar"
                           />
                         )
@@ -162,10 +136,10 @@ export default function NavigationBar() {
                 <DropdownMenuContent className="w-56" align="end" forceMount>
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
-                      {data
+                      {displayProfile
                         ? (
                           <p className="text-sm font-medium leading-none overflow-hidden overflow-ellipsis">
-                            {data.username}
+                            {displayProfile.username}
                           </p>
                         )
                         : (

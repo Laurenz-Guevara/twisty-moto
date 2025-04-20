@@ -22,11 +22,12 @@ import {
   getUsername,
   updateProfileInfo,
 } from "@/db/database";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { User as UserType } from "@/db/types";
 import { LoaderCircle } from "lucide-react";
+import { useStore } from "@/app/providers";
 
 const formSchema = z.object({
   username: z.string()
@@ -49,6 +50,8 @@ const formSchema = z.object({
 
 export default function ProfileForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const updateDisplayProfile = useStore((state) => state.updateDisplayProfile);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -76,13 +79,16 @@ export default function ProfileForm() {
     },
   });
 
+  const hasPreloadedForm = useRef(false);
+
   useEffect(() => {
-    if (!isLoading && data) {
+    if (!hasPreloadedForm.current && !isLoading && data) {
       form.setValue("username", data.username);
       form.setValue("firstName", data.firstName);
       form.setValue("lastName", data.lastName);
+      hasPreloadedForm.current = true;
     }
-  }, [data]);
+  }, [isLoading, data]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
@@ -113,14 +119,16 @@ export default function ProfileForm() {
         toast.success(request.title, {
           description: request.description,
         });
+
+        updateDisplayProfile({ username: values.username });
       } else {
         toast.error(request.title, {
           description: request.description,
         });
       }
-    } catch {
+    } catch (error) {
       toast.error("Something went wrong.", {
-        description: "Please try again later.",
+        description: `Please try again later. ${error}`,
       });
     } finally {
       setIsSubmitting(false);
