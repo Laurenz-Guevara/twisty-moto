@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import { pgTableCreator, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import { nanoid } from "nanoid";
 
@@ -31,6 +31,17 @@ export const users = createTable("user", {
   lastName: varchar("last_name", { length: 255 })
     .notNull()
     .default(""),
-
-  avatarUrl: varchar("avatar_url", { length: 255 }),
 });
+
+export const avatars = createTable("avatar", {
+  userId: uuid("user_id").notNull().primaryKey(),
+  avatarUrl: varchar("avatar_url", { length: 255 }),
+  avatarFileKey: varchar("avatar_file_key", { length: 255 }),
+});
+
+export const userRelations = relations(users, ({ one }) => ({
+  avatar: one(avatars, {
+    fields: [users.userId],
+    references: [avatars.userId],
+  }),
+}));
