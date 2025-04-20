@@ -1,13 +1,29 @@
 "use server";
 
 import { db } from "@/db";
-import { users } from "@/db/schema";
+import { avatars, users } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { ToastVariant } from "./enums";
 import { NeonDbError } from "@neondatabase/serverless";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 
 const { getAccessToken } = getKindeServerSession();
+
+export const getUserId = async () => {
+  const accessToken = await getAccessToken();
+
+  if (accessToken) {
+    const userId = await db
+      .select({
+        userId: users.userId,
+      })
+      .from(users)
+      .where(eq(users.kindeId, accessToken.sub))
+      .limit(1);
+
+    return userId[0].userId || null;
+  }
+};
 
 export const getPrivateUserProfile = async () => {
   const accessToken = await getAccessToken();
@@ -19,9 +35,10 @@ export const getPrivateUserProfile = async () => {
         firstName: users.firstName,
         lastName: users.lastName,
         email: users.email,
-        avatarUrl: users.avatarUrl,
+        avatarUrl: avatars.avatarUrl,
       })
       .from(users)
+      .leftJoin(avatars, eq(users.userId, avatars.userId))
       .where(eq(users.kindeId, accessToken.sub))
       .limit(1);
 
@@ -51,9 +68,10 @@ export const getPublicUserProfile = async (username: string) => {
   const user = await db
     .select({
       username: users.username,
-      avatarUrl: users.avatarUrl,
+      avatarUrl: avatars.avatarUrl,
     })
     .from(users)
+    .leftJoin(avatars, eq(users.userId, avatars.userId))
     .where(eq(users.username, username))
     .limit(1);
 
@@ -144,28 +162,56 @@ export const updateProfileInfo = async (
   }
 };
 
-export const updateAvatarUrl = async (uploaderId: string, imageUrl: string) => {
-  const accessToken = await getAccessToken();
-
-  if (!accessToken?.sub && accessToken?.sub !== uploaderId) {
+export const updateAvatarUrl = async (
+  uuid: string,
+  imgUrl: string,
+  fileKey: string,
+) => {
+  if (!uuid) {
     return {
       title: "Error",
-      description: "Unable to authenticate user. Please log in again.",
+      description: "Unable to find user. Please try again later.",
       variant: ToastVariant.Destructive,
     };
   }
 
   try {
-    await db
-      .update(users)
-      .set({
-        avatarUrl: imageUrl,
+    const existing = await db
+      .select({
+        avatarFileKey: avatars.avatarFileKey,
       })
-      .where(eq(users.kindeId, accessToken.sub));
+      .from(avatars)
+      .where(eq(avatars.userId, uuid))
+      .limit(1);
+
+    let existingFileKey: string | null = null;
+
+    if (existing.length > 0) {
+      existingFileKey = existing[0].avatarFileKey;
+    }
+
+    await db
+      .insert(avatars)
+      .values({
+        userId: uuid,
+        avatarUrl: imgUrl,
+        avatarFileKey: fileKey,
+      })
+      .onConflictDoUpdate(
+        {
+          target: avatars.userId,
+          set: {
+            avatarUrl: imgUrl,
+            avatarFileKey: fileKey,
+          },
+        },
+      );
+
     return {
       title: "Sucess",
       description: "Your avatar has been updated.",
       variant: ToastVariant.Success,
+      fileKey: existingFileKey ? existingFileKey : undefined,
     };
   } catch {
     return {

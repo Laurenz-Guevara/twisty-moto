@@ -1,7 +1,7 @@
 "use client";
 
 import { LogOut, Settings, User } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -128,8 +128,6 @@ export default function NavigationBar() {
                             alt="User Avatar"
                           />
                         )}
-                      <AvatarFallback>
-                      </AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>

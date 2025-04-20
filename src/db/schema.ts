@@ -34,9 +34,11 @@ export const users = createTable("user", {
 });
 
 export const avatars = createTable("avatar", {
-  userId: uuid("user_id").notNull().primaryKey(),
-  avatarUrl: varchar("avatar_url", { length: 255 }),
-  avatarFileKey: varchar("avatar_file_key", { length: 255 }),
+  userId: uuid("user_id").notNull().primaryKey().references(() => users.userId),
+  avatarUrl: varchar("avatar_url", { length: 255 }).notNull().default(""),
+  avatarFileKey: varchar("avatar_file_key", { length: 255 }).notNull().default(
+    "",
+  ),
 });
 
 export const userRelations = relations(users, ({ one }) => ({

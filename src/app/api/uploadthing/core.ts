@@ -1,12 +1,15 @@
 // DOCS: https://docs.uploadthing.com/getting-started/appdir
+import { getUserId, updateAvatarUrl } from "@/db/database";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 
 import { createUploadthing, type FileRouter } from "uploadthing/next";
-import { UploadThingError } from "uploadthing/server";
+import { UploadThingError, UTApi } from "uploadthing/server";
+
+export const utapi = new UTApi({});
 
 const f = createUploadthing();
 
-const { getUser } = getKindeServerSession();
+const { isAuthenticated } = getKindeServerSession();
 
 // FileRouter for your app, can contain multiple FileRoutes
 export const ourFileRouter = {
@@ -21,24 +24,40 @@ export const ourFileRouter = {
       maxFileCount: 1,
     },
   })
-    // Set permissions and file types for this FileRoute
     .middleware(async () => {
-      // This code runs on your server before upload
-      const user = await getUser();
+      const userUuid = await getUserId();
+      const isAuth = await isAuthenticated();
 
-      // If you throw, the user will not be able to upload
-      if (!user) throw new UploadThingError("Unauthorized");
+      if (!isAuth) {
+        throw new UploadThingError("Unauthorized");
+      }
 
-      // Whatever is returned here is accessible in onUploadComplete as `metadata`
-      return { userId: user.id };
+      if (!userUuid) {
+        throw new UploadThingError("Could not find uuid");
+      }
+
+      return { userUuid: userUuid };
     })
-    .onUploadComplete(async ({ metadata }) => {
-      // This code RUNS ON YOUR SERVER after upload
-      // console.log("Upload complete for userId:", metadata.userId);
-      // console.log("file url", file.ufsUrl);
+    .onUploadComplete(async ({ file, metadata }) => {
+      const response = await updateAvatarUrl(
+        metadata.userUuid,
+        file.ufsUrl,
+        file.key,
+      );
 
-      // !!! Whatever is returned here is sent to the clientside `onClientUploadComplete` callback
-      return { uploadedBy: metadata.userId };
+      if (response.fileKey) {
+        await utapi.deleteFiles(
+          response.fileKey,
+        );
+      }
+
+      return {
+        response: {
+          title: response.title,
+          description: response.description,
+          variant: response.variant,
+        },
+      };
     }),
 } satisfies FileRouter;
 
