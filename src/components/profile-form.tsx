@@ -22,10 +22,11 @@ import {
   getUsername,
   updateProfileInfo,
 } from "@/db/database";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { User as UserType } from "@/db/types";
+import { LoaderCircle } from "lucide-react";
 
 const formSchema = z.object({
   username: z.string()
@@ -47,6 +48,7 @@ const formSchema = z.object({
 });
 
 export default function ProfileForm() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -83,15 +85,18 @@ export default function ProfileForm() {
   }, [data]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (isLoading || !data) return;
-    await refetch().then(async () => {
-      if (data.username.toLowerCase() !== values.username.toLowerCase()) {
-        const usernameExists = await checkUsernameExists(values.username)
-          .then(
-            (exists) => {
-              return exists;
-            },
-          );
+    setIsSubmitting(true);
+
+    try {
+      if (isLoading || !data) return;
+
+      await refetch();
+
+      const newUsername = values.username.toLowerCase();
+      const currentUsername = data.username.toLowerCase();
+
+      if (newUsername !== currentUsername) {
+        const usernameExists = await checkUsernameExists(values.username);
 
         if (usernameExists) {
           form.setError("username", {
@@ -101,26 +106,25 @@ export default function ProfileForm() {
           return;
         }
       }
+
       const request = await updateProfileInfo(values);
 
-      switch (request.variant) {
-        case ToastVariant.Success:
-          toast.success(
-            request.title,
-            {
-              description: request.description,
-            },
-          );
-          break;
-        default:
-          toast.error(
-            request.title,
-            {
-              description: request.description,
-            },
-          );
+      if (request.variant === ToastVariant.Success) {
+        toast.success(request.title, {
+          description: request.description,
+        });
+      } else {
+        toast.error(request.title, {
+          description: request.description,
+        });
       }
-    });
+    } catch {
+      toast.error("Something went wrong.", {
+        description: "Please try again later.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -201,8 +205,18 @@ export default function ProfileForm() {
                     </FormItem>
                   )}
                 />
-                <Button className="hover:cursor-pointer" type="submit">
-                  Submit
+                <Button
+                  disabled={isSubmitting}
+                  className="hover:cursor-pointer min-w-[130px]"
+                  type="submit"
+                >
+                  {isSubmitting
+                    ? (
+                      <span className="flex justify-center">
+                        <LoaderCircle className="animate-spin" />
+                      </span>
+                    )
+                    : <span>Update Profile</span>}
                 </Button>
               </>
             )
