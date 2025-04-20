@@ -13,8 +13,10 @@ import Dropzone, { FileRejection } from "react-dropzone";
 import { toast } from "sonner";
 import { updateAvatarUrl } from "@/db/database";
 import { ToastVariant } from "@/db/enums";
+import { useStore } from "@/app/providers";
 
 const EditAvatar = () => {
+  const updateDisplayProfile = useStore((state) => state.updateDisplayProfile);
   const [isDragOver, setIsDragOver] = useState<boolean>(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
 
@@ -26,6 +28,7 @@ const EditAvatar = () => {
         const request = await updateAvatarUrl(uploadUserId, imageUrl);
         switch (request.variant) {
           case ToastVariant.Success:
+            updateDisplayProfile({ avatarUrl: imageUrl });
             toast.success(
               request.title,
               {
