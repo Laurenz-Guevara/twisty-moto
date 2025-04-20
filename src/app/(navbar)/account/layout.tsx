@@ -1,13 +1,7 @@
 import { SidebarNav } from "@/components/sidebar-nav";
 import { Separator } from "@/components/ui/separator";
-import { Metadata } from "next";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { RegisterLink } from "@kinde-oss/kinde-auth-nextjs/components";
-
-export const metadata: Metadata = {
-  title: "Forms",
-  description: "Advanced form example using react-hook-form and Zod.",
-};
 
 const sidebarNavItems = [
   {
