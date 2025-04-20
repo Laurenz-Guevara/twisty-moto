@@ -9,7 +9,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 
 import { create } from "zustand";
 import { useEffect } from "react";
-import { getUsername } from "@/db/database";
+import { getPrivateUserProfile } from "@/db/database";
 import { User as UserType } from "@/db/types";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
@@ -51,10 +51,11 @@ export const useStore = create<{
 function ZustandStore({ children }: { children: React.ReactNode }) {
   const updateDisplayProfile = useStore((state) => state.updateDisplayProfile);
 
+  // TODO: Test to ensure it always has data
   const { data: displayProfile } = useQuery({
     queryKey: ["user"],
     queryFn: async (): Promise<UserType> => {
-      const response = await getUsername();
+      const response = await getPrivateUserProfile();
       return (
         response || {
           username: "",

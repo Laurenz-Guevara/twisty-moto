@@ -1,11 +1,18 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useStore } from "@/app/providers";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
-import { ToastVariant } from "@/db/enums";
+import {
+  checkUsernameExists,
+  getPrivateUserNames,
+  updateProfileInfo,
+} from "@/db/database";
 
-import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -15,19 +22,18 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { toast } from "sonner";
+import { ToastVariant } from "@/db/enums";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  checkUsernameExists,
-  getUsername,
-  updateProfileInfo,
-} from "@/db/database";
-import { useEffect, useRef, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
-import { User as UserType } from "@/db/types";
 import { LoaderCircle } from "lucide-react";
-import { useStore } from "@/app/providers";
+
+// TODO: This needs to be a partial of User and that it ensures username, firstName and lastName are never undefined
+interface UserType {
+  username: string;
+  firstName: string;
+  lastName: string;
+}
 
 const formSchema = z.object({
   username: z.string()
@@ -64,7 +70,7 @@ export default function ProfileForm() {
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["user"],
     queryFn: async (): Promise<UserType> => {
-      const response = await getUsername();
+      const response = await getPrivateUserNames();
 
       if (response) {
         return response;
@@ -73,7 +79,6 @@ export default function ProfileForm() {
           username: "",
           firstName: "",
           lastName: "",
-          avatarUrl: "",
         };
       }
     },

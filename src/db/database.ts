@@ -9,7 +9,7 @@ import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 
 const { getAccessToken } = getKindeServerSession();
 
-export const getUsername = async () => {
+export const getPrivateUserProfile = async () => {
   const accessToken = await getAccessToken();
 
   if (accessToken) {
@@ -27,6 +27,37 @@ export const getUsername = async () => {
 
     return user[0] || null;
   }
+};
+
+export const getPrivateUserNames = async () => {
+  const accessToken = await getAccessToken();
+
+  if (accessToken) {
+    const user = await db
+      .select({
+        username: users.username,
+        firstName: users.firstName,
+        lastName: users.lastName,
+      })
+      .from(users)
+      .where(eq(users.kindeId, accessToken.sub))
+      .limit(1);
+
+    return user[0] || null;
+  }
+};
+
+export const getPublicUserProfile = async (username: string) => {
+  const user = await db
+    .select({
+      username: users.username,
+      avatarUrl: users.avatarUrl,
+    })
+    .from(users)
+    .where(eq(users.username, username))
+    .limit(1);
+
+  return user[0] || null;
 };
 
 export const checkUsernameExists = async (username: string) => {
