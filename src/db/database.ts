@@ -10,20 +10,19 @@ import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 const { getAccessToken } = getKindeServerSession();
 
 export const setupNewUser = async (kindeId: string, email: string) => {
-  const uuid = sql`gen_random_uuid()`;
-
-  await db
+  const [user] = await db
     .insert(users)
     .values({
-      userId: uuid,
+      userId: sql`gen_random_uuid()`,
       kindeId: kindeId,
       email: email,
-    });
+    })
+    .returning({ userId: users.userId });
 
   await db
     .insert(notifications)
     .values({
-      userId: uuid,
+      userId: user.userId,
       title: "Please set up your username",
       description:
         "Complete your profile by setting up a username for your account.",
