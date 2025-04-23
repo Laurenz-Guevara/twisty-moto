@@ -2,6 +2,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -21,8 +22,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { deleteAccount } from "@/db/database";
+import { getPrivateUserProfile } from "@/db/database";
 
 const formSchema = z.object({
   email: z.string().min(2, {
@@ -38,17 +42,33 @@ const formSchema = z.object({
 });
 
 export default function DeleteProfile() {
+  const { user } = useKindeBrowserClient();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: "",
-      confirmation: "",
+      email: "laurenz.guevara@gmail.com",
+      confirmation: "delete my account",
+    },
+  });
+
+  const { data: userEmail } = useQuery({
+    queryKey: ["email"],
+    queryFn: async (): Promise<string> => {
+      const response = await getPrivateUserProfile();
+      return (response?.email || "");
     },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+    console.log("Submit", userEmail);
+    try {
+      deleteAccount(user.id, values.email);
+    } catch (error) {
+      console.log(error);
+    }
   }
+
   return (
     <div className="space-y-8">
       <div>
@@ -82,11 +102,17 @@ export default function DeleteProfile() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Enter your account's email address "email@domain.co.uk" to
-                      continue:
+                      Enter your account&lsquo;s email address &apos;{user.email
+                        ? user.email
+                        : "email@domain.co.uk"}&apos; to continue:
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="example@domain.com" {...field} />
+                      <Input
+                        placeholder={user.email
+                          ? user.email
+                          : "email@domain.co.uk"}
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -98,7 +124,7 @@ export default function DeleteProfile() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      To verify, type "delete my account" below:
+                      To verify, type &apos;delete my account&apos; below:
                     </FormLabel>
                     <FormControl>
                       <Input placeholder="delete my account" {...field} />

@@ -243,3 +243,104 @@ export const updateAvatarUrl = async (
     };
   }
 };
+
+async function getTokenFromKinde() {
+  const response = await fetch(
+    "https://twistymoto.kinde.com/oauth2/token",
+    {
+      method: "POST",
+      headers: {
+        "content-type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        audience: process.env.KINDE_M2M_AUDIENCE!,
+        grant_type: "client_credentials",
+        client_id: process.env.KINDE_M2M_CLIENT_ID!,
+        client_secret: process.env.KINDE_M2M_CLIENT_SECRET!,
+      }),
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(`Response status: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export const deleteAccount = async (kindeId: string, email: string) => {
+  const accessToken = await getAccessToken();
+
+  if (
+    !accessToken?.sub && accessToken?.sub !== kindeId &&
+    accessToken?.email !== email
+  ) {
+    return {
+      title: "Error",
+      description: "Unable to authenticate user. Please try again later.",
+      variant: ToastVariant.Destructive,
+    };
+  }
+
+  try {
+    await db.transaction(async (tx) => {
+      const [{ userId }] = await tx
+        .select({
+          userId: users.userId,
+        })
+        .from(users)
+        .where(eq(users.kindeId, accessToken.sub))
+        .limit(1);
+
+      await tx.delete(notifications)
+        .where(
+          eq(notifications.userId, userId),
+        );
+      await tx.delete(users).where(eq(users.kindeId, accessToken.sub));
+
+      try {
+        const token = await getTokenFromKinde();
+
+        await fetch(
+          `https://twistymoto.kinde.com/api/v1/users/${accessToken.sub}/sessions`,
+          {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token.access_token}`,
+            },
+          },
+        );
+
+        await fetch(
+          `https://twistymoto.kinde.com/api/v1/user?id=${accessToken.sub}`,
+          {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token.access_token}`,
+            },
+          },
+        );
+      } catch (error: unknown) {
+        console.log(
+          "Failed during delete action. Rolling back query...",
+          error,
+        );
+        tx.rollback();
+
+        return {
+          title: "Error",
+          description:
+            "An error has occured. Please try again later. No changes have been made.",
+          variant: ToastVariant.Destructive,
+        };
+      }
+    });
+  } catch {
+    return {
+      title: "Error",
+      description:
+        "An error has occured. Please try again later. No changes have been made.",
+      variant: ToastVariant.Destructive,
+    };
+  }
+};

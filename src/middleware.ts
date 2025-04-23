@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { withAuth } from "@kinde-oss/kinde-auth-nextjs/middleware";
 
 export default withAuth(
@@ -7,7 +8,7 @@ export default withAuth(
     isReturnToCurrentPage: true,
     publicPaths: ["/", "/discover", "/community-routes"],
     isAuthorized: ({ token }: { token: any }) => {
-      if (token.sub) {
+      if (token?.sub) {
         return true;
       }
     },
