@@ -2,8 +2,7 @@ import { NextResponse } from "next/server";
 import jwksClient from "jwks-rsa";
 import jwt from "jsonwebtoken";
 import type { JwtPayload } from "jsonwebtoken";
-import { db } from "@/db";
-import { users } from "@/db/schema";
+import { setupNewUser } from "@/db/database";
 
 const client = jwksClient({
   jwksUri: `${process.env.KINDE_ISSUER_URL}/.well-known/jwks.json`,
@@ -30,18 +29,10 @@ export async function POST(req: Request) {
 
     switch (event?.type) {
       case "user.created":
-        console.log("[user.created]");
         const user = event.data.user;
         const email = user.email;
-        console.log("[user]", user);
 
-        await db
-          .insert(users)
-          .values({
-            kindeId: user.id,
-            email: email,
-          })
-          .returning({ userId: users.userId });
+        await setupNewUser(user.id, email);
 
         break;
       case "user.updated":

@@ -1,13 +1,36 @@
 "use server";
 
 import { db } from "@/db";
-import { avatars, users } from "@/db/schema";
+import { avatars, notifications, users } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { ToastVariant } from "./enums";
 import { NeonDbError } from "@neondatabase/serverless";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 
 const { getAccessToken } = getKindeServerSession();
+
+export const setupNewUser = async (kindeId: string, email: string) => {
+  const uuid = sql`gen_random_uuid()`;
+
+  await db
+    .insert(users)
+    .values({
+      userId: uuid,
+      kindeId: kindeId,
+      email: email,
+    });
+
+  await db
+    .insert(notifications)
+    .values({
+      userId: uuid,
+      title: "Please set up your username",
+      description:
+        "Complete your profile by setting up a username for your account.",
+      category: "account",
+      priority: "high",
+    });
+};
 
 export const getUserId = async () => {
   const accessToken = await getAccessToken();
