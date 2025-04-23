@@ -6,6 +6,7 @@ import {
   useQuery,
 } from "@tanstack/react-query";
 import { ThemeProvider } from "@/components/theme-provider";
+import { KindeProvider } from "@kinde-oss/kinde-auth-nextjs";
 
 import { create } from "zustand";
 import { useEffect } from "react";
@@ -22,11 +23,13 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         enableSystem
         disableTransitionOnChange
       >
-        <QueryClientProvider client={queryClient}>
-          <ZustandStore>
-            {children}
-          </ZustandStore>
-        </QueryClientProvider>
+        <KindeProvider>
+          <QueryClientProvider client={queryClient}>
+            <ZustandStore>
+              {children}
+            </ZustandStore>
+          </QueryClientProvider>
+        </KindeProvider>
       </ThemeProvider>
     </>
   );
