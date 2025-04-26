@@ -1,3 +1,5 @@
+"use client";
+
 import { Separator } from "@/components/ui/separator";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,70 +12,11 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-
-interface Notification {
-  id: number;
-  title: string;
-  description: string;
-  time: string;
-  read: boolean;
-  category: string;
-  priority: string;
-}
+import { useStore } from "@/app/providers";
+import { Notification as NotificationType } from "@/db/types";
 
 export default function SettingsProfilePage() {
-  const notifications: Notification[] = [
-    {
-      id: 1,
-      title: "Please set up your username",
-      description:
-        "Complete your profile by setting up a username for your account.",
-      time: "Just now",
-      read: false,
-      category: "account",
-      priority: "high",
-    },
-    {
-      id: 2,
-      title: "Please verify email address",
-      description:
-        "Verify your email address to ensure the security of your account.",
-      time: "5 minutes ago",
-      read: false,
-      category: "security",
-      priority: "high",
-    },
-    {
-      id: 3,
-      title: "Welcome to the platform!",
-      description:
-        "Thank you for joining. Explore our features to get started.",
-      time: "1 hour ago",
-      read: true,
-      category: "general",
-      priority: "normal",
-    },
-    {
-      id: 4,
-      title: "New feature available",
-      description: "We've added a new dashboard feature. Check it out!",
-      time: "1 day ago",
-      read: true,
-      category: "product",
-      priority: "normal",
-    },
-    {
-      id: 5,
-      title: "Your subscription will renew soon",
-      description:
-        "Your monthly subscription will automatically renew in 7 days.",
-      time: "2 days ago",
-      read: true,
-      category: "billing",
-      priority: "normal",
-    },
-  ];
-
+  const notifications = useStore((state) => state.userNotifications);
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
@@ -146,7 +89,9 @@ export default function SettingsProfilePage() {
   );
 }
 
-function NotificationCard({ notification }: { notification: Notification }) {
+function NotificationCard(
+  { notification }: { notification: NotificationType },
+) {
   return (
     <Card className="relative overflow-hidden">
       {!notification.read && (
@@ -157,7 +102,11 @@ function NotificationCard({ notification }: { notification: Notification }) {
           <div>
             <CardTitle className="text-base">{notification.title}</CardTitle>
             <CardDescription className="text-xs">
-              {notification.time}
+              {notification.time.toLocaleDateString("en-GB", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })}
             </CardDescription>
           </div>
           <Badge variant={notification.read ? "outline" : "secondary"}>
@@ -176,16 +125,6 @@ function NotificationCard({ notification }: { notification: Notification }) {
           >
             {notification.read ? "Mark as unread" : "Mark as read"}
           </Button>
-          {notification.id === 1 && (
-            <Button size="sm" variant="outline">
-              Set username
-            </Button>
-          )}
-          {notification.id === 2 && (
-            <Button size="sm" variant="outline">
-              Verify email
-            </Button>
-          )}
         </div>
       </CardContent>
     </Card>

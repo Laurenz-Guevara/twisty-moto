@@ -60,20 +60,20 @@ export const notifications = createTable("notification", {
     .notNull()
     .references(() => users.userId, { onDelete: "cascade" }),
 
-  title: varchar("title", { length: 255 }).notNull(),
+  title: varchar("title", { length: 255 }).notNull().default(""),
 
-  description: varchar("description", { length: 1000 }).default(""),
+  description: varchar("description", { length: 1000 }).notNull().default(""),
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
 
   isRead: boolean("is_read").default(false).notNull(),
 
-  category: varchar("category", { length: 32 }).notNull(),
+  category: varchar("category", { length: 32 }).notNull().default(""),
 
-  priority: varchar("priority", { length: 32 }).notNull(),
+  priority: varchar("priority", { length: 32 }).notNull().default("low"),
 
-  actionLabel: varchar("action_label", { length: 128 }),
-  actionUrl: varchar("action_url", { length: 256 }),
+  actionLabel: varchar("action_label", { length: 128 }).notNull().default(""),
+  actionUrl: varchar("action_url", { length: 256 }).notNull().default(""),
 });
 
 export const userRelations = relations(users, ({ one, many }) => ({

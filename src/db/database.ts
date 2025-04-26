@@ -21,14 +21,21 @@ export const setupNewUser = async (kindeId: string, email: string) => {
 
   await db
     .insert(notifications)
-    .values({
+    .values([{
       userId: user.userId,
       title: "Please set up your username",
       description:
         "Complete your profile by setting up a username for your account.",
       category: "account",
       priority: "high",
-    });
+    }, {
+      userId: user.userId,
+      title: "Welcome to the platform!",
+      description:
+        "Thank you for joining. Explore our features to get started.",
+      category: "misc",
+      priority: "none",
+    }]);
 };
 
 export const getUserId = async () => {
@@ -292,10 +299,13 @@ export const deleteAccount = async (kindeId: string, email: string) => {
         .where(eq(users.kindeId, accessToken.sub))
         .limit(1);
 
+      // TODO: Foreign Key Constraint Issue, ensure avatar is deleted first before the rest.
+
       await tx.delete(notifications)
         .where(
           eq(notifications.userId, userId),
         );
+
       await tx.delete(users).where(eq(users.kindeId, accessToken.sub));
 
       try {
@@ -343,4 +353,36 @@ export const deleteAccount = async (kindeId: string, email: string) => {
       variant: ToastVariant.Destructive,
     };
   }
+};
+
+export const getUserNotifications = async () => {
+  const accessToken = await getAccessToken();
+
+  if (!accessToken) {
+    return [];
+  }
+
+  const [{ userId }] = await db
+    .select({
+      userId: users.userId,
+    })
+    .from(users)
+    .where(eq(users.kindeId, accessToken.sub))
+    .limit(1);
+
+  const userNotifications = await db
+    .select({
+      id: notifications.notificationId,
+      title: notifications.title,
+      description: notifications.description,
+      time: notifications.createdAt,
+      read: notifications.isRead,
+      category: notifications.category,
+      priority: notifications.priority,
+      actionLabel: notifications.actionLabel,
+      actionUrl: notifications.actionUrl,
+    }).from(notifications)
+    .where(eq(notifications.userId, userId));
+
+  return userNotifications || [];
 };

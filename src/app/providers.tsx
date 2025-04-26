@@ -9,9 +9,9 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { KindeProvider } from "@kinde-oss/kinde-auth-nextjs";
 
 import { create } from "zustand";
+import { getPrivateUserProfile, getUserNotifications } from "@/db/database";
+import { Notification as NotificationType, User as UserType } from "@/db/types";
 import { useEffect } from "react";
-import { getPrivateUserProfile } from "@/db/database";
-import { User as UserType } from "@/db/types";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const queryClient = new QueryClient();
@@ -40,8 +40,11 @@ type PartialUser = Partial<UserType>;
 export const useStore = create<{
   displayProfile: UserType;
   updateDisplayProfile: (newDisplayProfile: PartialUser) => void;
+  userNotifications: NotificationType[];
+  updateUserNotifications: (newUserNotifications: NotificationType[]) => void;
 }>((set) => ({
   displayProfile: { username: "", firstName: "", lastName: "", avatarUrl: "" },
+  userNotifications: [],
   updateDisplayProfile: (newDisplayProfile) =>
     set((state) => ({
       displayProfile: {
@@ -49,32 +52,58 @@ export const useStore = create<{
         ...newDisplayProfile,
       },
     })),
+  updateUserNotifications: (newUserNotifications) =>
+    set(() => ({
+      userNotifications: newUserNotifications,
+    })),
 }));
 
 function ZustandStore({ children }: { children: React.ReactNode }) {
   const updateDisplayProfile = useStore((state) => state.updateDisplayProfile);
+  const updateUserNotifications = useStore((state) =>
+    state.updateUserNotifications
+  );
 
   // TODO: Test to ensure it always has data
-  const { data: displayProfile } = useQuery({
+  const { data: userProfile } = useQuery({
     queryKey: ["user"],
-    queryFn: async (): Promise<UserType> => {
+    queryFn: async () => {
       const response = await getPrivateUserProfile();
-      return (
-        response || {
-          username: "",
-          firstName: "",
-          lastName: "",
-          avatarUrl: "",
-        }
-      );
+      return response || {
+        username: "",
+        firstName: "",
+        lastName: "",
+        avatarUrl: "",
+      };
+    },
+  });
+
+  const { data: userNotifications } = useQuery({
+    queryKey: ["notifications"],
+    queryFn: async () => {
+      const response = await getUserNotifications();
+
+      return response;
     },
   });
 
   useEffect(() => {
-    if (displayProfile) {
-      updateDisplayProfile(displayProfile);
+    if (userNotifications) {
+      console.log(userNotifications);
+      updateUserNotifications(userNotifications || []);
     }
-  }, [displayProfile, updateDisplayProfile]);
+
+    if (userProfile) {
+      updateDisplayProfile(
+        userProfile || {
+          username: "",
+          firstName: "",
+          lastName: "",
+          avatarUrl: "",
+        },
+      );
+    }
+  }, [userNotifications, userProfile]);
 
   return <>{children}</>;
 }
