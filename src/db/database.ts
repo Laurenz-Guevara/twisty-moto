@@ -2,7 +2,7 @@
 
 import { db } from "@/db";
 import { avatars, notifications, users } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { ToastVariant } from "./enums";
 import { NeonDbError } from "@neondatabase/serverless";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
@@ -205,7 +205,11 @@ export const getAvatarFileKey = async () => {
     .where(eq(avatars.userId, userId))
     .limit(1);
 
-  return avatar[0].avatarFileKey;
+  if (avatar[0]?.avatarFileKey.length > 0) {
+    return avatar[0].avatarFileKey;
+  } else {
+    return undefined;
+  }
 };
 
 export const updateAvatarUrl = async (
@@ -317,12 +321,14 @@ export const deleteAccount = async (kindeId: string, email: string) => {
         .limit(1);
 
       const avatarFileKey = await getAvatarFileKey();
-      await utapi.deleteFiles(avatarFileKey);
 
-      await tx.delete(avatars)
-        .where(
-          eq(avatars.userId, userId),
-        );
+      if (avatarFileKey !== undefined) {
+        await utapi.deleteFiles(avatarFileKey);
+        await tx.delete(avatars)
+          .where(
+            eq(avatars.userId, userId),
+          );
+      }
 
       await tx.delete(notifications)
         .where(
@@ -408,4 +414,55 @@ export const getUserNotifications = async () => {
     .where(eq(notifications.userId, userId));
 
   return userNotifications || [];
+};
+
+export const updateUserNotification = async (
+  updateType: string,
+  nid: string,
+) => {
+  const userId = await getUserId();
+
+  if (userId === null || userId === undefined) {
+    throw new Error("Cannot get userId.");
+  }
+
+  switch (updateType) {
+    case "read":
+      await db
+        .update(notifications)
+        .set({
+          isRead: true,
+        })
+        .where(
+          and(
+            eq(notifications.notificationId, nid),
+            eq(notifications.userId, userId),
+          ),
+        );
+
+      break;
+    case "unread":
+      await db
+        .update(notifications)
+        .set({
+          isRead: false,
+        })
+        .where(
+          and(
+            eq(notifications.notificationId, nid),
+            eq(notifications.userId, userId),
+          ),
+        );
+      break;
+    case "delete":
+      await db
+        .delete(notifications)
+        .where(
+          and(
+            eq(notifications.notificationId, nid),
+            eq(notifications.userId, userId),
+          ),
+        );
+      break;
+  }
 };

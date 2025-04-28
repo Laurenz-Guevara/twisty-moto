@@ -89,7 +89,6 @@ function ZustandStore({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (userNotifications) {
-      console.log(userNotifications);
       updateUserNotifications(userNotifications || []);
     }
 

@@ -15,9 +15,45 @@ import { Badge } from "@/components/ui/badge";
 import { useStore } from "@/app/providers";
 import { Notification as NotificationType } from "@/db/types";
 
+import { updateUserNotification } from "@/db/database";
+
+async function UpdateNotification(updateType: string, notificationId: string) {
+  await updateUserNotification(updateType, notificationId);
+}
+
 export default function SettingsProfilePage() {
   const notifications = useStore((state) => state.userNotifications);
+  const updateNotificationStore = useStore((state) =>
+    state.updateUserNotifications
+  );
   const unreadCount = notifications.filter((n) => !n.read).length;
+
+  function markReadNotification(notification: NotificationType) {
+    const updatedNotifications = notifications.map((n: NotificationType) => {
+      return {
+        ...n,
+        read: n.id === notification.id ? true : n.read,
+      };
+    });
+    updateNotificationStore(updatedNotifications);
+  }
+
+  function markUnreadNotification(notification: NotificationType) {
+    const updatedNotifications = notifications.map((n: NotificationType) => {
+      return {
+        ...n,
+        read: n.id === notification.id ? false : n.read,
+      };
+    });
+    updateNotificationStore(updatedNotifications);
+  }
+
+  function deleteNotification(notification: NotificationType) {
+    const updatedNotifications = notifications.filter((n) =>
+      n.id !== notification.id
+    );
+    updateNotificationStore(updatedNotifications);
+  }
 
   return (
     <div className="space-y-6">
@@ -53,10 +89,15 @@ export default function SettingsProfilePage() {
             </TabsList>
 
             <TabsContent value="all" className="space-y-4">
-              {notifications.map((notification) => (
+              {notifications.sort((a) => a.read ? 1 : -1).map((
+                notification,
+              ) => (
                 <NotificationCard
                   key={notification.id}
                   notification={notification}
+                  markReadNotification={markReadNotification}
+                  markUnreadNotification={markUnreadNotification}
+                  deleteNotification={deleteNotification}
                 />
               ))}
             </TabsContent>
@@ -68,6 +109,9 @@ export default function SettingsProfilePage() {
                   <NotificationCard
                     key={notification.id}
                     notification={notification}
+                    markReadNotification={markReadNotification}
+                    markUnreadNotification={markUnreadNotification}
+                    deleteNotification={deleteNotification}
                   />
                 ))}
             </TabsContent>
@@ -79,6 +123,9 @@ export default function SettingsProfilePage() {
                   <NotificationCard
                     key={notification.id}
                     notification={notification}
+                    markReadNotification={markReadNotification}
+                    markUnreadNotification={markUnreadNotification}
+                    deleteNotification={deleteNotification}
                   />
                 ))}
             </TabsContent>
@@ -89,9 +136,38 @@ export default function SettingsProfilePage() {
   );
 }
 
-function NotificationCard(
-  { notification }: { notification: NotificationType },
-) {
+function NotificationCard({
+  notification,
+  markReadNotification,
+  markUnreadNotification,
+  deleteNotification,
+}: {
+  notification: NotificationType;
+  markReadNotification: (notification: NotificationType) => void;
+  markUnreadNotification: (notification: NotificationType) => void;
+  deleteNotification: (notification: NotificationType) => void;
+}) {
+  function handleUpdateNotification(
+    notification: NotificationType,
+    updateType: string,
+  ) {
+    switch (updateType) {
+      case "read":
+        notification.read = false;
+        markReadNotification(notification);
+
+        break;
+      case "unread":
+        notification.read = true;
+        markUnreadNotification(notification);
+        break;
+      case "delete":
+        deleteNotification(notification);
+        break;
+    }
+    UpdateNotification(updateType, notification.id);
+  }
+
   return (
     <Card className="relative overflow-hidden">
       {!notification.read && (
@@ -118,12 +194,27 @@ function NotificationCard(
         <p className="text-sm text-muted-foreground">
           {notification.description}
         </p>
-        <div className="flex gap-2 mt-4">
+        <div className="flex justify-between gap-2 mt-4">
           <Button
             size="sm"
+            className="hover:cursor-pointer"
             variant={notification.read ? "outline" : "default"}
+            onClick={() => (
+              handleUpdateNotification(
+                notification,
+                notification.read ? "unread" : "read",
+              )
+            )}
           >
             {notification.read ? "Mark as unread" : "Mark as read"}
+          </Button>
+          <Button
+            size="sm"
+            className="hover:cursor-pointer"
+            variant={"destructive"}
+            onClick={() => handleUpdateNotification(notification, "delete")}
+          >
+            Delete
           </Button>
         </div>
       </CardContent>

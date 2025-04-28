@@ -8,20 +8,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Bell } from "lucide-react";
 import Link from "next/link";
+import { useStore } from "@/app/providers";
 
 export default function NotifcationBell() {
-  const notifications = [
-    {
-      id: 1,
-      title: "Please set up your username",
-      read: false,
-    },
-    {
-      id: 2,
-      title: "Please verify email address",
-      read: false,
-    },
-  ];
+  const notifications = useStore((state) => state.userNotifications);
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
     <Popover>
@@ -32,12 +23,14 @@ export default function NotifcationBell() {
           className="relative hover:cursor-pointer"
         >
           <Bell className="h-5 w-5" />
-          <Badge
-            className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
-            variant="destructive"
-          >
-            {notifications.filter((n) => !n.read).length}
-          </Badge>
+          {unreadCount > 0 && (
+            <Badge
+              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+              variant="destructive"
+            >
+              {notifications.filter((n) => !n.read).length}
+            </Badge>
+          )}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80 p-0" align="end">
@@ -45,10 +38,10 @@ export default function NotifcationBell() {
           <h3 className="font-medium">Notifications</h3>
         </div>
         <div className="max-h-96 overflow-auto">
-          {notifications.map((notification) => (
+          {notifications.filter((n) => !n.read).map((notification) => (
             <Card
               key={notification.id}
-              className="rounded-none border-x-0 border-t-0 p-4"
+              className="rounded-none border-0 p-4"
             >
               <div className="flex items-start gap-2">
                 <div className="h-2 w-2 mt-2 rounded-full bg-red-500" />
