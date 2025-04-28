@@ -6,6 +6,7 @@ import { eq, sql } from "drizzle-orm";
 import { ToastVariant } from "./enums";
 import { NeonDbError } from "@neondatabase/serverless";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
+import { utapi } from "@/app/api/uploadthing/core";
 
 const { getAccessToken } = getKindeServerSession();
 
@@ -191,6 +192,22 @@ export const updateProfileInfo = async (
   }
 };
 
+export const getAvatarFileKey = async () => {
+  const userId = await getUserId();
+
+  if (userId === null || userId === undefined) {
+    throw new Error("Cannot get userId.");
+  }
+
+  const avatar = await db
+    .select({ avatarFileKey: avatars.avatarFileKey })
+    .from(avatars)
+    .where(eq(avatars.userId, userId))
+    .limit(1);
+
+  return avatar[0].avatarFileKey;
+};
+
 export const updateAvatarUrl = async (
   uuid: string,
   imgUrl: string,
@@ -299,7 +316,13 @@ export const deleteAccount = async (kindeId: string, email: string) => {
         .where(eq(users.kindeId, accessToken.sub))
         .limit(1);
 
-      // TODO: Foreign Key Constraint Issue, ensure avatar is deleted first before the rest.
+      const avatarFileKey = await getAvatarFileKey();
+      await utapi.deleteFiles(avatarFileKey);
+
+      await tx.delete(avatars)
+        .where(
+          eq(avatars.userId, userId),
+        );
 
       await tx.delete(notifications)
         .where(
