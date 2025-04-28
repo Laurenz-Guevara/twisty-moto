@@ -47,8 +47,8 @@ export default function DeleteProfile() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: "laurenz.guevara@gmail.com",
-      confirmation: "delete my account",
+      email: "",
+      confirmation: "",
     },
   });
 
