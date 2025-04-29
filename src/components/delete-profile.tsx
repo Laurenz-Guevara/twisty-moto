@@ -61,12 +61,9 @@ export default function DeleteProfile() {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log("Submit", userEmail);
     try {
       deleteAccount(user.id, values.email);
-    } catch (error) {
-      console.log(error);
-    }
+    } catch { }
   }
 
   return (
@@ -102,14 +99,14 @@ export default function DeleteProfile() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Enter your account&lsquo;s email address &apos;{user.email
-                        ? user.email
+                      Enter your account&lsquo;s email address &apos;{userEmail
+                        ? userEmail
                         : "email@domain.co.uk"}&apos; to continue:
                     </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder={user.email
-                          ? user.email
+                        placeholder={userEmail
+                          ? userEmail
                           : "email@domain.co.uk"}
                         {...field}
                       />
@@ -134,7 +131,11 @@ export default function DeleteProfile() {
                 )}
               />
               <DialogFooter>
-                <Button variant="destructive" type="submit">
+                <Button
+                  className="hover:cursor-pointer"
+                  variant="destructive"
+                  type="submit"
+                >
                   Delete Account
                 </Button>
               </DialogFooter>
