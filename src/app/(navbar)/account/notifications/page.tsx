@@ -48,6 +48,18 @@ export default function SettingsProfilePage() {
     updateNotificationStore(updatedNotifications);
   }
 
+  function markAllAsReadNotification() {
+    const updatedNotifications = notifications.map((n: NotificationType) => {
+      return {
+        ...n,
+        read: true,
+      };
+    });
+    console.log(updatedNotifications);
+    updateNotificationStore(updatedNotifications);
+    UpdateNotification("readall", "");
+  }
+
   function deleteNotification(notification: NotificationType) {
     const updatedNotifications = notifications.filter((n) =>
       n.id !== notification.id
@@ -77,6 +89,7 @@ export default function SettingsProfilePage() {
             className="hover:cursor-pointer"
             variant="outline"
             size="sm"
+            onClick={() => markAllAsReadNotification()}
           >
             <Check className="h-4 w-4 mr-2" />
             Mark all as read

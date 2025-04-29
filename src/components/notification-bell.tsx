@@ -57,7 +57,7 @@ export default function NotifcationBell() {
             </Card>
           ))}
         </div>
-        <div className="p-2 border-t">
+        <div className={`p-2 ${unreadCount > 0 ? "border-t" : ""}`}>
           <Link href="/account/notifications">
             <Button
               variant="ghost"

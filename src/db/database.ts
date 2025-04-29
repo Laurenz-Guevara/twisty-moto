@@ -437,6 +437,19 @@ export const updateUserNotification = async (
   }
 
   switch (updateType) {
+    case "readall":
+      await db
+        .update(notifications)
+        .set({
+          isRead: true,
+        })
+        .where(
+          and(
+            eq(notifications.isRead, false),
+            eq(notifications.userId, userId),
+          ),
+        );
+      break;
     case "read":
       await db
         .update(notifications)

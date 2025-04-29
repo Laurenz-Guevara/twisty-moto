@@ -65,7 +65,7 @@ export default function DeleteProfile() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      let request = await deleteAccount(user.id, values.email);
+      const request = await deleteAccount(user.id, values.email);
 
       if (request.variant === ToastVariant.Success) {
         console.log("Success");
