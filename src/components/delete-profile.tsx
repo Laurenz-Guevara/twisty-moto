@@ -27,6 +27,9 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { deleteAccount } from "@/db/database";
 import { getPrivateUserProfile } from "@/db/database";
+import { ToastVariant } from "@/db/enums";
+import { toast } from "sonner";
+import router from "next/router";
 
 const formSchema = z.object({
   email: z.string().min(2, {
@@ -60,9 +63,21 @@ export default function DeleteProfile() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      deleteAccount(user.id, values.email);
+      let request = await deleteAccount(user.id, values.email);
+
+      if (request.variant === ToastVariant.Success) {
+        console.log("Success");
+        router.push("/");
+      } else {
+        toast.error(
+          request.title,
+          {
+            description: request.description,
+          },
+        );
+      }
     } catch { }
   }
 

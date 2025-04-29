@@ -296,7 +296,10 @@ async function getTokenFromKinde() {
   return response.json();
 }
 
-export const deleteAccount = async (kindeId: string, email: string) => {
+export const deleteAccount = async (
+  kindeId: string,
+  email: string,
+): Promise<{ title: string; description: string; variant: string }> => {
   const accessToken = await getAccessToken();
 
   if (
@@ -359,6 +362,7 @@ export const deleteAccount = async (kindeId: string, email: string) => {
             },
           },
         );
+        console.log("AFTER FETCH SUCESSS");
       } catch (error: unknown) {
         console.log(
           "Failed during delete action. Rolling back query...",
@@ -382,6 +386,12 @@ export const deleteAccount = async (kindeId: string, email: string) => {
       variant: ToastVariant.Destructive,
     };
   }
+  console.log("SUCESSS");
+  return {
+    title: "Success",
+    description: "Your account has been sucessfully deleted.",
+    variant: ToastVariant.Success,
+  };
 };
 
 export const getUserNotifications = async () => {
