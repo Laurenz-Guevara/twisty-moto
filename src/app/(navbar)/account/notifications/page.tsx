@@ -72,7 +72,12 @@ export default function SettingsProfilePage() {
           </p>
         </div>
         <div className="flex items-center gap-2 mb-auto">
-          <Button className="hover:cursor-pointer" variant="outline" size="sm">
+          <Button
+            disabled={notifications.length <= 0}
+            className="hover:cursor-pointer"
+            variant="outline"
+            size="sm"
+          >
             <Check className="h-4 w-4 mr-2" />
             Mark all as read
           </Button>
@@ -80,57 +85,61 @@ export default function SettingsProfilePage() {
       </div>
       <Separator />
       <div className="flex flex-col md:flex-row gap-6">
-        <div className="flex-1">
-          <Tabs defaultValue="all" className="w-full">
-            <TabsList className="mb-4">
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="unread">Unread</TabsTrigger>
-              <TabsTrigger value="read">Read</TabsTrigger>
-            </TabsList>
+        {notifications.length <= 0
+          ? <div>You have no more notifications.</div>
+          : (
+            <div className="flex-1">
+              <Tabs defaultValue="all" className="w-full">
+                <TabsList className="mb-4">
+                  <TabsTrigger value="all">All</TabsTrigger>
+                  <TabsTrigger value="unread">Unread</TabsTrigger>
+                  <TabsTrigger value="read">Read</TabsTrigger>
+                </TabsList>
 
-            <TabsContent value="all" className="space-y-4">
-              {notifications.sort((a) => a.read ? 1 : -1).map((
-                notification,
-              ) => (
-                <NotificationCard
-                  key={notification.id}
-                  notification={notification}
-                  markReadNotification={markReadNotification}
-                  markUnreadNotification={markUnreadNotification}
-                  deleteNotification={deleteNotification}
-                />
-              ))}
-            </TabsContent>
+                <TabsContent value="all" className="space-y-4">
+                  {notifications.sort((a) => a.read ? 1 : -1).map((
+                    notification,
+                  ) => (
+                    <NotificationCard
+                      key={notification.id}
+                      notification={notification}
+                      markReadNotification={markReadNotification}
+                      markUnreadNotification={markUnreadNotification}
+                      deleteNotification={deleteNotification}
+                    />
+                  ))}
+                </TabsContent>
 
-            <TabsContent value="unread" className="space-y-4">
-              {notifications
-                .filter((n) => !n.read)
-                .map((notification) => (
-                  <NotificationCard
-                    key={notification.id}
-                    notification={notification}
-                    markReadNotification={markReadNotification}
-                    markUnreadNotification={markUnreadNotification}
-                    deleteNotification={deleteNotification}
-                  />
-                ))}
-            </TabsContent>
+                <TabsContent value="unread" className="space-y-4">
+                  {notifications
+                    .filter((n) => !n.read)
+                    .map((notification) => (
+                      <NotificationCard
+                        key={notification.id}
+                        notification={notification}
+                        markReadNotification={markReadNotification}
+                        markUnreadNotification={markUnreadNotification}
+                        deleteNotification={deleteNotification}
+                      />
+                    ))}
+                </TabsContent>
 
-            <TabsContent value="read" className="space-y-4">
-              {notifications
-                .filter((n) => n.read)
-                .map((notification) => (
-                  <NotificationCard
-                    key={notification.id}
-                    notification={notification}
-                    markReadNotification={markReadNotification}
-                    markUnreadNotification={markUnreadNotification}
-                    deleteNotification={deleteNotification}
-                  />
-                ))}
-            </TabsContent>
-          </Tabs>
-        </div>
+                <TabsContent value="read" className="space-y-4">
+                  {notifications
+                    .filter((n) => n.read)
+                    .map((notification) => (
+                      <NotificationCard
+                        key={notification.id}
+                        notification={notification}
+                        markReadNotification={markReadNotification}
+                        markUnreadNotification={markUnreadNotification}
+                        deleteNotification={deleteNotification}
+                      />
+                    ))}
+                </TabsContent>
+              </Tabs>
+            </div>
+          )}
       </div>
     </div>
   );
