@@ -52,6 +52,7 @@ export const useStore = create<{
         ...newDisplayProfile,
       },
     })),
+
   updateUserNotifications: (newUserNotifications) =>
     set(() => ({
       userNotifications: newUserNotifications,
@@ -64,7 +65,6 @@ function ZustandStore({ children }: { children: React.ReactNode }) {
     state.updateUserNotifications
   );
 
-  // TODO: Test to ensure it always has data
   const { data: userProfile } = useQuery({
     queryKey: ["user"],
     queryFn: async () => {

@@ -68,7 +68,7 @@ export default function ProfileForm() {
   });
 
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ["user"],
+    queryKey: ["userProfile"],
     queryFn: async (): Promise<UserType> => {
       const response = await getPrivateUserNames();
 
@@ -124,8 +124,9 @@ export default function ProfileForm() {
         toast.success(request.title, {
           description: request.description,
         });
-
-        updateDisplayProfile({ username: values.username });
+        updateDisplayProfile({
+          username: values.username,
+        });
       } else {
         toast.error(request.title, {
           description: request.description,
