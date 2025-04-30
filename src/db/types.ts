@@ -16,3 +16,23 @@ export interface Notification {
   actionLabel: string;
   actionUrl: string;
 }
+
+export interface MarkerProps {
+  order: number;
+  latitude: number;
+  longitude: number;
+  streetName: string;
+  type: string;
+}
+
+export interface Waypoint {
+  distance: number;
+  location: number[];
+  name: string;
+  type: string;
+}
+
+export interface StatsProp {
+  distance: number | undefined;
+  duration: number | undefined;
+}

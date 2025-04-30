@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { RouteAction } from "@/components/route-action";
+import { RouteActionSidebarContent } from "@/components/route-action-sidebar-content";
 import { NavUser } from "@/components/nav-user";
 import { SidebarHeaderContent } from "@/components/sidebar-header-content";
 import {
@@ -19,7 +19,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarHeaderContent />
       </SidebarHeader>
       <SidebarContent>
-        <RouteAction />
+        <RouteActionSidebarContent />
       </SidebarContent>
       <SidebarFooter>
         <NavUser />

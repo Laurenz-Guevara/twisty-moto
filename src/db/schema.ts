@@ -1,6 +1,7 @@
 import { relations, sql } from "drizzle-orm";
 import {
   boolean,
+  jsonb,
   pgTableCreator,
   timestamp,
   uuid,
@@ -82,11 +83,45 @@ export const userRelations = relations(users, ({ one, many }) => ({
     references: [avatars.userId],
   }),
   notifications: many(notifications),
+  rotues: many(routes),
 }));
 
 export const notificationRelations = relations(notifications, ({ one }) => ({
   user: one(users, {
     fields: [notifications.userId],
+    references: [users.userId],
+  }),
+}));
+
+export const routes = createTable("routes", {
+  routeId: uuid("route_id")
+    .default(sql`gen_random_uuid()`)
+    .notNull()
+    .primaryKey(),
+
+  routeCreator: uuid("user_id")
+    .notNull()
+    .references(() => users.userId, { onDelete: "cascade" }),
+
+  routeName: varchar("route_name", { length: 128 }).notNull().default(""),
+
+  routeLocation: varchar("route_location", { length: 128 }).notNull().default(
+    "",
+  ),
+
+  routeDescription: varchar("route_description", { length: 1000 }).notNull()
+    .default(""),
+
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+
+  isPublic: boolean("is_public").default(false).notNull(),
+
+  routeState: jsonb("route_state").notNull().default({}),
+});
+
+export const routesRelations = relations(routes, ({ one }) => ({
+  user: one(users, {
+    fields: [routes.routeCreator],
     references: [users.userId],
   }),
 }));

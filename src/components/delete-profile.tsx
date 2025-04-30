@@ -68,7 +68,6 @@ export default function DeleteProfile() {
       const request = await deleteAccount(user.id, values.email);
 
       if (request.variant === ToastVariant.Success) {
-        console.log("Success");
         router.push("/");
       } else {
         toast.error(
@@ -78,7 +77,7 @@ export default function DeleteProfile() {
           },
         );
       }
-    } catch { }
+    } catch {}
   }
 
   return (

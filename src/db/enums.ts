@@ -3,3 +3,10 @@ export enum ToastVariant {
   Success = "success",
   Destructive = "destructive",
 }
+
+export enum RouteBuilderVariant {
+  Start = "start",
+  Via = "via",
+  Destination = "destination",
+  Bookmark = "bookmark",
+}

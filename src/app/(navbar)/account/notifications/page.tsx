@@ -55,7 +55,6 @@ export default function SettingsProfilePage() {
         read: true,
       };
     });
-    console.log(updatedNotifications);
     updateNotificationStore(updatedNotifications);
     UpdateNotification("readall", "");
   }

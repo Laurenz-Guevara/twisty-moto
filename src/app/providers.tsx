@@ -102,7 +102,12 @@ function ZustandStore({ children }: { children: React.ReactNode }) {
         },
       );
     }
-  }, [userNotifications, userProfile]);
+  }, [
+    userNotifications,
+    userProfile,
+    updateUserNotifications,
+    updateDisplayProfile,
+  ]);
 
   return <>{children}</>;
 }
