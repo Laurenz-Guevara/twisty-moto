@@ -79,6 +79,7 @@ export default function MapContainer() {
     return Math.hypot(px - closestX, py - closestY);
   }
 
+  // TODO: Check if route is valid otherwise fallback
   const { data: routeState } = useQuery({
     queryKey: ["route", storedRouteJson],
     queryFn: async () => {
@@ -256,8 +257,8 @@ export default function MapContainer() {
             )}
           {marker.order !== 0 &&
             marker.order !== storedRouteJson.length - 1 && (
-              <IconMapPinFilled size={30} className="text-blue-500" />
-            )}
+            <IconMapPinFilled size={30} className="text-blue-500" />
+          )}
         </Marker>
       );
     }), [storedRouteJson]);
