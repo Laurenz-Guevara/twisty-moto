@@ -131,7 +131,7 @@ export default function MapContainer() {
   const handleMapClick = (type: string, lng: number, lat: number) => {
     switch (type) {
       case RouteBuilderVariant.Start:
-        let updated = storedRouteJson.map((route) => {
+        const updated = storedRouteJson.map((route) => {
           return {
             ...route,
             order: route.order + 1,
@@ -257,8 +257,8 @@ export default function MapContainer() {
             )}
           {marker.order !== 0 &&
             marker.order !== storedRouteJson.length - 1 && (
-            <IconMapPinFilled size={30} className="text-blue-500" />
-          )}
+              <IconMapPinFilled size={30} className="text-blue-500" />
+            )}
         </Marker>
       );
     }), [storedRouteJson]);
