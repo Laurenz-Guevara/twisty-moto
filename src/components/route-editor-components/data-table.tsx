@@ -58,7 +58,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { useEffect, useId, useMemo, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useState } from "react";
 import { useRouteStore } from "@/app/stores/useRouteStore";
 
 export const schema = z.object({
@@ -66,6 +66,7 @@ export const schema = z.object({
   latitude: z.number(),
   longitude: z.number(),
   streetName: z.string(),
+  type: z.string(),
 });
 
 function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
@@ -115,9 +116,7 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
 }
 
 function DragHandle({ id }: { id: number }) {
-  const { attributes, listeners } = useSortable({
-    id,
-  });
+  const { attributes, listeners } = useSortable({ id });
 
   return (
     <Button
@@ -133,44 +132,52 @@ function DragHandle({ id }: { id: number }) {
   );
 }
 
-const columns: ColumnDef<z.infer<typeof schema>>[] = [
-  {
-    id: "drag",
-    header: () => null,
-    cell: ({ row }) => <DragHandle id={row.original.order} />,
-  },
-  {
-    accessorKey: "header",
-    header: "Header",
-    cell: ({ row }) => {
-      return <TableCellViewer item={row.original} />;
+const getColumns = (
+  handleDeleteWaypoint: (order: number) => void,
+): ColumnDef<z.infer<typeof schema>>[] => [
+    {
+      id: "drag",
+      header: () => null,
+      cell: ({ row }) => <DragHandle id={row.original.order} />,
     },
-    enableHiding: false,
-  },
-  {
-    id: "actions",
-    cell: () => (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
-            size="icon"
-          >
-            <IconDotsVertical />
-            <span className="sr-only">Open menu</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-32">
-          <DropdownMenuItem>Move Up</DropdownMenuItem>
-          <DropdownMenuItem>Move Down</DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    ),
-  },
-];
+    {
+      accessorKey: "header",
+      header: "Header",
+      cell: ({ row }) => <TableCellViewer item={row.original} />,
+      enableHiding: false,
+    },
+    {
+      id: "actions",
+      cell: ({ row }) => {
+        const order = row.original.order;
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
+                size="icon"
+              >
+                <IconDotsVertical />
+                <span className="sr-only">Open menu</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-32">
+              <DropdownMenuItem>Move Up</DropdownMenuItem>
+              <DropdownMenuItem>Move Down</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => handleDeleteWaypoint(order)}
+                variant="destructive"
+              >
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
+    },
+  ];
 
 function DraggableRow({ row }: { row: Row<z.infer<typeof schema>> }) {
   const { transform, transition, setNodeRef, isDragging } = useSortable({
@@ -201,10 +208,11 @@ export function DataTable() {
   const storedRouteJson: z.infer<typeof schema>[] = useRouteStore((s) =>
     s.routeJson
   );
-  const [data, setData] = useState(() => storedRouteJson);
+  const [data, setRoute] = useState(() => storedRouteJson);
+  const updateRouteState = useRouteStore((s) => s.updateRouteData);
 
   useEffect(() => {
-    setData(storedRouteJson);
+    setRoute(storedRouteJson);
   }, [storedRouteJson]);
 
   const [rowSelection, setRowSelection] = useState({});
@@ -215,6 +223,17 @@ export function DataTable() {
     useSensor(TouchSensor, {}),
     useSensor(KeyboardSensor, {}),
   );
+
+  const handleDeleteWaypoint = useCallback((order: number) => {
+    const updatedRoute = data.filter((waypoint) => waypoint.order !== order);
+    updateRouteState({
+      routeJson: updatedRoute,
+    });
+  }, [data, updateRouteState]);
+
+  const columns = useMemo(() => getColumns(handleDeleteWaypoint), [
+    handleDeleteWaypoint,
+  ]);
 
   const dataIds = useMemo<UniqueIdentifier[]>(
     () => data?.map(({ order }) => order) || [],
@@ -242,7 +261,7 @@ export function DataTable() {
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (active && over && active.id !== over.id) {
-      setData((data) => {
+      setRoute((data) => {
         const oldIndex = dataIds.indexOf(active.id);
         const newIndex = dataIds.indexOf(over.id);
         return arrayMove(data, oldIndex, newIndex);

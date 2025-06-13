@@ -18,7 +18,7 @@ import { RouteBuilderVariant } from "@/db/enums";
 import { useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouteStore } from "@/app/stores/useRouteStore";
-import { Waypoint } from "@/db/types";
+import { MarkerProps, Waypoint } from "@/db/types";
 import { Button } from "@/components/ui/button";
 
 const routeStyle: LayerProps = {
@@ -101,7 +101,7 @@ export default function MapContainer() {
       };
 
       const totalWaypoints = json.waypoints.length;
-      const waypoints = json.waypoints.map(
+      const waypoints: MarkerProps[] = json.waypoints.map(
         (waypoint: Waypoint, idx: number) => {
           return {
             order: idx,
