@@ -64,7 +64,7 @@ export default function RouteActions() {
                 onClick={() => handleResetRoute()}
               >
                 <RefreshCcw className="h-4 w-4" />
-                <span>Reset Route</span>
+                <span>Clear Route</span>
               </SidebarMenuSubButton>
             </SidebarMenuSubItem>
           </SidebarMenuSub>
