@@ -109,6 +109,14 @@ export const routes = createTable("routes", {
     "",
   ),
 
+  routeImageUrl: varchar("route_image_url", { length: 255 }).notNull().default(
+    "",
+  ),
+  routeImageFileKey: varchar("route_image_file_key", { length: 255 }).notNull()
+    .default(
+      "",
+    ),
+
   routeDescription: varchar("route_description", { length: 1000 }).notNull()
     .default(""),
 

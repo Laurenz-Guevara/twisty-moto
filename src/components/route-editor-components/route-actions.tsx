@@ -14,15 +14,36 @@ import {
 } from "@/components/ui/collapsible";
 import { ChevronRight, Plus, RefreshCcw, Save } from "lucide-react";
 import { useRouteStore } from "@/app/stores/useRouteStore";
+import { saveRoute } from "@/db/database";
+import { ToastVariant } from "@/db/enums";
+import { toast } from "sonner";
 
 export default function RouteActions() {
   const updateRouteState = useRouteStore((s) => s.updateRouteData);
+  const route = useRouteStore((s) => s);
 
   function handleResetRoute() {
     updateRouteState({
       routeJson: [],
       routeStats: { distance: undefined, duration: undefined },
     });
+  }
+
+  async function handleSaveRoute() {
+    const response = await saveRoute(route);
+
+    switch (response.variant) {
+      case ToastVariant.Success:
+        toast.success(response.title, {
+          description: response.description,
+        });
+        break;
+      case ToastVariant.Destructive:
+        toast.error(response.title, {
+          description: response.description,
+        });
+        break;
+    }
   }
 
   return (
@@ -52,7 +73,7 @@ export default function RouteActions() {
             <SidebarMenuSubItem>
               <SidebarMenuSubButton
                 className="hover:cursor-pointer"
-                onClick={() => console.log("Save Route")}
+                onClick={() => handleSaveRoute()}
               >
                 <Save className="h-4 w-4" />
                 <span>Save Route</span>

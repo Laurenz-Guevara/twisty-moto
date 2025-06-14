@@ -36,3 +36,11 @@ export interface StatsProp {
   distance: number | undefined;
   duration: number | undefined;
 }
+
+export interface Route {
+  routeId: string;
+  routeName: string;
+  routeLocation: string;
+  routeImage: string | undefined;
+  routeDescription: string | undefined;
+}

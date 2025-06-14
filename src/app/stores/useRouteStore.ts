@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { MarkerProps, StatsProp } from "@/db/types";
 
-type RouteData = {
+export type RouteData = {
   routeName: string;
   routeDescription: string;
   routeJson: Array<MarkerProps>;

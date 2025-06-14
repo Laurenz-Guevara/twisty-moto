@@ -1,12 +1,14 @@
 "use server";
 
 import { db } from "@/db";
-import { avatars, notifications, users } from "@/db/schema";
+import { avatars, notifications, routes, users } from "@/db/schema";
 import { and, eq, sql } from "drizzle-orm";
 import { ToastVariant } from "./enums";
 import { NeonDbError } from "@neondatabase/serverless";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { utapi } from "@/app/api/uploadthing/core";
+import { RouteData } from "@/app/stores/useRouteStore";
+import { Route } from "@/db/types";
 
 const { getAccessToken } = getKindeServerSession();
 
@@ -488,4 +490,52 @@ export const updateUserNotification = async (
         );
       break;
   }
+};
+
+// TODO: Update and consolidate type in my-routes
+export const getUserRoutes = async (): Promise<Array<Route>> => {
+  const accessToken = await getAccessToken();
+
+  if (!accessToken) return [];
+
+  const [{ userId }] = await db
+    .select({
+      userId: users.userId,
+    })
+    .from(users)
+    .where(eq(users.kindeId, accessToken.sub))
+    .limit(1);
+
+  const userRoutes = await db
+    .select({
+      routeId: routes.routeId,
+      routeName: routes.routeName,
+      routeLocation: routes.routeLocation,
+      routeDescription: routes.routeDescription,
+      routeImage: routes.routeImageUrl,
+    })
+    .from(routes)
+    .where(eq(routes.routeCreator, userId));
+
+  return userRoutes;
+};
+
+// TODO: Save route to database
+export const saveRoute = async (route: RouteData) => {
+  console.log(route);
+  const accessToken = await getAccessToken();
+
+  if (!accessToken) {
+    return {
+      title: "Error",
+      description: "Unable to authenticate user. Please try again later.",
+      variant: ToastVariant.Destructive,
+    };
+  }
+
+  return {
+    title: "Sucess",
+    description: "Your route has been saved sucessfully.",
+    variant: ToastVariant.Success,
+  };
 };
