@@ -3,6 +3,7 @@ import { persist } from "zustand/middleware";
 import { MarkerProps, StatsProp } from "@/db/types";
 
 export type RouteData = {
+  routeId: string | undefined;
   routeName: string;
   routeDescription: string;
   routeJson: Array<MarkerProps>;
@@ -10,6 +11,7 @@ export type RouteData = {
 };
 
 export const defaultRoute: RouteData = {
+  routeId: undefined,
   routeName: "Unnamed Route",
   routeDescription: "",
   routeJson: [],
@@ -28,6 +30,7 @@ export const useRouteStore = create<RouteStore>()(
       ...defaultRoute,
       setRouteData: (data) =>
         set(() => ({
+          routeId: data.routeId,
           routeName: data.routeName,
           description: data.routeDescription,
           routeJson: data.routeJson,

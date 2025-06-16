@@ -30,13 +30,19 @@ export default function RouteActions() {
   }
 
   async function handleSaveRoute() {
-    const response = await saveRoute(route);
+    const routeId = route.routeId;
+    const response = await saveRoute(route, routeId);
 
     switch (response.variant) {
       case ToastVariant.Success:
         toast.success(response.title, {
           description: response.description,
         });
+
+        updateRouteState({
+          routeId: response.routeId
+        });
+
         break;
       case ToastVariant.Destructive:
         toast.error(response.title, {
