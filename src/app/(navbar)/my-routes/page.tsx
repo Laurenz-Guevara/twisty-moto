@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { MapPin } from "lucide-react";
 import { Route } from "@/db/types";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function MyRoutes() {
   const { data: routes, isLoading } = useQuery({
@@ -99,6 +100,16 @@ export default function MyRoutes() {
                 <SkeletonForm />
               </>
             )}
+          {routes?.length === 0 && !isLoading && (
+            <Button
+              asChild
+              className="aspect-square w-full h-full rounded-md hover:cursor-pointer"
+            >
+              <Link href="route-editor">
+                Create your first route.
+              </Link>
+            </Button>
+          )}
         </div>
       </div>
     </div>
