@@ -13,7 +13,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { ChevronRight, Plus, RefreshCcw, Save } from "lucide-react";
-import { useRouteStore } from "@/app/stores/useRouteStore";
+import { defaultRoute, useRouteStore } from "@/app/stores/useRouteStore";
 import { saveRoute } from "@/db/database";
 import { ToastVariant } from "@/db/enums";
 import { toast } from "sonner";
@@ -47,12 +47,7 @@ export default function RouteActions() {
   }
 
   function handleCreateNewRoute() {
-    updateRouteState({
-      routeName: "Unnamed Route",
-      routeDescription: "",
-      routeJson: [],
-      routeStats: { duration: undefined, distance: undefined },
-    });
+    updateRouteState(defaultRoute);
   }
 
   return (

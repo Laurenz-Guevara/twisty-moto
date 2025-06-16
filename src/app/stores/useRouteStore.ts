@@ -9,7 +9,7 @@ export type RouteData = {
   routeStats: StatsProp;
 };
 
-const defaultRouteData: RouteData = {
+export const defaultRoute: RouteData = {
   routeName: "Unnamed Route",
   routeDescription: "",
   routeJson: [],
@@ -25,7 +25,7 @@ type RouteStore = RouteData & {
 export const useRouteStore = create<RouteStore>()(
   persist(
     (set) => ({
-      ...defaultRouteData,
+      ...defaultRoute,
       setRouteData: (data) =>
         set(() => ({
           routeName: data.routeName,
@@ -34,7 +34,7 @@ export const useRouteStore = create<RouteStore>()(
           routeStats: data.routeStats,
         })),
       updateRouteData: (partial) => set((state) => ({ ...state, ...partial })),
-      resetRouteData: () => set(defaultRouteData),
+      resetRouteData: () => set(defaultRoute),
     }),
     {
       name: "route-editor-state",
