@@ -2,22 +2,27 @@
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { deleteRoute, getUserRoutes } from "@/db/database";
+import { deleteRoute, getUserRouteFromId, getUserRoutes } from "@/db/database";
 import { Separator } from "@radix-ui/react-dropdown-menu";
 import { useQuery } from "@tanstack/react-query";
 import { MapPin } from "lucide-react";
-import { Route } from "@/db/types";
+import { MarkerProps, Route } from "@/db/types";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouteStore } from "@/app/stores/useRouteStore";
+import { toast } from "sonner";
 
 export default function MyRoutes() {
+  const router = useRouter();
+  const updateRouteState = useRouteStore((s) => s.updateRouteData);
+
   const { data: routes, isLoading } = useQuery({
     queryKey: ["userRoutes"],
     queryFn: async (): Promise<Route[] | undefined> => {
       const response = await getUserRoutes();
 
       if (response) {
-        console.log(response);
         return response;
       }
     },
@@ -25,6 +30,29 @@ export default function MyRoutes() {
 
   async function handleDeleteRoute(routeId: string) {
     await deleteRoute(routeId);
+  }
+
+  async function handleEditRoute(routeId: string) {
+    let request = await getUserRouteFromId(routeId);
+
+    if (request.userRoute) {
+      const userRoute = request.userRoute[0];
+      updateRouteState({
+        routeId: userRoute.routeId,
+        routeName: userRoute.routeName,
+        routeDescription: userRoute.routeDescription,
+        routeJson: userRoute.routeState as MarkerProps[],
+      });
+
+      router.push("/route-editor");
+    } else {
+      toast.error(
+        request.title,
+        {
+          description: request.description,
+        },
+      );
+    }
   }
 
   return (
@@ -71,6 +99,7 @@ export default function MyRoutes() {
                           className="hover:cursor-pointer"
                           variant="outline"
                           size="sm"
+                          onClick={() => handleEditRoute(route.routeId)}
                         >
                           Edit Route
                         </Button>

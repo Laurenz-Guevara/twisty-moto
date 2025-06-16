@@ -492,7 +492,6 @@ export const updateUserNotification = async (
   }
 };
 
-// TODO: Update and consolidate type in my-routes
 export const getUserRoutes = async (): Promise<Array<Route>> => {
   const userId = await getUserId();
 
@@ -512,7 +511,41 @@ export const getUserRoutes = async (): Promise<Array<Route>> => {
   return userRoutes;
 };
 
-// TODO: Save route to database
+export const getUserRouteFromId = async (clientRouteId: string) => {
+  const userId = await getUserId();
+
+  if (!userId) {
+    return {
+      title: "Unable to authenticate user.",
+      description: "Please logout and then back in.",
+      variant: ToastVariant.Destructive,
+    };
+  }
+
+  const userRoute = await db
+    .select({
+      routeId: routes.routeId,
+      routeName: routes.routeName,
+      routeDescription: routes.routeDescription,
+      routeState: routes.routeState,
+    })
+    .from(routes)
+    .where(
+      and(
+        eq(routes.routeId, clientRouteId),
+        eq(routes.routeCreator, userId),
+      ),
+    )
+    .limit(1);
+
+  return {
+    title: "Error",
+    description: "Unable to authenticate user. Please logout and then back in.",
+    variant: ToastVariant.Destructive,
+    userRoute,
+  };
+};
+
 export const saveRoute = async (
   route: RouteData,
   clientRouteId: string | undefined,
@@ -522,7 +555,8 @@ export const saveRoute = async (
   if (!userId) {
     return {
       title: "Error",
-      description: "Unable to authenticate user. Please try again later.",
+      description:
+        "Unable to authenticate user. Please logout and then back in.",
       variant: ToastVariant.Destructive,
     };
   }
@@ -547,22 +581,22 @@ export const saveRoute = async (
         .set({
           routeName: route.routeName,
           routeDescription: route.routeDescription,
-          routeState: route.routeJson
+          routeState: route.routeJson,
         })
         .where(
           and(
             eq(routes.routeId, routeId),
-            eq(routes.routeCreator, userId)
-          )
+            eq(routes.routeCreator, userId),
+          ),
         );
 
       return {
         title: "Route Updated",
         description: "Your route has been updated and saved.",
         variant: ToastVariant.Success,
-        routeId: routeId
+        routeId: routeId,
       };
-    } catch (_) {
+    } catch {
       return {
         title: "Error",
         description: "Something went wrong.",
@@ -584,10 +618,9 @@ export const saveRoute = async (
       title: "New Route Saved",
       description: "Your route has been saved sucessfully.",
       variant: ToastVariant.Success,
-      routeId: routeId.routeId
+      routeId: routeId.routeId,
     };
   }
-
 };
 
 export const deleteRoute = async (routeId: string) => {
