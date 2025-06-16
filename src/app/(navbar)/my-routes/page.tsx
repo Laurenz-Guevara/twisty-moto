@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getUserRoutes } from "@/db/database";
+import { deleteRoute, getUserRoutes } from "@/db/database";
 import { Separator } from "@radix-ui/react-dropdown-menu";
 import { useQuery } from "@tanstack/react-query";
 import { MapPin } from "lucide-react";
@@ -21,6 +21,10 @@ export default function MyRoutes() {
       }
     },
   });
+
+  async function handleDeleteRoute(routeId: string) {
+    await deleteRoute(routeId);
+  }
 
   return (
     <div className="container mx-auto">
@@ -73,6 +77,7 @@ export default function MyRoutes() {
                           className="hover:cursor-pointer"
                           variant="destructive"
                           size="sm"
+                          onClick={() => handleDeleteRoute(route.routeId)}
                         >
                           Delete Route
                         </Button>

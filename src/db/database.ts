@@ -539,3 +539,13 @@ export const saveRoute = async (route: RouteData) => {
     variant: ToastVariant.Success,
   };
 };
+
+export const deleteRoute = async (routeId: string) => {
+  const userId = await getUserId();
+
+  if (userId) {
+    await db.delete(routes).where(
+      and(eq(routes.routeId, routeId), eq(routes.routeCreator, userId)),
+    );
+  }
+};
