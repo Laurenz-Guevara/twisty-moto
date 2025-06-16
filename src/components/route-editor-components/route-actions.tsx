@@ -46,6 +46,15 @@ export default function RouteActions() {
     }
   }
 
+  function handleCreateNewRoute() {
+    updateRouteState({
+      routeName: "Unnamed Route",
+      routeDescription: "",
+      routeJson: [],
+      routeStats: { duration: undefined, distance: undefined },
+    });
+  }
+
   return (
     <Collapsible
       asChild
@@ -64,7 +73,7 @@ export default function RouteActions() {
             <SidebarMenuSubItem>
               <SidebarMenuSubButton
                 className="hover:cursor-pointer"
-                onClick={() => console.log("Create New Route")}
+                onClick={() => handleCreateNewRoute()}
               >
                 <Plus className="h-4 w-4" />
                 <span>Create New Route</span>
