@@ -33,7 +33,7 @@ export default function MyRoutes() {
   }
 
   async function handleEditRoute(routeId: string) {
-    let request = await getUserRouteFromId(routeId);
+    const request = await getUserRouteFromId(routeId);
 
     if (request.userRoute) {
       const userRoute = request.userRoute[0];
