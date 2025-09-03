@@ -6,7 +6,7 @@ export default withAuth(
   // },
   {
     isReturnToCurrentPage: true,
-    publicPaths: ["/", "/discover", "/community-routes"],
+    publicPaths: ["/", "/featured", "/community-routes"],
     isAuthorized: ({ token }: { token: any }) => {
       if (token?.sub) {
         return true;

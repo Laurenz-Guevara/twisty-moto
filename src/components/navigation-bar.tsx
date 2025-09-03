@@ -39,13 +39,13 @@ export default function NavigationBar() {
             Twisty Moto
           </Link>
           <Link
-            href={"/discover"}
+            href={"/featured"}
             className={buttonVariants({
               size: "sm",
               variant: "ghost",
             })}
           >
-            Discover
+            Featured
           </Link>
           <Link
             href={"/community-routes"}
