@@ -29,7 +29,7 @@ export default function RouteFields() {
   }, [storedRouteName]);
 
   function onRouteDescriptionBlur() {
-    const routeDescriptionToSet = routeDescription.trim() || "Unnamed Route";
+    const routeDescriptionToSet = routeDescription.trim() || "";
     setRouteDescription(routeDescriptionToSet);
     updateRouteState({ routeDescription: routeDescriptionToSet });
   }
