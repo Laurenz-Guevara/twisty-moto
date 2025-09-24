@@ -2,9 +2,14 @@
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { deleteRoute, getUserRouteFromId, getUserRoutes } from "@/db/database";
+import {
+  deleteRoute,
+  getUserRouteFromId,
+  getUserRoutes,
+  updateRoutePrivacy,
+} from "@/db/database";
 import { Separator } from "@radix-ui/react-dropdown-menu";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { MapPin } from "lucide-react";
 import { MarkerProps, Route } from "@/db/types";
 import { useRouter } from "next/navigation";
@@ -12,6 +17,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouteStore } from "@/app/stores/useRouteStore";
 import { toast } from "sonner";
+import { IconEye, IconEyeOff } from "@tabler/icons-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function MyRoutes() {
   const router = useRouter();
@@ -27,6 +38,13 @@ export default function MyRoutes() {
       }
     },
   });
+
+  const queryClient = useQueryClient();
+
+  async function handleUpdateRoutePrivacy(routeId: string, isPublic: boolean) {
+    await updateRoutePrivacy(routeId, isPublic);
+    queryClient.invalidateQueries({ queryKey: ["userRoutes"] });
+  }
 
   async function handleDeleteRoute(routeId: string) {
     await deleteRoute(routeId);
@@ -94,23 +112,50 @@ export default function MyRoutes() {
                       <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
                         {route.routeDescription}
                       </p>
-                      <div className="flex space-x-2 items-center mt-2">
-                        <Button
-                          className="hover:cursor-pointer"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEditRoute(route.routeId)}
-                        >
-                          Edit Route
-                        </Button>
-                        <Button
-                          className="hover:cursor-pointer"
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => handleDeleteRoute(route.routeId)}
-                        >
-                          Delete Route
-                        </Button>
+                      <div className="flex space-x-2 items-center justify-between mt-2">
+                        <div className="space-x-2">
+                          <Button
+                            className="hover:cursor-pointer"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEditRoute(route.routeId)}
+                          >
+                            Edit Route
+                          </Button>
+                          <Button
+                            className="hover:cursor-pointer"
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleDeleteRoute(route.routeId)}
+                          >
+                            Delete Route
+                          </Button>
+                        </div>
+                        <Tooltip>
+                          <TooltipTrigger
+                            className="hover:cursor-pointer"
+                            onClick={() =>
+                              handleUpdateRoutePrivacy(
+                                route.routeId,
+                                !route.isPublic,
+                              )}
+                          >
+                            {route.isPublic
+                              ? (
+                                <IconEye
+                                  size={24}
+                                />
+                              )
+                              : (
+                                <IconEyeOff
+                                  size={24}
+                                />
+                              )}
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {route.isPublic ? "Public" : "Private"}
+                          </TooltipContent>
+                        </Tooltip>
                       </div>
                     </div>
                   </div>

@@ -43,4 +43,5 @@ export interface Route {
   routeLocation: string;
   routeImage: string | undefined;
   routeDescription: string | undefined;
+  isPublic: boolean;
 }

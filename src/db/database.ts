@@ -504,6 +504,7 @@ export const getUserRoutes = async (): Promise<Array<Route>> => {
       routeLocation: routes.routeLocation,
       routeDescription: routes.routeDescription,
       routeImage: routes.routeImageUrl,
+      isPublic: routes.isPublic,
     })
     .from(routes)
     .where(eq(routes.routeCreator, userId));
@@ -630,5 +631,29 @@ export const deleteRoute = async (routeId: string) => {
     await db.delete(routes).where(
       and(eq(routes.routeId, routeId), eq(routes.routeCreator, userId)),
     );
+  }
+};
+
+export const updateRoutePrivacy = async (
+  routeId: string,
+  isPublic: boolean,
+) => {
+  const userId = await getUserId();
+
+  if (userId === null || userId === undefined) {
+    throw new Error("Cannot get userId.");
+  }
+
+  try {
+    await db
+      .update(routes)
+      .set({
+        isPublic: isPublic,
+      })
+      .where(
+        and(eq(routes.routeCreator, userId), eq(routes.routeId, routeId)),
+      );
+  } catch (error) {
+    throw error;
   }
 };
