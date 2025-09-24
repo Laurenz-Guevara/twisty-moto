@@ -37,11 +37,16 @@ export interface StatsProp {
   duration: number | undefined;
 }
 
-export interface Route {
+export interface BaseRoute {
   routeId: string;
   routeName: string;
   routeLocation: string;
-  routeImage: string | undefined;
-  routeDescription: string | undefined;
+  routeImage?: string;
+  routeDescription?: string;
+}
+
+export interface Route extends BaseRoute {
   isPublic: boolean;
 }
+
+export type CommunityRoute = BaseRoute;
