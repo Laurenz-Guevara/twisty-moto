@@ -8,7 +8,7 @@ import { NeonDbError } from "@neondatabase/serverless";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { utapi } from "@/app/api/uploadthing/core";
 import { RouteData } from "@/app/stores/useRouteStore";
-import { Route } from "@/db/types";
+import { CommunityRoute, Route } from "@/db/types";
 
 const { getAccessToken } = getKindeServerSession();
 
@@ -510,6 +510,21 @@ export const getUserRoutes = async (): Promise<Array<Route>> => {
     .where(eq(routes.routeCreator, userId));
 
   return userRoutes;
+};
+
+export const getCommunityRoutes = async (): Promise<Array<CommunityRoute>> => {
+  const communityRoutes = await db
+    .select({
+      routeId: routes.routeId,
+      routeName: routes.routeName,
+      routeLocation: routes.routeLocation,
+      routeDescription: routes.routeDescription,
+      routeImage: routes.routeImageUrl,
+    })
+    .from(routes)
+    .where(eq(routes.isPublic, true));
+
+  return communityRoutes;
 };
 
 export const getUserRouteFromId = async (clientRouteId: string) => {
