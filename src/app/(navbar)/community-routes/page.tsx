@@ -2,14 +2,18 @@
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getCommunityRoutes } from "@/db/database";
+import { getCommunityRoutes, getPublicUserRouteFromId } from "@/db/database";
 import { Separator } from "@radix-ui/react-dropdown-menu";
 import { useQuery } from "@tanstack/react-query";
 import { MapPin } from "lucide-react";
-import { CommunityRoute } from "@/db/types";
+import { CommunityRoute, MarkerProps } from "@/db/types";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useRouteStore } from "@/app/stores/useRouteStore";
 
 export default function CommunityRoutes() {
+  const router = useRouter();
+  const updateRouteState = useRouteStore((s) => s.updateRouteData);
   const { data: routes, isLoading } = useQuery({
     queryKey: ["communityRoutes"],
     queryFn: async (): Promise<CommunityRoute[] | undefined> => {
@@ -20,6 +24,22 @@ export default function CommunityRoutes() {
       }
     },
   });
+
+  async function handleViewRoute(routeId: string) {
+    const request = await getPublicUserRouteFromId(routeId);
+
+    if (request.publicUserRoute) {
+      const userRoute = request.publicUserRoute[0];
+      updateRouteState({
+        routeId: userRoute.routeId,
+        routeName: userRoute.routeName,
+        routeDescription: userRoute.routeDescription,
+        routeJson: userRoute.routeState as MarkerProps[],
+      });
+
+      router.push("/route-editor");
+    }
+  }
 
   return (
     <div className="container mx-auto">
@@ -63,6 +83,7 @@ export default function CommunityRoutes() {
                       <div className="flex space-x-2 items-center justify-between mt-2">
                         <div className="space-x-2">
                           <Button
+                            onClick={() => handleViewRoute(route.routeId)}
                             className="hover:cursor-pointer"
                             variant="outline"
                             size="sm"

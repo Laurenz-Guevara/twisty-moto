@@ -562,6 +562,28 @@ export const getUserRouteFromId = async (clientRouteId: string) => {
   };
 };
 
+export const getPublicUserRouteFromId = async (clientRouteId: string) => {
+  const publicUserRoute = await db
+    .select({
+      routeId: routes.routeId,
+      routeName: routes.routeName,
+      routeDescription: routes.routeDescription,
+      routeState: routes.routeState,
+    })
+    .from(routes)
+    .where(
+      and(
+        eq(routes.routeId, clientRouteId),
+        eq(routes.isPublic, true),
+      ),
+    )
+    .limit(1);
+
+  return {
+    publicUserRoute,
+  };
+};
+
 export const saveRoute = async (
   route: RouteData,
   clientRouteId: string | undefined,
