@@ -80,6 +80,9 @@ export default function CommunityRoutes() {
                       <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
                         {route.routeDescription}
                       </p>
+                      <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
+                        Created by {route.routeAuthor}
+                      </p>
                       <div className="flex space-x-2 items-center justify-between mt-2">
                         <div className="space-x-2">
                           <Button

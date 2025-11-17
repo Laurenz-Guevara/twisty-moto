@@ -103,6 +103,8 @@ export const routes = createTable("routes", {
     .notNull()
     .references(() => users.userId, { onDelete: "cascade" }),
 
+  routeAuthor: varchar("route_author", { length: 255 }).notNull(),
+
   routeName: varchar("route_name", { length: 128 }).notNull().default(""),
 
   routeLocation: varchar("route_location", { length: 128 }).notNull().default(

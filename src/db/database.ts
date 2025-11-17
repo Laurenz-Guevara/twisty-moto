@@ -57,6 +57,22 @@ export const getUserId = async () => {
   }
 };
 
+export const getUsername = async () => {
+  const accessToken = await getAccessToken();
+
+  if (accessToken) {
+    const userId = await db
+      .select({
+        username: users.username,
+      })
+      .from(users)
+      .where(eq(users.kindeId, accessToken.sub))
+      .limit(1);
+
+    return userId[0].username || null;
+  }
+};
+
 export const getPrivateUserProfile = async () => {
   const accessToken = await getAccessToken();
 
@@ -501,6 +517,7 @@ export const getUserRoutes = async (): Promise<Array<Route>> => {
     .select({
       routeId: routes.routeId,
       routeName: routes.routeName,
+      routeAuthor: routes.routeAuthor,
       routeLocation: routes.routeLocation,
       routeDescription: routes.routeDescription,
       routeImage: routes.routeImageUrl,
@@ -517,6 +534,7 @@ export const getCommunityRoutes = async (): Promise<Array<CommunityRoute>> => {
     .select({
       routeId: routes.routeId,
       routeName: routes.routeName,
+      routeAuthor: routes.routeAuthor,
       routeLocation: routes.routeLocation,
       routeDescription: routes.routeDescription,
       routeImage: routes.routeImageUrl,
@@ -589,12 +607,21 @@ export const saveRoute = async (
   clientRouteId: string | undefined,
 ) => {
   const userId = await getUserId();
+  const username = await getUsername();
 
   if (!userId) {
     return {
       title: "Error",
       description:
         "Unable to authenticate user. Please logout and then back in.",
+      variant: ToastVariant.Destructive,
+    };
+  }
+
+  if (!username) {
+    return {
+      title: "Error",
+      description: "Unable to get username.",
       variant: ToastVariant.Destructive,
     };
   }
@@ -646,6 +673,7 @@ export const saveRoute = async (
       .insert(routes)
       .values({
         routeName: route.routeName,
+        routeAuthor: username,
         routeDescription: route.routeDescription,
         routeState: route.routeJson,
         routeCreator: userId,
