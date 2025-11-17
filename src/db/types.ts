@@ -40,6 +40,7 @@ export interface StatsProp {
 export interface BaseRoute {
   routeId: string;
   routeName: string;
+  routeAuthor: string;
   routeLocation: string;
   routeImage?: string;
   routeDescription?: string;
