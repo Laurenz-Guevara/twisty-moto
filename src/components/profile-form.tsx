@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import { User } from "@/db/types";
 import {
   checkUsernameExists,
   getPrivateUserNames,
@@ -27,13 +28,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LoaderCircle } from "lucide-react";
-
-// TODO: This needs to be a partial of User and that it ensures username, firstName and lastName are never undefined
-interface UserType {
-  username: string;
-  firstName: string;
-  lastName: string;
-}
 
 const formSchema = z.object({
   username: z.string()
@@ -69,7 +63,7 @@ export default function ProfileForm() {
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["userProfile"],
-    queryFn: async (): Promise<UserType> => {
+    queryFn: async (): Promise<Partial<User>> => {
       const response = await getPrivateUserNames();
 
       if (response) {
@@ -88,7 +82,7 @@ export default function ProfileForm() {
 
   useEffect(() => {
     if (!hasPreloadedForm.current && !isLoading && data) {
-      form.setValue("username", data.username);
+      form.setValue("username", data.username!);
       form.setValue("firstName", data.firstName);
       form.setValue("lastName", data.lastName);
       hasPreloadedForm.current = true;
@@ -104,7 +98,7 @@ export default function ProfileForm() {
       await refetch();
 
       const newUsername = values.username.toLowerCase();
-      const currentUsername = data.username.toLowerCase();
+      const currentUsername = data.username!.toLowerCase();
 
       if (newUsername !== currentUsername) {
         const usernameExists = await checkUsernameExists(values.username);
