@@ -8,7 +8,7 @@ import { NeonDbError } from "@neondatabase/serverless";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { utapi } from "@/app/api/uploadthing/core";
 import { RouteData } from "@/app/stores/useRouteStore";
-import { CommunityRoute, Route } from "@/db/types";
+import { CommunityRoute, Route, User } from "@/db/types";
 
 const { getAccessToken } = getKindeServerSession();
 
@@ -143,14 +143,11 @@ export const checkUsernameExists = async (username: string) => {
   return false;
 };
 
-export const updateProfileInfo = async (
-  values: {
-    username: string;
-    firstName?: string;
-    lastName?: string;
-  },
-) => {
-  if (values.username === null || values.username.length < 1) {
+export const updateProfileInfo = async (values: Partial<User>) => {
+  if (
+    values.username === null || values.username === undefined ||
+    values.username.length < 1
+  ) {
     return {
       title: "Error",
       description: "You cannot have an empty username.",
@@ -167,8 +164,9 @@ export const updateProfileInfo = async (
   }
 
   const accessToken = await getAccessToken();
+  const userId = await getUserId();
 
-  if (!accessToken?.sub) {
+  if (!accessToken?.sub || userId == null) {
     return {
       title: "Error",
       description: "Unable to authenticate user. Please log in again.",
@@ -176,44 +174,51 @@ export const updateProfileInfo = async (
     };
   }
 
-  try {
-    await db
-      .update(users)
-      .set({
-        username: values.username,
-        firstName: values.firstName,
-        lastName: values.lastName,
-      })
-      .where(eq(users.kindeId, accessToken.sub));
+  await db.transaction(async (tx) => {
+    try {
+      await tx
+        .update(users)
+        .set({
+          username: values.username,
+          firstName: values.firstName,
+          lastName: values.lastName,
+        })
+        .where(eq(users.kindeId, accessToken.sub));
 
-    return {
-      title: "Success",
-      description: "Your profile has been updated sucessfully.",
-      variant: ToastVariant.Success,
-    };
-  } catch (error) {
-    if (error instanceof NeonDbError) {
-      if (error.constraint === "tm_user_username_unique") {
-        return {
-          title: "Error",
-          description: "This username already exists.",
-          variant: ToastVariant.Destructive,
-        };
+      await tx.update(routes).set({ routeAuthor: values.username }).where(
+        eq(routes.routeCreator, userId),
+      );
+    } catch (error) {
+      tx.rollback();
+      if (error instanceof NeonDbError) {
+        if (error.constraint === "tm_user_username_unique") {
+          return {
+            title: "Error",
+            description: "This username already exists.",
+            variant: ToastVariant.Destructive,
+          };
+        }
       }
-    }
 
-    return {
-      title: "Error",
-      description: "An unexpected error has occured",
-      variant: ToastVariant.Destructive,
-    };
-  }
+      return {
+        title: "Error",
+        description: "An unexpected error has occured",
+        variant: ToastVariant.Destructive,
+      };
+    }
+  });
+
+  return {
+    title: "Success",
+    description: "Your profile has been updated sucessfully.",
+    variant: ToastVariant.Success,
+  };
 };
 
 export const getAvatarFileKey = async () => {
   const userId = await getUserId();
 
-  if (userId === null || userId === undefined) {
+  if (userId == null) {
     throw new Error("Cannot get userId.");
   }
 
