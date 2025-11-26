@@ -8,10 +8,12 @@ import { useRouteStore } from "@/app/stores/useRouteStore";
 
 export default function RouteFields() {
   const [routeName, setRouteName] = useState("Unnamed Route");
+  const [routeLocation, setRouteLocation] = useState("");
   const [routeDescription, setRouteDescription] = useState("");
 
   const updateRouteState = useRouteStore((s) => s.updateRouteData);
   const storedRouteName = useRouteStore((s) => s.routeName);
+  const storedRouteLocation = useRouteStore((s) => s.routeLocation);
   const storedRouteDescription = useRouteStore((s) => s.routeDescription);
 
   function onRouteNameBlur() {
@@ -27,6 +29,20 @@ export default function RouteFields() {
       setRouteName(storedRouteName);
     }
   }, [storedRouteName]);
+
+  function onRouteLocationBlur() {
+    const routeLocationToSet = routeLocation.trim() || "";
+    setRouteLocation(routeLocationToSet);
+    updateRouteState({ routeLocation: routeLocationToSet });
+  }
+
+  useEffect(() => {
+    if (storedRouteLocation.trim().length <= 0) {
+      setRouteLocation("");
+    } else {
+      setRouteLocation(routeLocation);
+    }
+  }, [storedRouteLocation]);
 
   function onRouteDescriptionBlur() {
     const routeDescriptionToSet = routeDescription.trim() || "";
@@ -51,6 +67,19 @@ export default function RouteFields() {
           value={routeName}
           onChange={(e) => setRouteName(e.target.value)}
           onBlur={onRouteNameBlur}
+        />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="route-location">
+          Location<span className="text-muted-foreground">
+            (optional)
+          </span>
+        </Label>
+        <Input
+          id="route-location"
+          value={routeLocation}
+          onChange={(e) => setRouteLocation(e.target.value)}
+          onBlur={onRouteLocationBlur}
         />
       </div>
       <div className="space-y-2">

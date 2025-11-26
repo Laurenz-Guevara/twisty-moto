@@ -5,6 +5,7 @@ import { MarkerProps, StatsProp } from "@/db/types";
 export type RouteData = {
   routeId: string | undefined;
   routeName: string;
+  routeLocation: string;
   routeDescription: string;
   routeJson: Array<MarkerProps>;
   routeStats: StatsProp;
@@ -13,6 +14,7 @@ export type RouteData = {
 export const defaultRoute: RouteData = {
   routeId: undefined,
   routeName: "Unnamed Route",
+  routeLocation: "",
   routeDescription: "",
   routeJson: [],
   routeStats: { duration: undefined, distance: undefined },
@@ -32,6 +34,7 @@ export const useRouteStore = create<RouteStore>()(
         set(() => ({
           routeId: data.routeId,
           routeName: data.routeName,
+          routeLocation: data.routeLocation,
           description: data.routeDescription,
           routeJson: data.routeJson,
           routeStats: data.routeStats,

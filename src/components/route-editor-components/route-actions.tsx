@@ -40,7 +40,7 @@ export default function RouteActions() {
         });
 
         updateRouteState({
-          routeId: response.routeId
+          routeId: response.routeId,
         });
 
         break;

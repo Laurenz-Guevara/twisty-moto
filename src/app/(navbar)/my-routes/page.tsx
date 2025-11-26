@@ -92,9 +92,9 @@ export default function MyRoutes() {
                 {routes?.map((route) => (
                   <div
                     key={route.routeId}
-                    className="group relative overflow-hidden rounded-lg border bg-background shadow-sm transition-all hover:shadow-md"
+                    className="group relative flex flex-col overflow-hidden rounded-lg border bg-background shadow-sm transition-all hover:shadow-md"
                   >
-                    <div className="aspect-video overflow-hidden">
+                    <div className="aspect-video overflow-hidden h-full">
                       <Image
                         src={route.routeImage || "/placeholder-map.png"}
                         alt={route.routeName}
@@ -103,15 +103,20 @@ export default function MyRoutes() {
                         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                       />
                     </div>
-                    <div className="p-4">
-                      <h3 className="font-semibold">{route.routeName}</h3>
-                      <div className="mt-1 flex items-center text-sm text-muted-foreground">
-                        <MapPin className="mr-1 h-4 w-4" />
-                        {route.routeLocation}
+                    <div className="p-4 h-3/4 flex flex-col justify-between">
+                      <div>
+                        <h3 className="font-semibold">{route.routeName}</h3>
+                        {route.routeLocation &&
+                          (
+                            <div className="mt-1 flex items-center text-sm text-muted-foreground">
+                              <MapPin className="mr-1 h-4 w-4" />
+                              {route.routeLocation}
+                            </div>
+                          )}
+                        <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
+                          {route.routeDescription}
+                        </p>
                       </div>
-                      <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
-                        {route.routeDescription}
-                      </p>
                       <div className="flex space-x-2 items-center justify-between mt-2">
                         <div className="space-x-2">
                           <Button

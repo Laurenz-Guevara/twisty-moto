@@ -650,6 +650,7 @@ export const saveRoute = async (
         .update(routes)
         .set({
           routeName: route.routeName,
+          routeLocation: route.routeLocation,
           routeDescription: route.routeDescription,
           routeState: route.routeJson,
         })
@@ -679,6 +680,7 @@ export const saveRoute = async (
       .values({
         routeName: route.routeName,
         routeAuthor: username,
+        routeLocation: route.routeLocation,
         routeDescription: route.routeDescription,
         routeState: route.routeJson,
         routeCreator: userId,
