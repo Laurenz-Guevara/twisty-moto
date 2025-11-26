@@ -8,6 +8,7 @@ export default async function RootLayout({
   return (
     <>
       <NavigationBar />
+      <div className="pt-[65px]"></div>
       {children}
     </>
   );
