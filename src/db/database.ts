@@ -631,6 +631,15 @@ export const saveRoute = async (
     };
   }
 
+  if (route.routeJson.length <= 1) {
+    return {
+      title: "Warning",
+      description:
+        "A route must have at least a start and destination before you are able to save it.",
+      variant: ToastVariant.Warning,
+    };
+  }
+
   if (clientRouteId !== undefined) {
     try {
       const [{ routeId }] = await db
