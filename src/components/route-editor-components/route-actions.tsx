@@ -31,24 +31,38 @@ export default function RouteActions() {
 
   async function handleSaveRoute() {
     const routeId = route.routeId;
-    const response = await saveRoute(route, routeId);
 
-    switch (response.variant) {
-      case ToastVariant.Success:
-        toast.success(response.title, {
-          description: response.description,
-        });
+    if (route.routeJson.length <= 1) {
+      toast.warning("Warning", {
+        description:
+          "A route must have at least a start and destination before you are able to save it.",
+      });
+    } else {
+      const response = await saveRoute(route, routeId);
 
-        updateRouteState({
-          routeId: response.routeId,
-        });
+      switch (response.variant) {
+        case ToastVariant.Success:
+          toast.success(response.title, {
+            description: response.description,
+          });
 
-        break;
-      case ToastVariant.Destructive:
-        toast.error(response.title, {
-          description: response.description,
-        });
-        break;
+          updateRouteState({
+            routeId: response.routeId,
+          });
+
+          break;
+        case ToastVariant.Destructive:
+          toast.error(response.title, {
+            description: response.description,
+          });
+          break;
+
+        case ToastVariant.Warning:
+          toast.warning(response.title, {
+            description: response.description,
+          });
+          break;
+      }
     }
   }
 
