@@ -21,6 +21,9 @@ import { useRouteStore } from "@/app/stores/useRouteStore";
 import { MarkerProps, Waypoint } from "@/db/types";
 import { Button } from "@/components/ui/button";
 
+import { Card, CardContent } from "@/components/ui/card";
+import { Bookmark, MapPin, Navigation, Plus } from "lucide-react";
+
 const routeStyle: LayerProps = {
   id: "route",
   type: "line",
@@ -297,50 +300,69 @@ export default function MapContainer() {
           anchor="bottom"
           className="text-black"
         >
-          <div>
-            <Button
-              onClick={() =>
-                handleMapClick(
-                  RouteBuilderVariant.Start,
-                  popupInfo.lng,
-                  popupInfo.lat,
-                )}
-            >
-              Set as start
-            </Button>
-            <Button
-              onClick={() =>
-                handleMapClick(
-                  RouteBuilderVariant.Via,
-                  popupInfo.lng,
-                  popupInfo.lat,
-                )}
-            >
-              Create via point
-            </Button>
-            <Button
-              onClick={() =>
-                handleMapClick(
-                  RouteBuilderVariant.Destination,
-                  popupInfo.lng,
-                  popupInfo.lat,
-                )}
-            >
-              Set as destination
-            </Button>
-            <Button
-              onClick={() =>
-                handleMapClick(
-                  RouteBuilderVariant.Bookmark,
-                  popupInfo.lng,
-                  popupInfo.lat,
-                )}
-            >
-              Bookmark Location
-            </Button>
-          </div>
-          Long - {popupInfo.lng}
-          Lat - {popupInfo.lat}
+          <Card className="w-full max-w-sm border-b-0 p-0 overflow-hidden">
+            <CardContent className="p-0 flex flex-col">
+              <Button
+                className="rounded-t-lg flex justify-start rounded-b-none w-full text-sm"
+                variant="ghost"
+                onClick={() =>
+                  handleMapClick(
+                    RouteBuilderVariant.Start,
+                    popupInfo.lng,
+                    popupInfo.lat,
+                  )}
+              >
+                <Navigation className="w-4 h-4" />
+                <span>
+                  Set as start
+                </span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="rounded-none flex justify-start rounded-b-none w-full text-sm"
+                onClick={() =>
+                  handleMapClick(
+                    RouteBuilderVariant.Via,
+                    popupInfo.lng,
+                    popupInfo.lat,
+                  )}
+              >
+                <Plus className="w-4 h-4" />
+                <span>
+                  Create via point
+                </span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="rounded-none flex justify-start rounded-b-none w-full text-sm"
+                onClick={() =>
+                  handleMapClick(
+                    RouteBuilderVariant.Destination,
+                    popupInfo.lng,
+                    popupInfo.lat,
+                  )}
+              >
+                <MapPin className="w-4 h-4" />
+                <span>
+                  Set as destination
+                </span>
+              </Button>
+              <div className="border-t border-border" />
+              <Button
+                variant="ghost"
+                className="rounded-t-none flex justify-start w-full text-sm"
+                onClick={() =>
+                  handleMapClick(
+                    RouteBuilderVariant.Bookmark,
+                    popupInfo.lng,
+                    popupInfo.lat,
+                  )}
+              >
+                <Bookmark className="w-4 h-4" />
+                <span>Bookmark Location</span>
+              </Button>
+            </CardContent>
+          </Card>
         </Popup>
       )}
       {markers}

@@ -74,6 +74,24 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+
+  .mapboxgl-popup-anchor-top .mapboxgl-popup-tip,
+  .mapboxgl-popup-anchor-top-left .mapboxgl-popup-tip,
+  .mapboxgl-popup-anchor-top-right .mapboxgl-popup-tip {
+    border-bottom-color: oklch(0.2046 0 0) !important;
+  }
+  .mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip,
+  .mapboxgl-popup-anchor-bottom-left .mapboxgl-popup-tip,
+  .mapboxgl-popup-anchor-bottom-right .mapboxgl-popup-tip {
+    border-top-color: oklch(0.2046 0 0) !important;
+  }
+  .mapboxgl-popup-anchor-left .mapboxgl-popup-tip {
+    border-right-color: oklch(0.2046 0 0) !important;
+  }
+  .mapboxgl-popup-anchor-right .mapboxgl-popup-tip {
+    border-left-color: oklch(0.2046 0 0) !important;
+  }
+
 }
 
 @theme inline {
@@ -123,3 +141,16 @@
   }
 }
 
+
+.mapboxgl-popup-content {
+  padding: 0 !important;
+  background-color: transparent !important;
+
+  div {
+    box-sizing: content-box;
+  }
+}
+
+.mapboxgl-popup-close-button {
+  display: none;
+}
