@@ -24,7 +24,9 @@ export function SidebarHeaderContent() {
             <span className="truncate font-medium">Twisty Moto</span>
           </Link>
           <Link className="w-min" href="/membership">
-            <span className="truncate text-xs text-yellow-300">Non Member</span>
+            <span className="truncate text-xs text-blue-600 dark:text-blue-300">
+              Free Tier
+            </span>
           </Link>
         </div>
       </SidebarMenuItem>
