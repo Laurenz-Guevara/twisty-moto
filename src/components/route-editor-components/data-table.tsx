@@ -59,7 +59,9 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { useCallback, useEffect, useId, useMemo, useState } from "react";
+
 import { useRouteStore } from "@/app/stores/useRouteStore";
+import { useMapStore } from "@/app/stores/useMapStore";
 
 export const schema = z.object({
   order: z.number(),
@@ -106,6 +108,19 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
         </div>
         <DrawerFooter>
           <Button>Submit</Button>
+          <DrawerClose asChild>
+            <Button
+              onClick={() =>
+                useMapStore.getState().setJumpToLocation({
+                  latitude: item.latitude,
+                  longitude: item.longitude,
+                })}
+              className="hover:cursor-pointer"
+              variant="outline"
+            >
+              Jump To Location
+            </Button>
+          </DrawerClose>
           <DrawerClose asChild>
             <Button variant="outline">Done</Button>
           </DrawerClose>

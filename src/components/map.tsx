@@ -15,11 +15,15 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import { IconFlagFilled, IconMapPinFilled } from "@tabler/icons-react";
 import { RouteBuilderVariant } from "@/db/enums";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouteStore } from "@/app/stores/useRouteStore";
 import { MarkerProps, Waypoint } from "@/db/types";
 import { Button } from "@/components/ui/button";
+
+import { Card, CardContent } from "@/components/ui/card";
+import { Bookmark, MapPin, Navigation, Plus } from "lucide-react";
+import { useMapStore } from "@/app/stores/useMapStore";
 
 const routeStyle: LayerProps = {
   id: "route",
@@ -44,6 +48,22 @@ export default function MapContainer() {
 
   const mapRef = useRef<MapRef>(null);
   const updateRouteState = useRouteStore((s) => s.updateRouteData);
+
+  const jumpToLocation = useMapStore((s) => s.jumpToLocation);
+  const clearJumpToLocation = useMapStore((s) => s.clearJumpToLocation);
+
+  useEffect(() => {
+    console.log("Hello");
+    if (!jumpToLocation || !mapRef.current) return;
+
+    mapRef.current.flyTo({
+      center: [jumpToLocation.longitude, jumpToLocation.latitude],
+      zoom: 14,
+      duration: 2000,
+    });
+
+    clearJumpToLocation();
+  }, [jumpToLocation, clearJumpToLocation]);
 
   function determineType(idx: number, totalWaypoints: number) {
     if (idx === 0) {
@@ -263,17 +283,27 @@ export default function MapContainer() {
       );
     }), [storedRouteJson]);
 
+  const hasRoute = storedRouteJson.length > 0;
+
+  const initialViewState = hasRoute
+    ? {
+      longitude: storedRouteJson[0].longitude,
+      latitude: storedRouteJson[0].latitude,
+      zoom: 14,
+    }
+    : {
+      longitude: -1.3,
+      latitude: 50.7,
+      zoom: 10,
+    };
+
   return (
     <Map
       mapboxAccessToken={process.env
         .NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN as string}
-      initialViewState={{
-        longitude: -1,
-        latitude: 51,
-        zoom: 8,
-      }}
       mapStyle="mapbox://styles/mapbox/streets-v12"
       ref={mapRef}
+      initialViewState={initialViewState}
       onContextMenu={(e) => {
         e.preventDefault();
         const { lng, lat } = e.lngLat;
@@ -297,50 +327,69 @@ export default function MapContainer() {
           anchor="bottom"
           className="text-black"
         >
-          <div>
-            <Button
-              onClick={() =>
-                handleMapClick(
-                  RouteBuilderVariant.Start,
-                  popupInfo.lng,
-                  popupInfo.lat,
-                )}
-            >
-              Set as start
-            </Button>
-            <Button
-              onClick={() =>
-                handleMapClick(
-                  RouteBuilderVariant.Via,
-                  popupInfo.lng,
-                  popupInfo.lat,
-                )}
-            >
-              Create via point
-            </Button>
-            <Button
-              onClick={() =>
-                handleMapClick(
-                  RouteBuilderVariant.Destination,
-                  popupInfo.lng,
-                  popupInfo.lat,
-                )}
-            >
-              Set as destination
-            </Button>
-            <Button
-              onClick={() =>
-                handleMapClick(
-                  RouteBuilderVariant.Bookmark,
-                  popupInfo.lng,
-                  popupInfo.lat,
-                )}
-            >
-              Bookmark Location
-            </Button>
-          </div>
-          Long - {popupInfo.lng}
-          Lat - {popupInfo.lat}
+          <Card className="w-full max-w-sm border-b-0 p-0 overflow-hidden">
+            <CardContent className="p-0 flex flex-col">
+              <Button
+                className="rounded-t-lg flex justify-start rounded-b-none w-full text-sm"
+                variant="ghost"
+                onClick={() =>
+                  handleMapClick(
+                    RouteBuilderVariant.Start,
+                    popupInfo.lng,
+                    popupInfo.lat,
+                  )}
+              >
+                <Navigation className="w-4 h-4" />
+                <span>
+                  Set as start
+                </span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="rounded-none flex justify-start rounded-b-none w-full text-sm"
+                onClick={() =>
+                  handleMapClick(
+                    RouteBuilderVariant.Via,
+                    popupInfo.lng,
+                    popupInfo.lat,
+                  )}
+              >
+                <Plus className="w-4 h-4" />
+                <span>
+                  Create via point
+                </span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="rounded-none flex justify-start rounded-b-none w-full text-sm"
+                onClick={() =>
+                  handleMapClick(
+                    RouteBuilderVariant.Destination,
+                    popupInfo.lng,
+                    popupInfo.lat,
+                  )}
+              >
+                <MapPin className="w-4 h-4" />
+                <span>
+                  Set as destination
+                </span>
+              </Button>
+              <div className="border-t border-border" />
+              <Button
+                variant="ghost"
+                className="rounded-t-none flex justify-start w-full text-sm"
+                onClick={() =>
+                  handleMapClick(
+                    RouteBuilderVariant.Bookmark,
+                    popupInfo.lng,
+                    popupInfo.lat,
+                  )}
+              >
+                <Bookmark className="w-4 h-4" />
+                <span>Bookmark Location</span>
+              </Button>
+            </CardContent>
+          </Card>
         </Popup>
       )}
       {markers}
