@@ -283,17 +283,27 @@ export default function MapContainer() {
       );
     }), [storedRouteJson]);
 
+  const hasRoute = storedRouteJson.length > 0;
+
+  const initialViewState = hasRoute
+    ? {
+      longitude: storedRouteJson[0].longitude,
+      latitude: storedRouteJson[0].latitude,
+      zoom: 14,
+    }
+    : {
+      longitude: -1.3,
+      latitude: 50.7,
+      zoom: 10,
+    };
+
   return (
     <Map
       mapboxAccessToken={process.env
         .NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN as string}
-      initialViewState={{
-        longitude: -1,
-        latitude: 51,
-        zoom: 8,
-      }}
       mapStyle="mapbox://styles/mapbox/streets-v12"
       ref={mapRef}
+      initialViewState={initialViewState}
       onContextMenu={(e) => {
         e.preventDefault();
         const { lng, lat } = e.lngLat;
