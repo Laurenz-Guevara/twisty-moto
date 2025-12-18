@@ -15,7 +15,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import { IconFlagFilled, IconMapPinFilled } from "@tabler/icons-react";
 import { RouteBuilderVariant } from "@/db/enums";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouteStore } from "@/app/stores/useRouteStore";
 import { MarkerProps, Waypoint } from "@/db/types";
@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Bookmark, MapPin, Navigation, Plus } from "lucide-react";
+import { useMapStore } from "@/app/stores/useMapStore";
 
 const routeStyle: LayerProps = {
   id: "route",
@@ -47,6 +48,22 @@ export default function MapContainer() {
 
   const mapRef = useRef<MapRef>(null);
   const updateRouteState = useRouteStore((s) => s.updateRouteData);
+
+  const jumpToLocation = useMapStore((s) => s.jumpToLocation);
+  const clearJumpToLocation = useMapStore((s) => s.clearJumpToLocation);
+
+  useEffect(() => {
+    console.log("Hello");
+    if (!jumpToLocation || !mapRef.current) return;
+
+    mapRef.current.flyTo({
+      center: [jumpToLocation.longitude, jumpToLocation.latitude],
+      zoom: 14,
+      duration: 2000,
+    });
+
+    clearJumpToLocation();
+  }, [jumpToLocation, clearJumpToLocation]);
 
   function determineType(idx: number, totalWaypoints: number) {
     if (idx === 0) {
