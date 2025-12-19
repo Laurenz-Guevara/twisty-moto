@@ -23,6 +23,17 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function MyRoutes() {
   const router = useRouter();
@@ -48,6 +59,7 @@ export default function MyRoutes() {
 
   async function handleDeleteRoute(routeId: string) {
     await deleteRoute(routeId);
+    queryClient.invalidateQueries({ queryKey: ["userRoutes"] });
   }
 
   async function handleEditRoute(routeId: string) {
@@ -142,14 +154,40 @@ export default function MyRoutes() {
                           >
                             Edit Route
                           </Button>
-                          <Button
-                            className="hover:cursor-pointer"
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => handleDeleteRoute(route.routeId)}
-                          >
-                            Delete Route
-                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="destructive"
+                                className="hover:cursor-pointer"
+                                size="sm"
+                              >
+                                Delete Route
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                  Are you absolutely sure?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This action cannot be undone. This will
+                                  permanently delete your route.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel className="hover:cursor-pointer">
+                                  Cancel
+                                </AlertDialogCancel>
+                                <AlertDialogAction
+                                  className="hover:cursor-pointer bg-destructive text-white"
+                                  onClick={() =>
+                                    handleDeleteRoute(route.routeId)}
+                                >
+                                  Confirm Delete Route
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </div>
                         <Tooltip>
                           <TooltipTrigger
