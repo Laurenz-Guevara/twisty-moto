@@ -10,12 +10,12 @@ import {
 } from "@/db/database";
 import { Separator } from "@radix-ui/react-dropdown-menu";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { MapPin } from "lucide-react";
+import { MapPin, Plus } from "lucide-react";
 import { MarkerProps, Route } from "@/db/types";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouteStore } from "@/app/stores/useRouteStore";
+import { defaultRoute, useRouteStore } from "@/app/stores/useRouteStore";
 import { toast } from "sonner";
 import { IconEye, IconEyeOff } from "@tabler/icons-react";
 import {
@@ -73,16 +73,31 @@ export default function MyRoutes() {
     }
   }
 
+  function createNewRoute() {
+    updateRouteState(defaultRoute);
+    router.push("/route-editor");
+  }
+
   return (
     <div className="container mx-auto">
       <div className="space-y-6 py-10 px-7 pb-16">
-        <div className="space-y-0.5">
-          <h2 className="text-2xl font-bold tracking-tight">
-            My Routes
-          </h2>
-          <p className="text-muted-foreground">
-            A collection of all the routes you built.
-          </p>
+        <div className="flex flex-col sm:flex-row justify-between sm:items-center">
+          <div className="space-y-0.5">
+            <h2 className="text-2xl font-bold tracking-tight">
+              My Routes
+            </h2>
+            <p className="text-muted-foreground">
+              A collection of all the routes you built.
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            className="hover:cursor-pointer mt-4 sm:mt-0"
+            onClick={() => createNewRoute()}
+          >
+            <Plus />
+            <span>Create New Route</span>
+          </Button>
         </div>
         <Separator className="my-6" />
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
