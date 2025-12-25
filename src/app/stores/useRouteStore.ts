@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { MarkerProps, StatsProp } from "@/db/types";
+import type { Feature, LineString } from "geojson";
 
 export type RouteData = {
   routeId: string | undefined;
@@ -9,6 +10,7 @@ export type RouteData = {
   routeDescription: string;
   routeJson: Array<MarkerProps>;
   routeStats: StatsProp;
+  routeGeoJson: Feature<LineString>;
 };
 
 export const defaultRoute: RouteData = {
@@ -18,6 +20,14 @@ export const defaultRoute: RouteData = {
   routeDescription: "",
   routeJson: [],
   routeStats: { duration: undefined, distance: undefined },
+  routeGeoJson: {
+    type: "Feature",
+    properties: {},
+    geometry: {
+      type: "LineString",
+      coordinates: []
+    },
+  },
 };
 
 type RouteStore = RouteData & {
@@ -38,6 +48,7 @@ export const useRouteStore = create<RouteStore>()(
           description: data.routeDescription,
           routeJson: data.routeJson,
           routeStats: data.routeStats,
+          routeGeoJson: data.routeGeoJson,
         })),
       updateRouteData: (partial) => set((state) => ({ ...state, ...partial })),
       resetRouteData: () => set(defaultRoute),
