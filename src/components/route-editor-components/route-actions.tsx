@@ -30,39 +30,34 @@ export default function RouteActions() {
   }
 
   async function handleSaveRoute() {
-    const routeId = route.routeId;
-
     if (route.routeJson.length <= 1) {
       toast.warning("Warning", {
         description:
           "A route must have at least a start and destination before you are able to save it.",
       });
-    } else {
-      const response = await saveRoute(route, routeId);
+      return;
+    }
+    const response = await saveRoute(route, route.routeId);
 
-      switch (response.variant) {
-        case ToastVariant.Success:
-          toast.success(response.title, {
-            description: response.description,
-          });
+    switch (response.variant) {
+      case ToastVariant.Success:
+        toast.success(response.title, {
+          description: response.description,
+        });
+        updateRouteState({ routeId: response.routeId });
+        break;
 
-          updateRouteState({
-            routeId: response.routeId,
-          });
+      case ToastVariant.Destructive:
+        toast.error(response.title, {
+          description: response.description,
+        });
+        break;
 
-          break;
-        case ToastVariant.Destructive:
-          toast.error(response.title, {
-            description: response.description,
-          });
-          break;
-
-        case ToastVariant.Warning:
-          toast.warning(response.title, {
-            description: response.description,
-          });
-          break;
-      }
+      case ToastVariant.Warning:
+        toast.warning(response.title, {
+          description: response.description,
+        });
+        break;
     }
   }
 
@@ -118,3 +113,4 @@ export default function RouteActions() {
     </Collapsible>
   );
 }
+

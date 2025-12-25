@@ -9,6 +9,9 @@ import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { utapi } from "@/app/api/uploadthing/core";
 import { RouteData } from "@/app/stores/useRouteStore";
 import { CommunityRoute, Route, User } from "@/db/types";
+import { simplify } from "@turf/simplify";
+import { nanoid } from "nanoid";
+import type { FeatureCollection } from "geojson";
 
 const { getAccessToken } = getKindeServerSession();
 
@@ -613,6 +616,44 @@ export const saveRoute = async (
 ) => {
   const userId = await getUserId();
   const username = await getUsername();
+
+  const COORDINATE_THRESHOLD_BEFORE_SIMPLIFY = 1500
+  const HIGH_ACCURACY_ROUTE = 0.001
+  const LOW_ACCURACY_ROUTE = 0.005
+
+  console.log("GEO", route.routeGeoJson.geometry)
+
+  const simplifiedFeature = simplify(
+    route.routeGeoJson,
+    {
+      tolerance: route.routeGeoJson.geometry.coordinates.length > COORDINATE_THRESHOLD_BEFORE_SIMPLIFY
+        ? LOW_ACCURACY_ROUTE
+        : HIGH_ACCURACY_ROUTE, highQuality: true
+    }
+  );
+
+  const payloadGeoJson: FeatureCollection = {
+    type: "FeatureCollection",
+    features: [simplifiedFeature]
+  };
+
+  const encodedGeoJson = encodeURIComponent(JSON.stringify(payloadGeoJson));
+
+
+  const generatedStaticMapResponse = await fetch(`https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/geojson(${encodedGeoJson})/auto/640x360?padding=40&access_token=pk.eyJ1IjoibGF1cmVuei1tYXlmYWlyIiwiYSI6ImNtOTBnZmlxbjBtNXUyanM4NHVvNGFoMXYifQ.PD0pw6XNU1dTxeswLu_hNA`)
+  const uploadedFile = await utapi.uploadFilesFromUrl({
+    url: generatedStaticMapResponse.url,
+    name: `${nanoid()}.jpg`
+  });
+
+  if (uploadedFile.error !== null) {
+    return {
+      title: "Error",
+      description:
+        "Unable to upload the thumbnail.",
+      variant: ToastVariant.Destructive,
+    };
+  }
 
   if (!userId) {
     return {
