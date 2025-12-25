@@ -15,6 +15,13 @@ import type { FeatureCollection } from "geojson";
 
 const { getAccessToken } = getKindeServerSession();
 
+const HIGH_ACCURACY_ROUTE_THRESHOLD = 4000
+const MEDIUM_ACCURACY_ROUTE_THRESHOLD = 6000
+const LOW_ACCURACY_ROUTE_THRESHOLD = 8000
+const HIGH_ACCURACY_ROUTE = 0.001
+const MEDIUM_ACCURACY_ROUTE = 0.005
+const LOW_ACCURACY_ROUTE = 0.010
+
 export const setupNewUser = async (kindeId: string, email: string) => {
   const [user] = await db
     .insert(users)
@@ -218,13 +225,22 @@ export const updateProfileInfo = async (values: Partial<User>) => {
   };
 };
 
-export const getAvatarFileKey = async () => {
-  const userId = await getUserId();
+async function getRouteFileKeys(userId: string) {
+  const routeImageFileKeys = await db
+    .select({
+      fileKey: routes.routeImageFileKey,
+    })
+    .from(routes)
+    .where(
+      and(
+        eq(routes.routeCreator, userId),
+      ))
+  const routeImageFileKeysCollection = routeImageFileKeys.map(item => item.fileKey);
 
-  if (userId == null) {
-    throw new Error("Cannot get userId.");
-  }
+  return routeImageFileKeysCollection;
+}
 
+export const getAvatarFileKey = async (userId: string) => {
   const avatar = await db
     .select({ avatarFileKey: avatars.avatarFileKey })
     .from(avatars)
@@ -349,10 +365,11 @@ export const deleteAccount = async (
         .where(eq(users.kindeId, accessToken.sub))
         .limit(1);
 
-      const avatarFileKey = await getAvatarFileKey();
+      const avatarFileKey = await getAvatarFileKey(userId);
+      const routeFileKeys = await getRouteFileKeys(userId);
 
-      if (avatarFileKey !== undefined) {
-        await utapi.deleteFiles(avatarFileKey);
+      if (avatarFileKey !== undefined && routeFileKeys !== undefined) {
+        await utapi.deleteFiles([avatarFileKey, ...routeFileKeys]);
         await tx.delete(avatars)
           .where(
             eq(avatars.userId, userId),
@@ -610,50 +627,51 @@ export const getPublicUserRouteFromId = async (clientRouteId: string) => {
   };
 };
 
+interface UploadRouteResponse {
+  uploadSuccess: boolean,
+  fileUrl: string | undefined,
+  fileKey: string | undefined,
+}
+
+function determineRouteAccuracy(routeLength: number): number {
+  if (routeLength < HIGH_ACCURACY_ROUTE_THRESHOLD) {
+    return HIGH_ACCURACY_ROUTE
+  } else if (routeLength < MEDIUM_ACCURACY_ROUTE_THRESHOLD) {
+    return MEDIUM_ACCURACY_ROUTE
+  } else if (routeLength < LOW_ACCURACY_ROUTE_THRESHOLD) {
+    return LOW_ACCURACY_ROUTE
+  } else {
+    return LOW_ACCURACY_ROUTE
+  }
+}
+
+async function UploadRouteThumbnail(route: RouteData): Promise<UploadRouteResponse> {
+  const simplifiedFeature = simplify(
+    route.routeGeoJson,
+    {
+      tolerance: determineRouteAccuracy(route.routeGeoJson.geometry.coordinates.length), highQuality: true
+    }
+  );
+  const payloadGeoJson: FeatureCollection = {
+    type: "FeatureCollection",
+    features: [simplifiedFeature]
+  };
+  const encodedGeoJson = encodeURIComponent(JSON.stringify(payloadGeoJson));
+  const generatedStaticMapResponse = await fetch(`https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/geojson(${encodedGeoJson})/auto/640x360?padding=40&access_token=${process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}`)
+  const uploadedFile = await utapi.uploadFilesFromUrl({
+    url: generatedStaticMapResponse.url,
+    name: `${nanoid()}.jpg`,
+  });
+
+  return { uploadSuccess: uploadedFile.error === null, fileUrl: uploadedFile.data?.ufsUrl, fileKey: uploadedFile.data?.key }
+}
+
 export const saveRoute = async (
   route: RouteData,
   clientRouteId: string | undefined,
 ) => {
   const userId = await getUserId();
   const username = await getUsername();
-
-  const COORDINATE_THRESHOLD_BEFORE_SIMPLIFY = 1500
-  const HIGH_ACCURACY_ROUTE = 0.001
-  const LOW_ACCURACY_ROUTE = 0.005
-
-  console.log("GEO", route.routeGeoJson.geometry)
-
-  const simplifiedFeature = simplify(
-    route.routeGeoJson,
-    {
-      tolerance: route.routeGeoJson.geometry.coordinates.length > COORDINATE_THRESHOLD_BEFORE_SIMPLIFY
-        ? LOW_ACCURACY_ROUTE
-        : HIGH_ACCURACY_ROUTE, highQuality: true
-    }
-  );
-
-  const payloadGeoJson: FeatureCollection = {
-    type: "FeatureCollection",
-    features: [simplifiedFeature]
-  };
-
-  const encodedGeoJson = encodeURIComponent(JSON.stringify(payloadGeoJson));
-
-
-  const generatedStaticMapResponse = await fetch(`https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/geojson(${encodedGeoJson})/auto/640x360?padding=40&access_token=pk.eyJ1IjoibGF1cmVuei1tYXlmYWlyIiwiYSI6ImNtOTBnZmlxbjBtNXUyanM4NHVvNGFoMXYifQ.PD0pw6XNU1dTxeswLu_hNA`)
-  const uploadedFile = await utapi.uploadFilesFromUrl({
-    url: generatedStaticMapResponse.url,
-    name: `${nanoid()}.jpg`
-  });
-
-  if (uploadedFile.error !== null) {
-    return {
-      title: "Error",
-      description:
-        "Unable to upload the thumbnail.",
-      variant: ToastVariant.Destructive,
-    };
-  }
 
   if (!userId) {
     return {
@@ -696,6 +714,32 @@ export const saveRoute = async (
         )
         .limit(1);
 
+      const thumbnailUploadResponse = await UploadRouteThumbnail(route)
+      if (thumbnailUploadResponse.uploadSuccess === false) {
+        return {
+          title: "Error",
+          description:
+            "Unable to upload the thumbnail. Your route has still been saved.",
+          variant: ToastVariant.Destructive,
+        };
+      }
+
+      const previousRouteThumbnail = await db
+        .select({
+          fileKey: routes.routeImageFileKey,
+          fileUrl: routes.routeImageUrl
+        })
+        .from(routes)
+        .where(
+          and(
+            eq(routes.routeCreator, userId),
+            eq(routes.routeId, routeId),
+          )
+        )
+        .limit(1);
+
+      await utapi.deleteFiles(previousRouteThumbnail[0].fileKey);
+
       await db
         .update(routes)
         .set({
@@ -703,6 +747,8 @@ export const saveRoute = async (
           routeLocation: route.routeLocation,
           routeDescription: route.routeDescription,
           routeState: route.routeJson,
+          routeImageUrl: thumbnailUploadResponse.fileUrl ? thumbnailUploadResponse.fileUrl : "",
+          routeImageFileKey: thumbnailUploadResponse.fileKey ? thumbnailUploadResponse.fileKey : "",
         })
         .where(
           and(
@@ -725,6 +771,17 @@ export const saveRoute = async (
       };
     }
   } else {
+    const thumbnailUploadResponse = await UploadRouteThumbnail(route)
+
+    if (thumbnailUploadResponse.uploadSuccess === false) {
+      return {
+        title: "Error",
+        description:
+          "Unable to upload the thumbnail. Your route has still been saved.",
+        variant: ToastVariant.Destructive,
+      };
+    }
+
     const [routeId] = await db
       .insert(routes)
       .values({
@@ -734,6 +791,8 @@ export const saveRoute = async (
         routeDescription: route.routeDescription,
         routeState: route.routeJson,
         routeCreator: userId,
+        routeImageUrl: thumbnailUploadResponse.fileUrl ? thumbnailUploadResponse.fileUrl : "",
+        routeImageFileKey: thumbnailUploadResponse.fileKey ? thumbnailUploadResponse.fileKey : "",
       })
       .returning({ routeId: routes.routeId });
 
@@ -750,6 +809,19 @@ export const deleteRoute = async (routeId: string) => {
   const userId = await getUserId();
 
   if (userId) {
+    const routeThumbnail = await db
+      .select({
+        fileKey: routes.routeImageFileKey,
+      })
+      .from(routes)
+      .where(
+        and(
+          eq(routes.routeCreator, userId),
+          eq(routes.routeId, routeId)
+        ))
+      .limit(1);
+
+    await utapi.deleteFiles(routeThumbnail[0].fileKey);
     await db.delete(routes).where(
       and(eq(routes.routeId, routeId), eq(routes.routeCreator, userId)),
     );
