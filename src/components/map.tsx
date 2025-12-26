@@ -11,9 +11,11 @@ import Map, {
   Popup,
   Source,
 } from "react-map-gl/mapbox";
+import type { Feature, LineString } from "geojson";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { IconFlagFilled, IconMapPinFilled } from "@tabler/icons-react";
 import { RouteBuilderVariant } from "@/db/enums";
+
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -24,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Bookmark, MapPin, Navigation, Plus } from "lucide-react";
 import { useMapStore } from "@/app/stores/useMapStore";
+
 
 const routeStyle: LayerProps = {
   id: "route",
@@ -113,11 +116,11 @@ export default function MapContainer() {
       );
       const json = await response.json();
       const data = json.routes[0];
-      const route = data.geometry;
-      const geojson = {
-        "type": "Feature",
-        "properties": {},
-        "geometry": route,
+      const route: LineString = data.geometry;
+      const geojson: Feature<LineString> = {
+        type: "Feature",
+        properties: {},
+        geometry: route
       };
 
       const totalWaypoints = json.waypoints.length;
@@ -140,6 +143,7 @@ export default function MapContainer() {
           ...waypoints,
         ],
         routeStats: { distance: data.distance, duration: data.duration },
+        routeGeoJson: geojson,
       });
 
       return { data: data, route: route, geojson: geojson };
