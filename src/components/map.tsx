@@ -344,7 +344,7 @@ export default function MapContainer() {
           <Card className="w-full max-w-sm border-b-0 p-0 overflow-hidden">
             <CardContent className="p-0 flex flex-col">
               <Button
-                className="rounded-t-lg flex justify-start rounded-b-none w-full text-sm"
+                className="rounded-t-lg flex justify-start rounded-b-none w-full text-sm hover:cursor-pointer"
                 variant="ghost"
                 onClick={() =>
                   handleMapClick(
@@ -360,7 +360,7 @@ export default function MapContainer() {
               </Button>
               <Button
                 variant="ghost"
-                className="rounded-none flex justify-start rounded-b-none w-full text-sm"
+                className="rounded-none flex justify-start rounded-b-none w-full text-sm hover:cursor-pointer"
                 onClick={() =>
                   handleMapClick(
                     RouteBuilderVariant.Via,
@@ -375,7 +375,7 @@ export default function MapContainer() {
               </Button>
               <Button
                 variant="ghost"
-                className="rounded-none flex justify-start rounded-b-none w-full text-sm"
+                className="rounded-none flex justify-start rounded-b-none w-full text-sm hover:cursor-pointer"
                 onClick={() =>
                   handleMapClick(
                     RouteBuilderVariant.Destination,
@@ -391,7 +391,7 @@ export default function MapContainer() {
               <div className="border-t border-border" />
               <Button
                 variant="ghost"
-                className="rounded-t-none flex justify-start w-full text-sm"
+                className="rounded-t-none flex justify-start w-full text-sm hover:cursor-pointer"
                 onClick={() =>
                   handleMapClick(
                     RouteBuilderVariant.Bookmark,
