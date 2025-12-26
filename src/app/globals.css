@@ -4,10 +4,22 @@
 @import "uploadthing/tw/v4";
 @source "../../node_modules/@uploadthing/react/dist";
 
+@custom-variant dark (&:where(.dark &, &.dark, .mode-dark &, &.mode-dark));
 
-@custom-variant dark (&:is(.dark *));
+.mode-light {
+    color-scheme: light;
+    color: var(--foreground);
+    background-color: var(
+        --background
+    );
+}
+.mode-dark {
+    color-scheme: dark;
+    color: var(--foreground);
+    background-color: var(--background);
+}
 
-:root {
+:is(:root, .mode-light) {
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -42,7 +54,7 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
-.dark {
+:is(.dark, .mode-dark) {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
