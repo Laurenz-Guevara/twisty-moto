@@ -447,7 +447,7 @@ function MapSearchBox() {
 
   return (
     <div className="relative grid w-full max-w-sm gap-2 mt-4 ml-4">
-      <InputGroup className="bg-white! shadow">
+      <InputGroup className="shadow text-black mode-light">
         <InputGroupInput onChange={(e) => setSearchInput(e.target.value)} value={searchInput} placeholder="Search..." />
         <InputGroupAddon>
           <Search />
@@ -470,7 +470,7 @@ function MapSearchBox() {
           </InputGroupButton>
         </InputGroupAddon>
       </InputGroup>
-      <div className="rounded-md bg-white shadow overflow-hidden">
+      <div className="rounded-md bg-white shadow overflow-hidden mode-light">
         {searchInput.length > 0 && suggestedLocationsResponse?.suggestions?.map((suggestion) => (
           <div key={suggestion.mapbox_id} onClick={() => jumpToLocation(suggestion.mapbox_id)} className="pl-3 py-1.5 hover:bg-muted hover:cursor-pointer">
             <p>{suggestion.name}</p>
