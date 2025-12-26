@@ -11,11 +11,21 @@ import Map, {
   Popup,
   Source,
 } from "react-map-gl/mapbox";
-import type { Feature, LineString } from "geojson";
+import type { Feature, FeatureCollection, LineString, Point } from "geojson";
+import { SearchBoxSuggestionResponse } from '@mapbox/search-js-core';
 import "mapbox-gl/dist/mapbox-gl.css";
 import { IconFlagFilled, IconMapPinFilled } from "@tabler/icons-react";
 import { RouteBuilderVariant } from "@/db/enums";
+import { useDebounce } from "use-debounce";
+import { Search, X } from "lucide-react"
+import { nanoid } from "nanoid";
 
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group"
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -56,7 +66,6 @@ export default function MapContainer() {
   const clearJumpToLocation = useMapStore((s) => s.clearJumpToLocation);
 
   useEffect(() => {
-    console.log("Hello");
     if (!jumpToLocation || !mapRef.current) return;
 
     mapRef.current.flyTo({
@@ -322,6 +331,7 @@ export default function MapContainer() {
           <Layer {...routeStyle} />
         </Source>
       )}
+      <MapSearchBox />
       {popupInfo && (
         <Popup
           longitude={popupInfo.lng}
@@ -401,4 +411,73 @@ export default function MapContainer() {
       <FullscreenControl />
     </Map>
   );
+}
+
+async function getFeatureCollection(mapbox_id: string, sessionTokenRef: string): Promise<FeatureCollection<Point>> {
+  const response = await fetch(`https://api.mapbox.com/search/searchbox/v1/retrieve/${mapbox_id}?&access_token=${process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}&session_token=${sessionTokenRef}`)
+  return await response.json()
+}
+
+async function getSuggestedLocations(searchInput: string, sessionTokenRef: string): Promise<SearchBoxSuggestionResponse> {
+  const response = await fetch(`https://api.mapbox.com/search/searchbox/v1/suggest?q=${searchInput}&access_token=${process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}&session_token=${sessionTokenRef}&language=en&limit=10`)
+  return await response.json()
+}
+
+const DEBOUNCE_DELAY = 500
+
+function MapSearchBox() {
+  const [searchInput, setSearchInput] = useState("")
+  const [debouncedSearch] = useDebounce(searchInput, DEBOUNCE_DELAY);
+  const sessionTokenRef = useRef<string>(nanoid());
+
+  const { data: suggestedLocationsResponse } = useQuery({
+    queryKey: ["suggestedLocations", debouncedSearch],
+    queryFn: () => getSuggestedLocations(debouncedSearch, sessionTokenRef.current),
+    enabled: debouncedSearch.length > 1,
+  });
+
+  async function jumpToLocation(mapboxId: string) {
+    const geojson = await getFeatureCollection(mapboxId, sessionTokenRef.current)
+    const [longitude, latitude] = geojson.features[0].geometry.coordinates
+    useMapStore.getState().setJumpToLocation({
+      latitude,
+      longitude,
+    })
+  }
+
+  return (
+    <div className="relative grid w-full max-w-sm gap-2 mt-4 ml-4">
+      <InputGroup className="bg-white! shadow">
+        <InputGroupInput onChange={(e) => setSearchInput(e.target.value)} value={searchInput} placeholder="Search..." />
+        <InputGroupAddon>
+          <Search />
+        </InputGroupAddon>
+        {searchInput.length > 1 &&
+          suggestedLocationsResponse?.suggestions?.length === 0 && (
+            <InputGroupAddon className="pr-0" align="inline-end">
+              0 results
+            </InputGroupAddon>
+          )}
+        <InputGroupAddon align="inline-end">
+          <InputGroupButton
+            className="hover:cursor-pointer bg-transparent!"
+            variant="ghost"
+            aria-label="clear"
+            size="icon-sm"
+            onClick={() => setSearchInput("")}
+          >
+            <X />
+          </InputGroupButton>
+        </InputGroupAddon>
+      </InputGroup>
+      <div className="rounded-md bg-white shadow overflow-hidden">
+        {searchInput.length > 0 && suggestedLocationsResponse?.suggestions?.map((suggestion) => (
+          <div key={suggestion.mapbox_id} onClick={() => jumpToLocation(suggestion.mapbox_id)} className="pl-3 py-1.5 hover:bg-muted hover:cursor-pointer">
+            <p>{suggestion.name}</p>
+            <p className="text-muted-foreground">{suggestion.place_formatted}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
 }
