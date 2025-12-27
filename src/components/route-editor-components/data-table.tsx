@@ -80,7 +80,13 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
     <Drawer direction={isMobile ? "bottom" : "right"}>
       <div className="flex justify-between">
         <div className="overflow-ellipsis overflow-hidden hover:cursor-pointer h-full">
-          {item.streetName}
+          <span onClick={() =>
+            useMapStore.getState().setJumpToLocation({
+              latitude: item.latitude,
+              longitude: item.longitude,
+            })}>
+            {item.streetName}
+          </span>
         </div>
         <DrawerTrigger className="cursor-pointer" asChild>
           <IconEdit className="size-5 text-muted-foreground" />
