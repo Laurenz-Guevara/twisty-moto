@@ -90,7 +90,7 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
         <DrawerHeader className="gap-1">
           <DrawerTitle>{item.streetName}</DrawerTitle>
           <DrawerDescription>
-            Directly update the route here.
+            Waypoint number {item.order + 1}
           </DrawerDescription>
         </DrawerHeader>
         <div className="flex flex-col gap-4 px-4 text-sm">
@@ -112,7 +112,6 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
           </div>
         </div>
         <DrawerFooter>
-          <Button>Submit</Button>
           <DrawerClose asChild>
             <Button
               onClick={() =>
@@ -121,13 +120,12 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
                   longitude: item.longitude,
                 })}
               className="hover:cursor-pointer"
-              variant="outline"
             >
               Jump To Location
             </Button>
           </DrawerClose>
           <DrawerClose asChild>
-            <Button variant="outline">Done</Button>
+            <Button className="cursor-pointer" variant="outline">Done</Button>
           </DrawerClose>
         </DrawerFooter>
       </DrawerContent>
