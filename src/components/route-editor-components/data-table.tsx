@@ -19,7 +19,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { IconDotsVertical, IconGripVertical } from "@tabler/icons-react";
+import { IconDotsVertical, IconEdit, IconGripVertical } from "@tabler/icons-react";
 import {
   ColumnDef,
   flexRender,
@@ -78,11 +78,14 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
 
   return (
     <Drawer direction={isMobile ? "bottom" : "right"}>
-      <DrawerTrigger asChild>
-        <div className="w-50 overflow-ellipsis overflow-hidden hover:cursor-pointer">
+      <div className="flex justify-between">
+        <div className="overflow-ellipsis overflow-hidden hover:cursor-pointer h-full">
           {item.streetName}
         </div>
-      </DrawerTrigger>
+        <DrawerTrigger className="cursor-pointer" asChild>
+          <IconEdit className="size-5 text-muted-foreground" />
+        </DrawerTrigger>
+      </div>
       <DrawerContent>
         <DrawerHeader className="gap-1">
           <DrawerTitle>{item.streetName}</DrawerTitle>
@@ -141,9 +144,9 @@ function DragHandle({ id }: { id: number }) {
       {...listeners}
       variant="ghost"
       size="icon"
-      className="text-muted-foreground size-7 hover:bg-transparent hover:cursor-pointer"
+      className="text-muted-foreground size-6 hover:bg-transparent hover:cursor-pointer"
     >
-      <IconGripVertical className="text-muted-foreground size-3" />
+      <IconGripVertical className="text-muted-foreground" />
       <span className="sr-only">Drag to reorder</span>
     </Button>
   );
@@ -206,7 +209,7 @@ function DraggableRow({ row }: { row: Row<z.infer<typeof schema>> }) {
       }}
     >
       {row.getVisibleCells().map((cell) => (
-        <TableCell key={cell.id}>
+        <TableCell className="nth-[2]:w-full nth-[2]:pr-1 last:pl-0 last:py-0" key={cell.id}>
           {flexRender(cell.column.columnDef.cell, cell.getContext())}
         </TableCell>
       ))}
