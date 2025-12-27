@@ -149,6 +149,46 @@ function DragHandle({ id }: { id: number }) {
   );
 }
 
+const columns: ColumnDef<z.infer<typeof schema>>[] = [
+  {
+    id: "drag",
+    header: () => null,
+    cell: ({ row }) => <DragHandle id={row.original.order} />,
+  },
+  {
+    accessorKey: "header",
+    header: "Header",
+    cell: ({ row }) => {
+      return <TableCellViewer item={row.original} />;
+    },
+    enableHiding: false,
+  },
+  {
+    id: "actions",
+    cell: ({ row }) => (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            className="data-[state=open]:bg-muted text-muted-foreground flex size-8 cursor-pointer"
+            size="icon"
+          >
+            <IconDotsVertical />
+            <span className="sr-only">Open menu</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-32">
+          <DropdownMenuItem>Move Up</DropdownMenuItem>
+          <DropdownMenuItem>Move Down</DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DeleteWaypoint order={row.original.order}></DeleteWaypoint>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    ),
+  },
+];
+
+
 function DraggableRow({ row }: { row: Row<z.infer<typeof schema>> }) {
   const { transform, setNodeRef, isDragging } = useSortable({
     id: row.original.order,
@@ -193,45 +233,6 @@ export function DataTable({ storedRouteJson }: DataTableProps) {
     () => storedRouteJson?.map(({ order }) => order) || [],
     [storedRouteJson],
   );
-
-  const columns: ColumnDef<z.infer<typeof schema>>[] = [
-    {
-      id: "drag",
-      header: () => null,
-      cell: ({ row }) => <DragHandle id={row.original.order} />,
-    },
-    {
-      accessorKey: "header",
-      header: "Header",
-      cell: ({ row }) => {
-        return <TableCellViewer item={row.original} />;
-      },
-      enableHiding: false,
-    },
-    {
-      id: "actions",
-      cell: ({ row }) => (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              className="data-[state=open]:bg-muted text-muted-foreground flex size-8 cursor-pointer"
-              size="icon"
-            >
-              <IconDotsVertical />
-              <span className="sr-only">Open menu</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-32">
-            <DropdownMenuItem>Move Up</DropdownMenuItem>
-            <DropdownMenuItem>Move Down</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DeleteWaypoint order={row.original.order}></DeleteWaypoint>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ),
-    },
-  ];
 
   const table = useReactTable({
     data: storedRouteJson,
