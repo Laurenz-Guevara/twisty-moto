@@ -64,6 +64,7 @@ import { useMapStore } from "@/app/stores/useMapStore";
 import z from "zod";
 import { MarkerProps } from "@/db/types";
 import DeleteWaypoint from "@/components/route-editor-components/DeleteWaypoint";
+import MoveRoute from "@/components/route-editor-components/MoveRoute";
 
 export const schema = z.object({
   order: z.number(),
@@ -185,8 +186,8 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-32">
-          <DropdownMenuItem>Move Up</DropdownMenuItem>
-          <DropdownMenuItem>Move Down</DropdownMenuItem>
+          <MoveRoute direction={"Up"} orderIndex={row.original.order}></MoveRoute>
+          <MoveRoute direction={"Down"} orderIndex={row.original.order}></MoveRoute>
           <DropdownMenuSeparator />
           <DeleteWaypoint order={row.original.order}></DeleteWaypoint>
         </DropdownMenuContent>
