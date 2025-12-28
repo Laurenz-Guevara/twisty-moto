@@ -430,7 +430,7 @@ function MapSearchBox() {
   const [debouncedSearch] = useDebounce(searchInput, DEBOUNCE_DELAY);
   const sessionTokenRef = useRef<string>(nanoid());
 
-  const { data: suggestedLocationsResponse } = useQuery({
+  const { data: suggestedLocationsResponse, isPending: isPending } = useQuery({
     queryKey: ["suggestedLocations", debouncedSearch],
     queryFn: () => getSuggestedLocations(debouncedSearch, sessionTokenRef.current),
     enabled: debouncedSearch.length > 1,
@@ -452,12 +452,11 @@ function MapSearchBox() {
         <InputGroupAddon>
           <Search />
         </InputGroupAddon>
-        {searchInput.length > 1 &&
-          suggestedLocationsResponse?.suggestions?.length === 0 && (
-            <InputGroupAddon className="pr-0" align="inline-end">
-              0 results
-            </InputGroupAddon>
-          )}
+        {searchInput.length > 1 && suggestedLocationsResponse?.suggestions?.length === 0 && (
+          <InputGroupAddon className="pr-0" align="inline-end">
+            0 results
+          </InputGroupAddon>
+        )}
         <InputGroupAddon align="inline-end">
           <InputGroupButton
             className="hover:cursor-pointer bg-transparent!"
@@ -477,6 +476,11 @@ function MapSearchBox() {
             <p className="text-muted-foreground">{suggestion.place_formatted}</p>
           </div>
         ))}
+        {isPending && searchInput.length > 0 && (
+          <div className="pl-3 py-1.5">
+            <p>Searching...</p>
+          </div>
+        )}
       </div>
     </div>
   )
