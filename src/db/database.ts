@@ -8,7 +8,7 @@ import { NeonDbError } from "@neondatabase/serverless";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { utapi } from "@/app/api/uploadthing/core";
 import { RouteData } from "@/app/stores/useRouteStore";
-import { CommunityRoute, Route, User } from "@/db/types";
+import { CommunityRoute, Route, RouteLocation, User } from "@/db/types";
 import { GeocodingResponse } from '@mapbox/search-js-core';
 import { simplify } from "@turf/simplify";
 import { nanoid } from "nanoid";
@@ -546,7 +546,10 @@ export const getUserRoutes = async (): Promise<Array<Route>> => {
     .from(routes)
     .where(eq(routes.routeCreator, userId));
 
-  return userRoutes;
+  return userRoutes.map(route => ({
+    ...route,
+    routeLocation: route.routeLocation as RouteLocation
+  }));
 };
 
 export const getCommunityRoutes = async (): Promise<Array<CommunityRoute>> => {
@@ -562,7 +565,10 @@ export const getCommunityRoutes = async (): Promise<Array<CommunityRoute>> => {
     .from(routes)
     .where(eq(routes.isPublic, true));
 
-  return communityRoutes;
+  return communityRoutes.map(route => ({
+    ...route,
+    routeLocation: route.routeLocation as RouteLocation
+  }));
 };
 
 export const getUserRouteFromId = async (clientRouteId: string) => {
