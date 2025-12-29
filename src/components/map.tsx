@@ -242,7 +242,6 @@ export default function MapContainer() {
         break;
       }
       case RouteBuilderVariant.Bookmark:
-        // TODO: Add sidebar component and add lat lng to db with icon image url
         console.log("Open Bookmark Context Sidebar");
         break;
       default:

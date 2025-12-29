@@ -17,6 +17,11 @@ export interface Notification {
   actionUrl: string;
 }
 
+export interface RouteLocation {
+  routeStartPlace: string,
+  routeDestinationPlace: string,
+}
+
 export interface MarkerProps {
   order: number;
   latitude: number;
@@ -41,7 +46,7 @@ export interface BaseRoute {
   routeId: string;
   routeName: string;
   routeAuthor: string;
-  routeLocation: string;
+  routeLocation: RouteLocation;
   routeImage?: string;
   routeDescription?: string;
 }

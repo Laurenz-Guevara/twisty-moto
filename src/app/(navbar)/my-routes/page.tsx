@@ -137,7 +137,7 @@ export default function MyRoutes() {
                           (
                             <div className="mt-1 flex items-center text-sm text-muted-foreground">
                               <MapPin className="mr-1 h-4 w-4" />
-                              {route.routeLocation}
+                              {route.routeLocation.routeStartPlace} - {route.routeLocation.routeDestinationPlace}
                             </div>
                           )}
                         <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">

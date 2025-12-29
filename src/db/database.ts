@@ -9,6 +9,7 @@ import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { utapi } from "@/app/api/uploadthing/core";
 import { RouteData } from "@/app/stores/useRouteStore";
 import { CommunityRoute, Route, User } from "@/db/types";
+import { GeocodingResponse } from '@mapbox/search-js-core';
 import { simplify } from "@turf/simplify";
 import { nanoid } from "nanoid";
 import type { FeatureCollection } from "geojson";
@@ -405,12 +406,7 @@ export const deleteAccount = async (
             },
           },
         );
-        console.log("AFTER FETCH SUCESSS");
-      } catch (error: unknown) {
-        console.log(
-          "Failed during delete action. Rolling back query...",
-          error,
-        );
+      } catch {
         tx.rollback();
 
         return {
@@ -429,7 +425,6 @@ export const deleteAccount = async (
       variant: ToastVariant.Destructive,
     };
   }
-  console.log("SUCESSS");
   return {
     title: "Success",
     description: "Your account has been sucessfully deleted.",
@@ -666,6 +661,44 @@ async function UploadRouteThumbnail(route: RouteData): Promise<UploadRouteRespon
   return { uploadSuccess: uploadedFile.error === null, fileUrl: uploadedFile.data?.ufsUrl, fileKey: uploadedFile.data?.key }
 }
 
+async function reverseGeocode(
+  [longitude, latitude]: number[]
+): Promise<string> {
+  const url = `https://api.mapbox.com/search/geocode/v6/reverse?longitude=${longitude}&latitude=${latitude}&access_token=${process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}`
+
+  const res = await fetch(url)
+  if (!res.ok) {
+    throw new Error("Failed to reverse geocode coordinates")
+  }
+
+  const featureCollection: GeocodingResponse = await res.json()
+
+  if (!featureCollection.features?.length) {
+    throw new Error("No geocoding results found")
+  }
+
+  if (!featureCollection.features[0].properties.context.place?.name) {
+    return featureCollection.features[0].properties.place_formatted
+  }
+
+  return featureCollection.features[0].properties.context.place.name
+}
+
+async function getRegionFromCoordinates({
+  routeStartPlace,
+  routeDestinationPlace,
+}: {
+  routeStartPlace: number[]
+  routeDestinationPlace: number[]
+}): Promise<string[]> {
+  const [startRegion, destinationRegion] = await Promise.all([
+    reverseGeocode(routeStartPlace),
+    reverseGeocode(routeDestinationPlace),
+  ])
+
+  return [startRegion, destinationRegion]
+}
+
 export const saveRoute = async (
   route: RouteData,
   clientRouteId: string | undefined,
@@ -698,6 +731,13 @@ export const saveRoute = async (
       variant: ToastVariant.Warning,
     };
   }
+
+  const startLongitude = route.routeJson[0].longitude
+  const startLatitude = route.routeJson[0].latitude
+
+  const endLongitude = route.routeJson[route.routeJson.length - 1].longitude
+  const endLatitude = route.routeJson[route.routeJson.length - 1].latitude
+  const routeLocation = await getRegionFromCoordinates({ routeStartPlace: [startLongitude, startLatitude], routeDestinationPlace: [endLongitude, endLatitude] })
 
   if (clientRouteId !== undefined) {
     try {
@@ -744,7 +784,10 @@ export const saveRoute = async (
         .update(routes)
         .set({
           routeName: route.routeName,
-          routeLocation: route.routeLocation,
+          routeLocation: {
+            routeStartPlace: routeLocation[0],
+            routeDestinationPlace: routeLocation[1],
+          },
           routeDescription: route.routeDescription,
           routeState: route.routeJson,
           routeImageUrl: thumbnailUploadResponse.fileUrl ? thumbnailUploadResponse.fileUrl : "",
@@ -787,7 +830,10 @@ export const saveRoute = async (
       .values({
         routeName: route.routeName,
         routeAuthor: username,
-        routeLocation: route.routeLocation,
+        routeLocation: {
+          routeStartPlace: routeLocation[0],
+          routeDestinationPlace: routeLocation[1],
+        },
         routeDescription: route.routeDescription,
         routeState: route.routeJson,
         routeCreator: userId,

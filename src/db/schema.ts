@@ -107,9 +107,7 @@ export const routes = createTable("routes", {
 
   routeName: varchar("route_name", { length: 128 }).notNull().default(""),
 
-  routeLocation: varchar("route_location", { length: 128 }).notNull().default(
-    "",
-  ),
+  routeLocation: jsonb("route_location").notNull().default({ routeStartPlace: { longitude: 0, latitude: 0 }, routeDestinationPlace: { longitude: 0, latitude: 0 } }),
 
   routeImageUrl: varchar("route_image_url", { length: 255 }).notNull().default(
     "",
