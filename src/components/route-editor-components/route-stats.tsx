@@ -1,19 +1,10 @@
 import { useRouteStore } from "@/app/stores/useRouteStore";
 import { Label } from "@/components/ui/label";
+import { convertToMiles } from "@/utils/convertToMiles";
+import { formatDurationHoursMinutes } from "@/utils/formatDurationHoursMinutes";
 
 export default function RouteStats() {
   const storedRouteStats = useRouteStore((s) => s.routeStats);
-
-  function convertToMiles(distanceInMeters: number): number {
-    const miles = distanceInMeters / 1609.344;
-    return Math.round(miles * 10) / 10;
-  }
-
-  function formatDurationHoursMinutes(seconds: number): string {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    return `${hours}h ${minutes}m`;
-  }
 
   return (
     <div className="space-y-2">
