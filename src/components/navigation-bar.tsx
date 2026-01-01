@@ -45,15 +45,6 @@ export default function NavigationBar() {
                   Twisty Moto
                 </Link>
                 <Link
-                  href={"/featured"}
-                  className={buttonVariants({
-                    size: "sm",
-                    variant: "ghost",
-                  })}
-                >
-                  Featured
-                </Link>
-                <Link
                   href={"/community-routes"}
                   className={buttonVariants({
                     size: "sm",
@@ -230,16 +221,6 @@ export default function NavigationBar() {
             })}
           >
             Twisty Moto
-          </Link>
-          <Link
-            href={"/featured"}
-            onClick={() => setMobileMenu(!mobileMenu)}
-            className={buttonVariants({
-              size: "lg",
-              variant: "link",
-            })}
-          >
-            Featured
           </Link>
           <Link
             href={"/community-routes"}
