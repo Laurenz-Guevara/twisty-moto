@@ -2,7 +2,7 @@ import { Route } from "@/db/types";
 import Image from "next/image";
 import { MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { IconClock, IconEdit, IconEye, IconEyeOff, IconLock, IconRuler2, IconTrash, IconWorld } from "@tabler/icons-react";
+import { IconClock, IconEdit, IconLock, IconRuler2, IconTrash, IconWorld } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import {
   AlertDialog,
@@ -15,6 +15,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { convertToMiles } from "@/utils/convertToMiles";
+import { formatDurationHoursMinutes } from "@/utils/formatDurationHoursMinutes";
 
 interface MyRouteCardControls {
   handleUpdateRoutePrivacy: (routeId: string, isPublic: boolean) => void;
@@ -66,14 +68,13 @@ export default function MyRouteCard({ route, controls }: MyRouteCardProps) {
           <div className="flex items-center gap-4 text-sm">
             <div className="flex items-center gap-2 text-muted-foreground">
               <IconRuler2 className="h-4 w-4 shrink-0" />
-              <span>233 Miles</span>
+              <span>{convertToMiles(route.routeDistance)} Miles</span>
             </div>
             <div className="flex items-center gap-2 text-muted-foreground">
               <IconClock className="h-4 w-4 shrink-0" />
-              <span>1 hour</span>
+              <span>{formatDurationHoursMinutes(route.routeCompletionTime)}</span>
             </div>
           </div>
-
         </div>
         <div className="flex flex-wrap gap-2 w-full mt-3">
           <Button
