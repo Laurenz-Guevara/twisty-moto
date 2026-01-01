@@ -8,11 +8,13 @@ import { NeonDbError } from "@neondatabase/serverless";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { utapi } from "@/app/api/uploadthing/core";
 import { RouteData } from "@/app/stores/useRouteStore";
-import { CommunityRoute, Route, RouteLocation, User } from "@/db/types";
+import { CommunityRoute, MarkerProps, Route, RouteLocation, User } from "@/db/types";
 import { GeocodingResponse } from '@mapbox/search-js-core';
 import { simplify } from "@turf/simplify";
 import { nanoid } from "nanoid";
 import type { FeatureCollection } from "geojson";
+import MapboxClient from '@mapbox/mapbox-sdk';
+import DirectionsService from '@mapbox/mapbox-sdk/services/directions';
 
 const { getAccessToken } = getKindeServerSession();
 
@@ -690,6 +692,25 @@ async function reverseGeocode(
   return featureCollection.features[0].properties.context.place.name
 }
 
+async function getRouteServerSide(storedRouteJson: MarkerProps[]) {
+  const client = MapboxClient({ accessToken: process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN! });
+  const directionsService = DirectionsService(client);
+
+  const waypoints = storedRouteJson.map((coords) => ({
+    coordinates: [coords.longitude, coords.latitude] as [number, number]
+  }));
+
+  const response = await directionsService.getDirections({
+    profile: 'driving',
+    waypoints: waypoints,
+    geometries: 'geojson',
+    overview: "false",
+    steps: true
+  }).send();
+
+  return response;
+}
+
 async function getRegionFromCoordinates({
   routeStartPlace,
   routeDestinationPlace,
@@ -745,6 +766,10 @@ export const saveRoute = async (
   const endLatitude = route.routeJson[route.routeJson.length - 1].latitude
   const routeLocation = await getRegionFromCoordinates({ routeStartPlace: [startLongitude, startLatitude], routeDestinationPlace: [endLongitude, endLatitude] })
 
+  const serverSideRoute = (await getRouteServerSide(route.routeJson)).body
+  const routeDistance = serverSideRoute.routes[0].distance
+  const routeCompletionTime = serverSideRoute.routes[0].duration
+
   if (clientRouteId !== undefined) {
     try {
       const [{ routeId }] = await db
@@ -798,6 +823,8 @@ export const saveRoute = async (
           routeState: route.routeJson,
           routeImageUrl: thumbnailUploadResponse.fileUrl ? thumbnailUploadResponse.fileUrl : "",
           routeImageFileKey: thumbnailUploadResponse.fileKey ? thumbnailUploadResponse.fileKey : "",
+          routeCompletionTime: routeCompletionTime,
+          routeDistance: routeDistance,
         })
         .where(
           and(
@@ -845,6 +872,8 @@ export const saveRoute = async (
         routeCreator: userId,
         routeImageUrl: thumbnailUploadResponse.fileUrl ? thumbnailUploadResponse.fileUrl : "",
         routeImageFileKey: thumbnailUploadResponse.fileKey ? thumbnailUploadResponse.fileKey : "",
+        routeCompletionTime: routeCompletionTime,
+        routeDistance: routeDistance,
       })
       .returning({ routeId: routes.routeId });
 
