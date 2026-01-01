@@ -49,6 +49,8 @@ export interface BaseRoute {
   routeLocation: RouteLocation;
   routeImage?: string;
   routeDescription?: string;
+  routeCompletionTime: number;
+  routeDistance: number;
 }
 
 export interface Route extends BaseRoute {

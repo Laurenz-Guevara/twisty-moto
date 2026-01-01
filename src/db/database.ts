@@ -543,6 +543,8 @@ export const getUserRoutes = async (): Promise<Array<Route>> => {
       routeLocation: routes.routeLocation,
       routeDescription: routes.routeDescription,
       routeImage: routes.routeImageUrl,
+      routeCompletionTime: routes.routeCompletionTime,
+      routeDistance: routes.routeDistance,
       isPublic: routes.isPublic,
     })
     .from(routes)
@@ -563,13 +565,15 @@ export const getCommunityRoutes = async (): Promise<Array<CommunityRoute>> => {
       routeLocation: routes.routeLocation,
       routeDescription: routes.routeDescription,
       routeImage: routes.routeImageUrl,
+      routeCompletionTime: routes.routeCompletionTime,
+      routeDistance: routes.routeDistance,
     })
     .from(routes)
     .where(eq(routes.isPublic, true));
 
   return communityRoutes.map(route => ({
     ...route,
-    routeLocation: route.routeLocation as RouteLocation
+    routeLocation: route.routeLocation as RouteLocation,
   }));
 };
 
