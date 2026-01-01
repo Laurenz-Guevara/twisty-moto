@@ -1,15 +1,14 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getCommunityRoutes, getPublicUserRouteFromId } from "@/db/database";
 import { Separator } from "@radix-ui/react-dropdown-menu";
 import { useQuery } from "@tanstack/react-query";
-import { MapPin } from "lucide-react";
 import { CommunityRoute, MarkerProps } from "@/db/types";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useRouteStore } from "@/app/stores/useRouteStore";
+
+import CommunityRouteCard from "@/components/community-route-card"
 
 export default function CommunityRoutes() {
   const router = useRouter();
@@ -41,6 +40,11 @@ export default function CommunityRoutes() {
     }
   }
 
+
+  const controls = {
+    handleViewRoute,
+  };
+
   return (
     <div className="container mx-auto">
       <div className="space-y-6 py-10 px-7 pb-16">
@@ -58,52 +62,7 @@ export default function CommunityRoutes() {
             ? (
               <>
                 {routes?.map((route) => (
-                  <div
-                    key={route.routeId}
-                    className="group relative flex flex-col overflow-hidden rounded-lg border bg-background shadow-sm transition-all hover:shadow-md"
-                  >
-                    <div className="aspect-video overflow-hidden h-full">
-                      <Image
-                        src={route.routeImage || "/placeholder-map.png"}
-                        alt={route.routeName}
-                        width={400}
-                        height={300}
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
-                    </div>
-                    <div className="p-4 h-3/4 flex flex-col justify-between">
-                      <div>
-                        <h3 className="font-semibold">{route.routeName}</h3>
-                        {route.routeLocation &&
-                          (
-                            <div className="mt-1 flex items-center text-sm text-muted-foreground">
-                              <MapPin className="mr-1 h-4 w-4" />
-                              {route.routeLocation.routeStartPlace} - {route.routeLocation.routeDestinationPlace}
-                            </div>
-                          )
-                        }
-                        <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
-                          {route.routeDescription}
-                        </p>
-                      </div>
-
-                      <div className="flex space-x-2 items-center justify-between mt-2">
-                        <div className="space-x-2">
-                          <Button
-                            onClick={() => handleViewRoute(route.routeId)}
-                            className="hover:cursor-pointer"
-                            variant="outline"
-                            size="sm"
-                          >
-                            View Route
-                          </Button>
-                        </div>
-                        <p className="line-clamp-2 text-sm text-muted-foreground text-nowrap overflow-ellipsis">
-                          Created by {route.routeAuthor}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                  <CommunityRouteCard key={route.routeId} route={route} controls={controls} />
                 ))}
               </>
             )

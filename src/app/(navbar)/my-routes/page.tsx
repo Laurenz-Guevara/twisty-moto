@@ -10,30 +10,13 @@ import {
 } from "@/db/database";
 import { Separator } from "@radix-ui/react-dropdown-menu";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { MapPin, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { MarkerProps, Route } from "@/db/types";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import { defaultRoute, useRouteStore } from "@/app/stores/useRouteStore";
 import { toast } from "sonner";
-import { IconEye, IconEyeOff } from "@tabler/icons-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import MyRouteCard from "@/components/my-route-card"
 
 export default function MyRoutes() {
   const router = useRouter();
@@ -85,6 +68,12 @@ export default function MyRoutes() {
     }
   }
 
+  const controls = {
+    handleUpdateRoutePrivacy,
+    handleDeleteRoute,
+    handleEditRoute,
+  };
+
   function createNewRoute() {
     updateRouteState(defaultRoute);
     router.push("/route-editor");
@@ -117,110 +106,7 @@ export default function MyRoutes() {
             ? (
               <>
                 {routes?.map((route) => (
-                  <div
-                    key={route.routeId}
-                    className="group relative flex flex-col overflow-hidden rounded-lg border bg-background shadow-sm transition-all hover:shadow-md"
-                  >
-                    <div className="aspect-video overflow-hidden h-full">
-                      <Image
-                        src={route.routeImage || "/placeholder-map.png"}
-                        alt={route.routeName}
-                        width={400}
-                        height={300}
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
-                    </div>
-                    <div className="p-4 h-3/4 flex flex-col justify-between">
-                      <div>
-                        <h3 className="font-semibold">{route.routeName}</h3>
-                        {route.routeLocation &&
-                          (
-                            <div className="mt-1 flex items-center text-sm text-muted-foreground">
-                              <MapPin className="mr-1 h-4 w-4" />
-                              {route.routeLocation.routeStartPlace === route.routeLocation.routeDestinationPlace ? (
-                                route.routeLocation.routeStartPlace
-                              ) : (
-                                `${route.routeLocation.routeStartPlace} - ${route.routeLocation.routeDestinationPlace}`
-                              )}
-                            </div>
-                          )}
-                        <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
-                          {route.routeDescription}
-                        </p>
-                      </div>
-                      <div className="flex space-x-2 items-center justify-between mt-2">
-                        <div className="space-x-2">
-                          <Button
-                            className="hover:cursor-pointer"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleEditRoute(route.routeId)}
-                          >
-                            Edit Route
-                          </Button>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button
-                                variant="destructive"
-                                className="hover:cursor-pointer"
-                                size="sm"
-                              >
-                                Delete Route
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>
-                                  Are you absolutely sure?
-                                </AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  This action cannot be undone. This will
-                                  permanently delete your route.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel className="hover:cursor-pointer">
-                                  Cancel
-                                </AlertDialogCancel>
-                                <AlertDialogAction
-                                  className="hover:cursor-pointer bg-destructive text-white"
-                                  onClick={() =>
-                                    handleDeleteRoute(route.routeId)}
-                                >
-                                  Confirm Delete Route
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </div>
-                        <Tooltip>
-                          <TooltipTrigger
-                            className="hover:cursor-pointer"
-                            onClick={() =>
-                              handleUpdateRoutePrivacy(
-                                route.routeId,
-                                !route.isPublic,
-                              )}
-                          >
-                            {route.isPublic
-                              ? (
-                                <IconEye
-                                  size={24}
-                                />
-                              )
-                              : (
-                                <IconEyeOff
-                                  size={24}
-                                />
-                              )}
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            {route.isPublic ? "Public" : "Private"}
-                          </TooltipContent>
-                        </Tooltip>
-                      </div>
-                    </div>
-                  </div>
+                  <MyRouteCard key={route.routeId} route={route} controls={controls} />
                 ))}
               </>
             )
