@@ -715,6 +715,11 @@ async function getRouteServerSide(storedRouteJson: MarkerProps[]) {
   return response;
 }
 
+export const getRouteServerSideRoutes = async (storedRouteJson: MarkerProps[]) => {
+  const serverSideRoute = (await getRouteServerSide(storedRouteJson)).body
+  return serverSideRoute.routes;
+}
+
 async function getRegionFromCoordinates({
   routeStartPlace,
   routeDestinationPlace,
