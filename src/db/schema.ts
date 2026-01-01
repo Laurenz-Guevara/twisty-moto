@@ -1,7 +1,9 @@
 import { relations, sql } from "drizzle-orm";
 import {
   boolean,
+  integer,
   jsonb,
+  real,
   pgTableCreator,
   timestamp,
   uuid,
@@ -125,6 +127,14 @@ export const routes = createTable("routes", {
   isPublic: boolean("is_public").default(false).notNull(),
 
   routeState: jsonb("route_state").notNull().default({}),
+
+  routeCompletionTime: real("route_completion_time").notNull().default(0.0),
+
+  routeDistance: real("route_distance").notNull().default(0.0),
+
+  routeViews: integer("route_views").notNull().default(0),
+
+  routeFavouriteCount: integer("route_favourite_count").notNull().default(0),
 });
 
 export const routesRelations = relations(routes, ({ one }) => ({
