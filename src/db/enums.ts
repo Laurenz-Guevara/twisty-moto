@@ -11,3 +11,8 @@ export enum RouteBuilderVariant {
   Destination = "destination",
   Bookmark = "bookmark",
 }
+
+export enum RouteType {
+  MarkerProps = "MarkerProps",
+  Coordinates = "Coordinates",
+}
