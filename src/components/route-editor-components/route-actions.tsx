@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import GeoJsonToGpx from "@dwayneparton/geojson-to-gpx"
 import { Feature, LineString, Position } from 'geojson';
 import { getRouteServerSideRoutes } from "@/db/database";
+import { IconDownload } from "@tabler/icons-react";
 
 export default function RouteActions() {
   const updateRouteState = useRouteStore((s) => s.updateRouteData);
@@ -161,7 +162,7 @@ export default function RouteActions() {
                 className="hover:cursor-pointer"
                 onClick={() => handleExportRoute()}
               >
-                <RefreshCcw className="h-4 w-4" />
+                <IconDownload className="h-4 w-4" />
                 <span>Export to GPX file</span>
               </SidebarMenuSubButton>
             </SidebarMenuSubItem>
