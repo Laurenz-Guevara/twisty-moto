@@ -15,7 +15,7 @@ import type { Feature, FeatureCollection, LineString, Point } from "geojson";
 import { SearchBoxSuggestionResponse } from '@mapbox/search-js-core';
 import "mapbox-gl/dist/mapbox-gl.css";
 import { IconFlagFilled, IconMapPinFilled } from "@tabler/icons-react";
-import { RouteBuilderVariant } from "@/db/enums";
+import { RouteBuilderVariant, RouteType } from "@/db/enums";
 import { useDebounce } from "use-debounce";
 import { Search, X } from "lucide-react"
 import { nanoid } from "nanoid";
@@ -30,12 +30,13 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouteStore } from "@/app/stores/useRouteStore";
-import { MarkerProps, Waypoint } from "@/db/types";
+import { MarkerProps } from "@/db/types";
 import { Button } from "@/components/ui/button";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Bookmark, MapPin, Navigation, Plus } from "lucide-react";
 import { useMapStore } from "@/app/stores/useMapStore";
+import { getDirections } from "@/lib/map-service";
 
 
 const routeStyle: LayerProps = {
@@ -111,30 +112,21 @@ export default function MapContainer() {
     return Math.hypot(px - closestX, py - closestY);
   }
 
-  // TODO: Check if route is valid otherwise fallback
   const { data: routeState } = useQuery({
     queryKey: ["route", storedRouteJson],
     queryFn: async () => {
-      const coords = storedRouteJson
-        .sort((a, b) => a.order - b.order)
-        .map((pt) => `${pt.longitude},${pt.latitude}`)
-        .join(";");
+      const directions = await getDirections({ coordinates: storedRouteJson, routeType: RouteType.MarkerProps });
 
-      const response = await fetch(
-        `https://api.mapbox.com/directions/v5/mapbox/driving/${coords}?steps=true&geometries=geojson&overview=full&access_token=${process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}`,
-      );
-      const json = await response.json();
-      const data = json.routes[0];
-      const route: LineString = data.geometry;
+      const route = directions.routes[0];
       const geojson: Feature<LineString> = {
         type: "Feature",
         properties: {},
-        geometry: route
+        geometry: route.geometry
       };
 
-      const totalWaypoints = json.waypoints.length;
-      const waypoints: MarkerProps[] = json.waypoints.map(
-        (waypoint: Waypoint, idx: number) => {
+      const totalWaypoints = route.waypoints.length;
+      const waypoints: MarkerProps[] = route.waypoints.map(
+        (waypoint, idx) => {
           return {
             order: idx,
             latitude: waypoint.location[1],
@@ -151,11 +143,11 @@ export default function MapContainer() {
         routeJson: [
           ...waypoints,
         ],
-        routeStats: { distance: data.distance, duration: data.duration },
+        routeStats: { distance: route.distance, duration: route.duration },
         routeGeoJson: geojson,
       });
 
-      return { data: data, route: route, geojson: geojson };
+      return { data: directions, route: route.geometry, geojson: geojson };
     },
     refetchOnMount: true,
     enabled: storedRouteJson.length >= 2,
