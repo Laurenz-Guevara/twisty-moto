@@ -696,6 +696,22 @@ async function reverseGeocode(
   return featureCollection.features[0].properties.context.place.name
 }
 
+export async function getGeoJSONServerSide(coordinates: Array<[number, number]>) {
+  const client = MapboxClient({ accessToken: process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN! });
+  const directionsService = DirectionsService(client);
+  const waypoints = coordinates.map((coord) => ({ coordinates: coord }));
+
+  const response = await directionsService.getDirections({
+    profile: 'driving',
+    waypoints: waypoints,
+    geometries: 'geojson',
+    overview: "false",
+    steps: true
+  }).send();
+
+  return response.body;
+}
+
 async function getRouteServerSide(storedRouteJson: MarkerProps[]) {
   const client = MapboxClient({ accessToken: process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN! });
   const directionsService = DirectionsService(client);
