@@ -3,27 +3,16 @@
 import { db } from "@/db";
 import { avatars, notifications, routes, users } from "@/db/schema";
 import { and, eq, sql } from "drizzle-orm";
-import { ToastVariant } from "./enums";
 import { NeonDbError } from "@neondatabase/serverless";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { utapi } from "@/app/api/uploadthing/core";
 import { RouteData } from "@/app/stores/useRouteStore";
-import { CommunityRoute, MarkerProps, Route, RouteLocation, User } from "@/db/types";
-import { GeocodingResponse } from '@mapbox/search-js-core';
-import { simplify } from "@turf/simplify";
-import { nanoid } from "nanoid";
-import type { FeatureCollection } from "geojson";
-import MapboxClient from '@mapbox/mapbox-sdk';
-import DirectionsService from '@mapbox/mapbox-sdk/services/directions';
+import { CommunityRoute, Route, RouteLocation, User } from "@/db/types";
+import { ToastVariant, RouteType } from "@/db/enums";
+import { getDirections, getRegionFromCoordinates } from "@/lib/map-service";
+import { UploadRouteThumbnail } from "@/lib/upload-image-service";
 
 const { getAccessToken } = getKindeServerSession();
-
-const HIGH_ACCURACY_ROUTE_THRESHOLD = 4000
-const MEDIUM_ACCURACY_ROUTE_THRESHOLD = 6000
-const LOW_ACCURACY_ROUTE_THRESHOLD = 8000
-const HIGH_ACCURACY_ROUTE = 0.001
-const MEDIUM_ACCURACY_ROUTE = 0.005
-const LOW_ACCURACY_ROUTE = 0.010
 
 export const setupNewUser = async (kindeId: string, email: string) => {
   const [user] = await db
@@ -634,107 +623,6 @@ export const getPublicUserRouteFromId = async (clientRouteId: string) => {
   };
 };
 
-interface UploadRouteResponse {
-  uploadSuccess: boolean,
-  fileUrl: string | undefined,
-  fileKey: string | undefined,
-}
-
-function determineRouteAccuracy(routeLength: number): number {
-  if (routeLength < HIGH_ACCURACY_ROUTE_THRESHOLD) {
-    return HIGH_ACCURACY_ROUTE
-  } else if (routeLength < MEDIUM_ACCURACY_ROUTE_THRESHOLD) {
-    return MEDIUM_ACCURACY_ROUTE
-  } else if (routeLength < LOW_ACCURACY_ROUTE_THRESHOLD) {
-    return LOW_ACCURACY_ROUTE
-  } else {
-    return LOW_ACCURACY_ROUTE
-  }
-}
-
-async function UploadRouteThumbnail(route: RouteData): Promise<UploadRouteResponse> {
-  const simplifiedFeature = simplify(
-    route.routeGeoJson,
-    {
-      tolerance: determineRouteAccuracy(route.routeGeoJson.geometry.coordinates.length), highQuality: true
-    }
-  );
-  const payloadGeoJson: FeatureCollection = {
-    type: "FeatureCollection",
-    features: [simplifiedFeature]
-  };
-  const encodedGeoJson = encodeURIComponent(JSON.stringify(payloadGeoJson));
-  const generatedStaticMapResponse = await fetch(`https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/geojson(${encodedGeoJson})/auto/640x360?padding=40&access_token=${process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}`)
-  const uploadedFile = await utapi.uploadFilesFromUrl({
-    url: generatedStaticMapResponse.url,
-    name: `${nanoid()}.jpg`,
-  });
-
-  return { uploadSuccess: uploadedFile.error === null, fileUrl: uploadedFile.data?.ufsUrl, fileKey: uploadedFile.data?.key }
-}
-
-async function reverseGeocode(
-  [longitude, latitude]: number[]
-): Promise<string> {
-  const url = `https://api.mapbox.com/search/geocode/v6/reverse?longitude=${longitude}&latitude=${latitude}&access_token=${process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}`
-
-  const res = await fetch(url)
-  if (!res.ok) {
-    throw new Error("Failed to reverse geocode coordinates")
-  }
-
-  const featureCollection: GeocodingResponse = await res.json()
-
-  if (!featureCollection.features?.length) {
-    throw new Error("No geocoding results found")
-  }
-
-  if (!featureCollection.features[0].properties.context.place?.name) {
-    return featureCollection.features[0].properties.place_formatted
-  }
-
-  return featureCollection.features[0].properties.context.place.name
-}
-
-async function getRouteServerSide(storedRouteJson: MarkerProps[]) {
-  const client = MapboxClient({ accessToken: process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN! });
-  const directionsService = DirectionsService(client);
-
-  const waypoints = storedRouteJson.map((coords) => ({
-    coordinates: [coords.longitude, coords.latitude] as [number, number]
-  }));
-
-  const response = await directionsService.getDirections({
-    profile: 'driving',
-    waypoints: waypoints,
-    geometries: 'geojson',
-    overview: "false",
-    steps: true
-  }).send();
-
-  return response;
-}
-
-export const getRouteServerSideRoutes = async (storedRouteJson: MarkerProps[]) => {
-  const serverSideRoute = (await getRouteServerSide(storedRouteJson)).body
-  return serverSideRoute.routes;
-}
-
-async function getRegionFromCoordinates({
-  routeStartPlace,
-  routeDestinationPlace,
-}: {
-  routeStartPlace: number[]
-  routeDestinationPlace: number[]
-}): Promise<string[]> {
-  const [startRegion, destinationRegion] = await Promise.all([
-    reverseGeocode(routeStartPlace),
-    reverseGeocode(routeDestinationPlace),
-  ])
-
-  return [startRegion, destinationRegion]
-}
-
 export const saveRoute = async (
   route: RouteData,
   clientRouteId: string | undefined,
@@ -775,7 +663,7 @@ export const saveRoute = async (
   const endLatitude = route.routeJson[route.routeJson.length - 1].latitude
   const routeLocation = await getRegionFromCoordinates({ routeStartPlace: [startLongitude, startLatitude], routeDestinationPlace: [endLongitude, endLatitude] })
 
-  const serverSideRoute = (await getRouteServerSide(route.routeJson)).body
+  const serverSideRoute = (await getDirections({ coordinates: route.routeJson, routeType: RouteType.MarkerProps }))
   const routeDistance = serverSideRoute.routes[0].distance
   const routeCompletionTime = serverSideRoute.routes[0].duration
 
@@ -795,7 +683,7 @@ export const saveRoute = async (
         .limit(1);
 
       const thumbnailUploadResponse = await UploadRouteThumbnail(route)
-      if (thumbnailUploadResponse.uploadSuccess === false) {
+      if (thumbnailUploadResponse.uploadSuccess === null) {
         return {
           title: "Error",
           description:
@@ -858,7 +746,7 @@ export const saveRoute = async (
   } else {
     const thumbnailUploadResponse = await UploadRouteThumbnail(route)
 
-    if (thumbnailUploadResponse.uploadSuccess === false) {
+    if (thumbnailUploadResponse.uploadSuccess === null) {
       return {
         title: "Error",
         description:
