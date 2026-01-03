@@ -2,6 +2,7 @@ import { RouteType } from '@/db/enums';
 import { MarkerProps } from '@/db/types';
 import { DirectionsResponse } from '@mapbox/mapbox-sdk/services/directions';
 import { Coordinates } from "@mapbox/mapbox-sdk/services/geocoding-v6";
+import { GeocodingResponse } from '@mapbox/search-js-core';
 
 interface GetDirectionRouteParams {
   coordinates: MarkerProps[] | Coordinates[];
@@ -37,4 +38,40 @@ export async function getDirections({ coordinates, routeType }: GetDirectionRout
   } else {
     throw new Error("Cannot get route")
   }
+}
+
+async function reverseGeocode([longitude, latitude]: number[]): Promise<string> {
+  const url = `https://api.mapbox.com/search/geocode/v6/reverse?longitude=${longitude}&latitude=${latitude}&access_token=${process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}`
+
+  const res = await fetch(url)
+  if (!res.ok) {
+    throw new Error("Failed to reverse geocode coordinates")
+  }
+
+  const featureCollection: GeocodingResponse = await res.json()
+
+  if (!featureCollection.features?.length) {
+    throw new Error("No geocoding results found")
+  }
+
+  if (!featureCollection.features[0].properties.context.place?.name) {
+    return featureCollection.features[0].properties.place_formatted
+  }
+
+  return featureCollection.features[0].properties.context.place.name
+}
+
+export async function getRegionFromCoordinates({
+  routeStartPlace,
+  routeDestinationPlace,
+}: {
+  routeStartPlace: [number, number]
+  routeDestinationPlace: [number, number]
+}): Promise<string[]> {
+  const [startRegion, destinationRegion] = await Promise.all([
+    reverseGeocode(routeStartPlace),
+    reverseGeocode(routeDestinationPlace),
+  ])
+
+  return [startRegion, destinationRegion]
 }
