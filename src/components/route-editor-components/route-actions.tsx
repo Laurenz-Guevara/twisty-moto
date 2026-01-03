@@ -15,22 +15,22 @@ import {
 import { ChevronRight, Plus, RefreshCcw, Save } from "lucide-react";
 import { defaultRoute, useRouteStore } from "@/app/stores/useRouteStore";
 import { saveRoute } from "@/db/database";
-import { ToastVariant } from "@/db/enums";
+import { RouteType, ToastVariant } from "@/db/enums";
 import { toast } from "sonner";
 import GeoJsonToGpx from "@dwayneparton/geojson-to-gpx"
 import { Feature, LineString, Position } from 'geojson';
-import { getRouteServerSideRoutes } from "@/db/database";
 import { IconDownload } from "@tabler/icons-react";
+import { getDirections } from "@/lib/map-service";
 
 export default function RouteActions() {
   const updateRouteState = useRouteStore((s) => s.updateRouteData);
   const route = useRouteStore((s) => s);
 
   async function handleExportRoute() {
-    const gpxRoute = await getRouteServerSideRoutes(route.routeJson)
+    const gpxRoute = await getDirections({ coordinates: route.routeJson, routeType: RouteType.MarkerProps })
     const flatCoordinates: Position[] = [];
 
-    for (const leg of gpxRoute[0].legs) {
+    for (const leg of gpxRoute.routes[0].legs) {
       for (const step of leg.steps) {
         if (step.geometry?.coordinates) {
           for (const coord of step.geometry.coordinates) {
