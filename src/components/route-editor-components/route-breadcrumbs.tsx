@@ -33,8 +33,8 @@ export default function RouteBreadcrumbs() {
   }
 
   return (
-    <Breadcrumb>
-      <BreadcrumbList>
+    <Breadcrumb className="overflow-hidden">
+      <BreadcrumbList className="flex flex-row flex-nowrap text-nowrap">
         <BreadcrumbItem>
           <BreadcrumbLink href="/my-routes">My Routes</BreadcrumbLink>
         </BreadcrumbItem>
@@ -46,7 +46,7 @@ export default function RouteBreadcrumbs() {
         <BreadcrumbItem>
           <BreadcrumbPage className="flex">
             <input
-              className="outline-0"
+              className="outline-0 overflow-ellipsis"
               type="text"
               value={routeName}
               onBlur={onBlur}
