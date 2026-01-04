@@ -5,7 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@radix-ui/react-dropdown-menu";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
-import { MarkerProps, Route } from "@/db/types";
+import { MarkerProps, Route } from "@/types/types";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { defaultRoute, useRouteStore } from "@/app/stores/useRouteStore";

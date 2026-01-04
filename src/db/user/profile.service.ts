@@ -5,9 +5,9 @@ import { avatars, routes, users } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { NeonDbError } from "@neondatabase/serverless";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
-import { ToastVariant } from "@/db/enums";
+import { ToastVariant } from "@/enums/enums";
 import { getUserId } from "@/db/auth/session";
-import { User } from "@/db/types";
+import { User } from "@/types/types";
 
 const { getAccessToken } = getKindeServerSession();
 

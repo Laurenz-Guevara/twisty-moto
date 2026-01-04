@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { MarkerProps, StatsProp, RouteLocation } from "@/db/types";
+import { MarkerProps, StatsProp, RouteLocation } from "@/types/types";
 import type { Feature, LineString } from "geojson";
 
 export type RouteData = {

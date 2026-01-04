@@ -1,5 +1,5 @@
-import { RouteType } from '@/db/enums';
-import { MarkerProps } from '@/db/types';
+import { RouteType } from '@/enums/enums';
+import { MarkerProps } from '@/types/types';
 import { DirectionsResponse } from '@mapbox/mapbox-sdk/services/directions';
 import { Coordinates } from "@mapbox/mapbox-sdk/services/geocoding-v6";
 import { GeocodingResponse, SearchBoxSuggestionResponse } from '@mapbox/search-js-core';

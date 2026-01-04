@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { BaseRoute } from "@/db/types";
+import { BaseRoute } from "@/types/types";
 import { convertToMiles } from "@/utils/convertToMiles";
 import { formatDurationHoursMinutes } from "@/utils/formatDurationHoursMinutes";
 import { IconClock, IconRuler2 } from "@tabler/icons-react";

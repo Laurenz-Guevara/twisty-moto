@@ -25,7 +25,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { ToastVariant } from "@/db/enums";
+import { ToastVariant } from "@/enums/enums";
 import { toast } from "sonner";
 import router from "next/router";
 import { deleteAccount } from "@/db/user/user.service";

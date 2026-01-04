@@ -3,7 +3,7 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@radix-ui/react-dropdown-menu";
 import { useQuery } from "@tanstack/react-query";
-import { CommunityRoute, MarkerProps } from "@/db/types";
+import { CommunityRoute, MarkerProps } from "@/types/types";
 import { useRouter } from "next/navigation";
 import { useRouteStore } from "@/app/stores/useRouteStore";
 import CommunityRouteCard from "@/components/community-route-card"

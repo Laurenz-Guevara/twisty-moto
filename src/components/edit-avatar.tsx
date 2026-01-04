@@ -11,7 +11,7 @@ import {
 import { useState, useTransition } from "react";
 import Dropzone, { FileRejection } from "react-dropzone";
 import { toast } from "sonner";
-import { ToastVariant } from "@/db/enums";
+import { ToastVariant } from "@/enums/enums";
 import { useStore } from "@/app/providers";
 
 const EditAvatar = () => {
