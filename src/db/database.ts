@@ -769,20 +769,14 @@ export const updateRoutePrivacy = async (
 ) => {
   const userId = await getUserId();
 
-  if (userId === null || userId === undefined) {
+  if (!userId) {
     throw new Error("Cannot get userId.");
   }
 
-  try {
-    await db
-      .update(routes)
-      .set({
-        isPublic: isPublic,
-      })
-      .where(
-        and(eq(routes.routeCreator, userId), eq(routes.routeId, routeId)),
-      );
-  } catch (error) {
-    throw error;
-  }
+  await db.update(routes).set({
+    isPublic: isPublic,
+  })
+    .where(
+      and(eq(routes.routeCreator, userId), eq(routes.routeId, routeId)),
+    );
 };
