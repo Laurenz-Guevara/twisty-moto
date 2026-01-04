@@ -87,7 +87,7 @@ export default function ProfileForm() {
       form.setValue("lastName", data.lastName);
       hasPreloadedForm.current = true;
     }
-  }, [isLoading, data]);
+  }, [isLoading, data, form]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
