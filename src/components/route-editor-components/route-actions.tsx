@@ -12,7 +12,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { ChevronRight, Plus, RefreshCcw, Save } from "lucide-react";
+import { ChevronRight, Loader, Plus, RefreshCcw, Save } from "lucide-react";
 import { defaultRoute, useRouteStore } from "@/app/stores/useRouteStore";
 import { RouteType, ToastVariant } from "@/enums/enums";
 import { toast } from "sonner";
@@ -21,8 +21,10 @@ import { Feature, LineString, Position } from 'geojson';
 import { IconDownload } from "@tabler/icons-react";
 import { getDirections } from "@/lib/map-service";
 import { saveRoute } from "@/db/routes/routes.service";
+import { useState } from "react";
 
 export default function RouteActions() {
+  const [isSaving, setIsSaving] = useState(false);
   const updateRouteState = useRouteStore((s) => s.updateRouteData);
   const route = useRouteStore((s) => s);
 
@@ -80,6 +82,7 @@ export default function RouteActions() {
   }
 
   async function handleSaveRoute() {
+    setIsSaving(true)
     if (route.routeJson.length <= 1) {
       toast.warning("Warning", {
         description:
@@ -109,6 +112,7 @@ export default function RouteActions() {
         });
         break;
     }
+    setIsSaving(false)
   }
 
   function handleCreateNewRoute() {
@@ -140,12 +144,19 @@ export default function RouteActions() {
               </SidebarMenuSubButton>
             </SidebarMenuSubItem>
             <SidebarMenuSubItem>
-              <SidebarMenuSubButton
-                className="hover:cursor-pointer"
-                onClick={() => handleSaveRoute()}
-              >
-                <Save className="h-4 w-4" />
-                <span>Save Route</span>
+              <SidebarMenuSubButton asChild>
+                <button
+                  className="w-full"
+                  onClick={handleSaveRoute}
+                  disabled={isSaving}
+                >
+                  {isSaving ? (
+                    <Loader className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Save className="h-4 w-4" />
+                  )}
+                  <span>{isSaving ? "Saving..." : "Save Route"}</span>
+                </button>
               </SidebarMenuSubButton>
             </SidebarMenuSubItem>
             <SidebarMenuSubItem>
