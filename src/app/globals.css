@@ -103,7 +103,6 @@
   .mapboxgl-popup-anchor-right .mapboxgl-popup-tip {
     border-left-color: oklch(0.2046 0 0) !important;
   }
-
 }
 
 @theme inline {
@@ -166,3 +165,7 @@
 .mapboxgl-popup-close-button {
   display: none;
 }
+
+.mapboxgl-ctrl-group {
+    margin-top: 18px !important;
+  }

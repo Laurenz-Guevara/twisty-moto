@@ -509,7 +509,7 @@ function MapSearchBox() {
   }
 
   return (
-    <div className="relative grid w-full max-w-sm gap-2 mt-4 ml-4">
+    <div className="relative grid w-full max-w-lg gap-2 mt-4 ml-4 pr-16">
       <InputGroup className="shadow text-black mode-light">
         <InputGroupInput className="overflow-ellipsis" onChange={(e) => setSearchInput(e.target.value)} value={searchInput} placeholder="Search..." />
         <InputGroupAddon>
