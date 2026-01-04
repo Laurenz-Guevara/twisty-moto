@@ -54,6 +54,8 @@ const routeStyle: LayerProps = {
 
 export default function MapContainer() {
   const storedRouteJson = useRouteStore((s) => s.routeJson);
+  const touchStartTimeRef = useRef<number | null>(null);
+  const popupJustOpenedRef = useRef(false);
   const [isDragging, setIsDragging] = useState(false);
   const [popupInfo, setPopupInfo] = useState<
     { lng: number; lat: number } | null
@@ -240,6 +242,75 @@ export default function MapContainer() {
     setPopupInfo(null);
   };
 
+  const handleMobileControls = useCallback((map: mapboxgl.Map) => {
+    let touchTimer: NodeJS.Timeout | null = null;
+    let initialTouchPoint: { x: number; y: number } | null = null;
+    let initialLngLat: { lng: number; lat: number } | null = null;
+
+    const clearTouchTimer = () => {
+      if (touchTimer) {
+        clearTimeout(touchTimer);
+        touchTimer = null;
+      }
+      initialTouchPoint = null;
+      initialLngLat = null;
+    };
+
+    const handleTouchStart = (event: mapboxgl.MapTouchEvent) => {
+      setPopupInfo(null);
+      clearTouchTimer();
+
+      if (isDragging) return;
+
+      initialTouchPoint = event.point;
+      initialLngLat = event.lngLat;
+
+      touchTimer = setTimeout(() => {
+        if (!initialTouchPoint || !initialLngLat) return;
+
+        const acceptableMoveDistance = 20;
+        const didNotMove =
+          Math.abs(event.point.x - initialTouchPoint.x) < acceptableMoveDistance &&
+          Math.abs(event.point.y - initialTouchPoint.y) < acceptableMoveDistance;
+
+        if (didNotMove && !isDragging) {
+          setPopupInfo({
+            lng: initialLngLat.lng,
+            lat: initialLngLat.lat,
+          });
+        }
+        clearTouchTimer();
+      }, 600);
+    };
+
+    const handleTouchMove = (event: mapboxgl.MapTouchEvent) => {
+      if (touchTimer && initialTouchPoint) {
+        const acceptableMoveDistance = 20;
+        const hasMoved =
+          Math.abs(event.point.x - initialTouchPoint.x) >= acceptableMoveDistance ||
+          Math.abs(event.point.y - initialTouchPoint.y) >= acceptableMoveDistance;
+
+        if (hasMoved) {
+          clearTouchTimer();
+        }
+      }
+    };
+
+    map.on("touchstart", handleTouchStart);
+    map.on("touchmove", handleTouchMove);
+    map.on("touchend", clearTouchTimer);
+    map.on("touchcancel", clearTouchTimer);
+    map.on("dragstart", clearTouchTimer);
+
+    return () => {
+      map.off("touchstart", handleTouchStart);
+      map.off("touchmove", handleTouchMove);
+      map.off("touchend", clearTouchTimer);
+      map.off("touchcancel", clearTouchTimer);
+      map.off("dragstart", clearTouchTimer);
+    };
+  }, [isDragging]);
+
   const handleMoveMarker = useCallback(
     (event: MarkerDragEvent, order: number) => {
       const { lng, lat } = event.lngLat;
@@ -313,6 +384,11 @@ export default function MapContainer() {
       mapboxAccessToken={process.env
         .NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN as string}
       mapStyle="mapbox://styles/mapbox/streets-v12"
+      onLoad={() => {
+        const map = mapRef.current?.getMap();
+        if (!map) return;
+        handleMobileControls(map);
+      }}
       ref={mapRef}
       initialViewState={initialViewState}
       onContextMenu={(e) => {
