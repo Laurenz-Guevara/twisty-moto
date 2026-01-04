@@ -36,7 +36,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Bookmark, MapPin, Navigation, Plus } from "lucide-react";
 import { useMapStore } from "@/app/stores/useMapStore";
-import { getDirections } from "@/lib/map-service";
+import { getDirections, getFeatureCollection, getSuggestedLocations } from "@/lib/map-service";
 
 
 const routeStyle: LayerProps = {
@@ -404,16 +404,6 @@ export default function MapContainer() {
   );
 }
 
-async function getFeatureCollection(mapbox_id: string, sessionTokenRef: string): Promise<FeatureCollection<Point>> {
-  const response = await fetch(`https://api.mapbox.com/search/searchbox/v1/retrieve/${mapbox_id}?&access_token=${process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}&session_token=${sessionTokenRef}`)
-  return await response.json()
-}
-
-async function getSuggestedLocations(searchInput: string, sessionTokenRef: string): Promise<SearchBoxSuggestionResponse> {
-  const response = await fetch(`https://api.mapbox.com/search/searchbox/v1/suggest?q=${searchInput}&access_token=${process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}&session_token=${sessionTokenRef}&language=en&limit=10`)
-  return await response.json()
-}
-
 const DEBOUNCE_DELAY = 500
 
 function MapSearchBox() {
@@ -421,10 +411,11 @@ function MapSearchBox() {
   const [debouncedSearch] = useDebounce(searchInput, DEBOUNCE_DELAY);
   const sessionTokenRef = useRef<string>(nanoid());
 
-  const { data: suggestedLocationsResponse, isPending: isPending } = useQuery({
+  const { data: suggestedLocationsResponse, isPending, isError } = useQuery({
     queryKey: ["suggestedLocations", debouncedSearch],
     queryFn: () => getSuggestedLocations(debouncedSearch, sessionTokenRef.current),
-    enabled: debouncedSearch.length > 1,
+    enabled: debouncedSearch.length > 0,
+    retry: false,
   });
 
   async function jumpToLocation(mapboxId: string) {
@@ -439,11 +430,11 @@ function MapSearchBox() {
   return (
     <div className="relative grid w-full max-w-sm gap-2 mt-4 ml-4">
       <InputGroup className="shadow text-black mode-light">
-        <InputGroupInput onChange={(e) => setSearchInput(e.target.value)} value={searchInput} placeholder="Search..." />
+        <InputGroupInput className="overflow-ellipsis" onChange={(e) => setSearchInput(e.target.value)} value={searchInput} placeholder="Search..." />
         <InputGroupAddon>
           <Search />
         </InputGroupAddon>
-        {searchInput.length > 1 && suggestedLocationsResponse?.suggestions?.length === 0 && (
+        {((searchInput.length > 0 && suggestedLocationsResponse?.suggestions?.length === 0) || isError) && (
           <InputGroupAddon className="pr-0" align="inline-end">
             0 results
           </InputGroupAddon>
