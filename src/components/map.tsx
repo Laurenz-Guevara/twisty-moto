@@ -26,7 +26,7 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group"
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouteStore } from "@/app/stores/useRouteStore";
 import { MarkerProps } from "@/db/types";
@@ -240,51 +240,59 @@ export default function MapContainer() {
     setPopupInfo(null);
   };
 
-  const handleMoveMarker = (event: MarkerDragEvent, order: number) => {
-    const { lng, lat } = event.lngLat;
+  const handleMoveMarker = useCallback(
+    (event: MarkerDragEvent, order: number) => {
+      const { lng, lat } = event.lngLat;
 
-    const updatedMarkers = storedRouteJson.map((waypoint) =>
-      waypoint.order === order
-        ? {
-          ...waypoint,
-          longitude: lng,
-          latitude: lat,
-        }
-        : waypoint
-    );
+      const updatedMarkers = storedRouteJson.map((waypoint) =>
+        waypoint.order === order
+          ? {
+            ...waypoint,
+            longitude: lng,
+            latitude: lat,
+          }
+          : waypoint
+      );
 
-    updateRouteState({
-      routeJson: updatedMarkers,
-    });
-  };
+      updateRouteState({
+        routeJson: updatedMarkers,
+      });
+    },
+    [storedRouteJson, updateRouteState]
+  );
 
-  const markers = useMemo(() =>
-    storedRouteJson.map((marker) => {
-      return (
+
+  const markers = useMemo(
+    () =>
+      storedRouteJson.map((marker) => (
         <Marker
           key={marker.order}
-          draggable={true}
+          draggable
           onDragEnd={(e) => handleMoveMarker(e, marker.order)}
           longitude={marker.longitude}
           latitude={marker.latitude}
           anchor="bottom"
         >
-          {marker.order === 0 &&
-            <IconMapPinFilled size={40} className="text-red-500" />}
-          {marker.order === storedRouteJson.length - 1 && marker.order !== 0 &&
-            (
+          {marker.order === 0 && (
+            <IconMapPinFilled size={40} className="text-red-500" />
+          )}
+
+          {marker.order === storedRouteJson.length - 1 &&
+            marker.order !== 0 && (
               <IconFlagFilled
                 size={40}
                 className="text-red-500 ml-6 mb-[-4px]"
               />
             )}
+
           {marker.order !== 0 &&
             marker.order !== storedRouteJson.length - 1 && (
               <IconMapPinFilled size={30} className="text-blue-500" />
             )}
         </Marker>
-      );
-    }), [storedRouteJson]);
+      )),
+    [storedRouteJson, handleMoveMarker]
+  );
 
   const hasRoute = storedRouteJson.length > 0;
 
