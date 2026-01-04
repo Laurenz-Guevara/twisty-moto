@@ -54,8 +54,6 @@ const routeStyle: LayerProps = {
 
 export default function MapContainer() {
   const storedRouteJson = useRouteStore((s) => s.routeJson);
-  const touchStartTimeRef = useRef<number | null>(null);
-  const popupJustOpenedRef = useRef(false);
   const [isDragging, setIsDragging] = useState(false);
   const [popupInfo, setPopupInfo] = useState<
     { lng: number; lat: number } | null
