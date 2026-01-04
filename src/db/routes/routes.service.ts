@@ -5,7 +5,7 @@ import { routes } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { utapi } from "@/app/api/uploadthing/core";
 import { RouteData } from "@/app/stores/useRouteStore";
-import { CommunityRoute, Route, RouteLocation } from "@/types/types";
+import { CommunityRoute, MarkerProps, Route, RouteLocation } from "@/types/types";
 import { ToastVariant, RouteType } from "@/enums/enums";
 import { getDirections, getRegionFromCoordinates } from "@/lib/map-service";
 import { UploadRouteThumbnail } from "@/lib/upload-image-service";
@@ -176,9 +176,10 @@ export const saveRoute = async (
 
   if (clientRouteId !== undefined) {
     try {
-      const [{ routeId }] = await db
+      const [{ routeId, routeState }] = await db
         .select({
           routeId: routes.routeId,
+          routeState: routes.routeState
         })
         .from(routes)
         .where(
@@ -189,31 +190,36 @@ export const saveRoute = async (
         )
         .limit(1);
 
-      const thumbnailUploadResponse = await UploadRouteThumbnail(route)
-      if (thumbnailUploadResponse.uploadSuccess === null) {
-        return {
-          title: "Error",
-          description:
-            "Unable to upload the thumbnail. Your route has still been saved.",
-          variant: ToastVariant.Destructive,
-        };
-      }
+      const routeStateRecord = routeState as unknown as MarkerProps[]
+      let thumbnailUploadResponse = null
 
-      const previousRouteThumbnail = await db
-        .select({
-          fileKey: routes.routeImageFileKey,
-          fileUrl: routes.routeImageUrl
-        })
-        .from(routes)
-        .where(
-          and(
-            eq(routes.routeCreator, userId),
-            eq(routes.routeId, routeId),
+      if (!areBothRoutesEqual(routeStateRecord, route.routeJson)) {
+        thumbnailUploadResponse = await UploadRouteThumbnail(route)
+        if (thumbnailUploadResponse.uploadSuccess === null) {
+          return {
+            title: "Error",
+            description:
+              "Unable to upload the thumbnail. Your route has still been saved.",
+            variant: ToastVariant.Destructive,
+          };
+        }
+
+        const previousRouteThumbnail = await db
+          .select({
+            fileKey: routes.routeImageFileKey,
+            fileUrl: routes.routeImageUrl
+          })
+          .from(routes)
+          .where(
+            and(
+              eq(routes.routeCreator, userId),
+              eq(routes.routeId, routeId),
+            )
           )
-        )
-        .limit(1);
+          .limit(1);
 
-      await utapi.deleteFiles(previousRouteThumbnail[0].fileKey);
+        await utapi.deleteFiles(previousRouteThumbnail[0].fileKey);
+      }
 
       await db
         .update(routes)
@@ -225,8 +231,8 @@ export const saveRoute = async (
           },
           routeDescription: route.routeDescription,
           routeState: route.routeJson,
-          routeImageUrl: thumbnailUploadResponse.fileUrl ? thumbnailUploadResponse.fileUrl : "",
-          routeImageFileKey: thumbnailUploadResponse.fileKey ? thumbnailUploadResponse.fileKey : "",
+          routeImageUrl: thumbnailUploadResponse?.fileUrl ?? "",
+          routeImageFileKey: thumbnailUploadResponse?.fileKey ?? "",
           routeCompletionTime: routeCompletionTime,
           routeDistance: routeDistance,
         })
@@ -330,3 +336,22 @@ export const updateRoutePrivacy = async (
       and(eq(routes.routeCreator, userId), eq(routes.routeId, routeId)),
     );
 };
+
+function areBothRoutesEqual(routeStateRecord: MarkerProps[], routeJson: MarkerProps[]): boolean {
+  if (routeStateRecord.length !== routeJson.length) {
+    return false
+  }
+
+  for (let i = 0; i < routeStateRecord.length; i++) {
+    const routeStateWaypoint = routeStateRecord[i];
+    const routeWaypoint = routeJson[i];
+
+    if (
+      routeStateWaypoint.latitude !== routeWaypoint.latitude ||
+      routeStateWaypoint.longitude !== routeWaypoint.longitude
+    ) {
+      return false
+    }
+  }
+  return true
+}
