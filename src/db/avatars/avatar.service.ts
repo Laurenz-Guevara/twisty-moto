@@ -3,7 +3,7 @@
 import { db } from "@/db";
 import { avatars } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { ToastVariant } from "@/db/enums";
+import { ToastVariant } from "@/enums/enums";
 
 export const getAvatarFileKey = async (userId: string) => {
   const avatar = await db

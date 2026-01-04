@@ -5,10 +5,10 @@ import { avatars, notifications, users } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { utapi } from "@/app/api/uploadthing/core";
-import { ToastVariant } from "@/db/enums";
 import { deleteKindeUser } from "@/lib/kinde-service";
 import { getAvatarFileKey } from "@/db/avatars/avatar.service";
 import { getRouteFileKeys } from "@/db/routes/routes.service";
+import { ToastVariant } from "@/enums/enums";
 
 const { getAccessToken } = getKindeServerSession();
 

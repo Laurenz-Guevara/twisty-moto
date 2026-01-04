@@ -14,7 +14,7 @@ import Map, {
 import type { Feature, LineString } from "geojson";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { IconFlagFilled, IconMapPinFilled } from "@tabler/icons-react";
-import { RouteBuilderVariant, RouteType } from "@/db/enums";
+import { RouteBuilderVariant, RouteType } from "@/enums/enums";
 import { useDebounce } from "use-debounce";
 import { Search, X } from "lucide-react"
 import { nanoid } from "nanoid";
@@ -29,7 +29,7 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouteStore } from "@/app/stores/useRouteStore";
-import { MarkerProps } from "@/db/types";
+import { MarkerProps } from "@/types/types";
 import { Button } from "@/components/ui/button";
 
 import { Card, CardContent } from "@/components/ui/card";

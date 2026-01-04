@@ -1,4 +1,4 @@
-import { Route } from "@/db/types";
+import { Route } from "@/types/types";
 import Image from "next/image";
 import { MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";

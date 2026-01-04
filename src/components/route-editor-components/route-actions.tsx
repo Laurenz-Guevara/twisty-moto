@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/collapsible";
 import { ChevronRight, Plus, RefreshCcw, Save } from "lucide-react";
 import { defaultRoute, useRouteStore } from "@/app/stores/useRouteStore";
-import { RouteType, ToastVariant } from "@/db/enums";
+import { RouteType, ToastVariant } from "@/enums/enums";
 import { toast } from "sonner";
 import GeoJsonToGpx from "@dwayneparton/geojson-to-gpx"
 import { Feature, LineString, Position } from 'geojson';

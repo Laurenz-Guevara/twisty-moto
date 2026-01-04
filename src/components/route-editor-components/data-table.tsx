@@ -61,7 +61,7 @@ import { useId, useMemo, useState } from "react";
 import { useRouteStore } from "@/app/stores/useRouteStore";
 import { useMapStore } from "@/app/stores/useMapStore";
 import z from "zod";
-import { MarkerProps } from "@/db/types";
+import { MarkerProps } from "@/types/types";
 import DeleteWaypoint from "@/components/route-editor-components/DeleteWaypoint";
 import MoveRoute from "@/components/route-editor-components/MoveRoute";
 
