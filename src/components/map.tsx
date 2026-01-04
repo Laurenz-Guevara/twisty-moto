@@ -11,8 +11,7 @@ import Map, {
   Popup,
   Source,
 } from "react-map-gl/mapbox";
-import type { Feature, FeatureCollection, LineString, Point } from "geojson";
-import { SearchBoxSuggestionResponse } from '@mapbox/search-js-core';
+import type { Feature, LineString } from "geojson";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { IconFlagFilled, IconMapPinFilled } from "@tabler/icons-react";
 import { RouteBuilderVariant, RouteType } from "@/db/enums";
