@@ -25,11 +25,11 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { deleteAccount } from "@/db/database";
-import { getPrivateUserProfile } from "@/db/database";
 import { ToastVariant } from "@/db/enums";
 import { toast } from "sonner";
 import router from "next/router";
+import { deleteAccount } from "@/db/user/user.service";
+import { getPrivateUserProfile } from "@/db/user/profile.service";
 
 const formSchema = z.object({
   email: z.string().min(2, {
@@ -77,7 +77,7 @@ export default function DeleteProfile() {
           },
         );
       }
-    } catch {}
+    } catch { }
   }
 
   return (

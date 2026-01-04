@@ -1,5 +1,6 @@
 // DOCS: https://docs.uploadthing.com/getting-started/appdir
-import { getUserId, updateAvatarUrl } from "@/db/database";
+import { getUserId } from "@/db/auth/session";
+import { updateAvatarUrl } from "@/db/avatars/avatar.service";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 
 import { createUploadthing, type FileRouter } from "uploadthing/next";

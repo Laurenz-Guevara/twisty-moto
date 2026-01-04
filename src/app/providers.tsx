@@ -9,9 +9,10 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { KindeProvider } from "@kinde-oss/kinde-auth-nextjs";
 
 import { create } from "zustand";
-import { getPrivateUserProfile, getUserNotifications } from "@/db/database";
 import { Notification as NotificationType, User as UserType } from "@/db/types";
 import { useEffect } from "react";
+import { getPrivateUserProfile } from "@/db/user/profile.service";
+import { getUserNotifications } from "@/db/notifications/notification.service";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const queryClient = new QueryClient();
