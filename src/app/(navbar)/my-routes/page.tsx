@@ -2,12 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  deleteRoute,
-  getUserRouteFromId,
-  getUserRoutes,
-  updateRoutePrivacy,
-} from "@/db/database";
 import { Separator } from "@radix-ui/react-dropdown-menu";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
@@ -17,6 +11,7 @@ import Link from "next/link";
 import { defaultRoute, useRouteStore } from "@/app/stores/useRouteStore";
 import { toast } from "sonner";
 import MyRouteCard from "@/components/my-route-card"
+import { deleteRoute, getUserRouteFromId, getUserRoutes, updateRoutePrivacy } from "@/db/routes/routes.service";
 
 export default function MyRoutes() {
   const router = useRouter();

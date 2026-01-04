@@ -1,14 +1,13 @@
 "use client";
 
 import { Skeleton } from "@/components/ui/skeleton";
-import { getCommunityRoutes, getPublicUserRouteFromId } from "@/db/database";
 import { Separator } from "@radix-ui/react-dropdown-menu";
 import { useQuery } from "@tanstack/react-query";
 import { CommunityRoute, MarkerProps } from "@/db/types";
 import { useRouter } from "next/navigation";
 import { useRouteStore } from "@/app/stores/useRouteStore";
-
 import CommunityRouteCard from "@/components/community-route-card"
+import { getCommunityRoutes, getPublicUserRouteFromId } from "@/db/routes/routes.service";
 
 export default function CommunityRoutes() {
   const router = useRouter();

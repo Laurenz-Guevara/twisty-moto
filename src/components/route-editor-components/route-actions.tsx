@@ -14,13 +14,13 @@ import {
 } from "@/components/ui/collapsible";
 import { ChevronRight, Plus, RefreshCcw, Save } from "lucide-react";
 import { defaultRoute, useRouteStore } from "@/app/stores/useRouteStore";
-import { saveRoute } from "@/db/database";
 import { RouteType, ToastVariant } from "@/db/enums";
 import { toast } from "sonner";
 import GeoJsonToGpx from "@dwayneparton/geojson-to-gpx"
 import { Feature, LineString, Position } from 'geojson';
 import { IconDownload } from "@tabler/icons-react";
 import { getDirections } from "@/lib/map-service";
+import { saveRoute } from "@/db/routes/routes.service";
 
 export default function RouteActions() {
   const updateRouteState = useRouteStore((s) => s.updateRouteData);

@@ -14,8 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { useStore } from "@/app/providers";
 import { Notification as NotificationType } from "@/db/types";
-
-import { updateUserNotification } from "@/db/database";
+import { updateUserNotification } from "@/db/notifications/notification.service";
 
 async function UpdateNotification(updateType: string, notificationId: string) {
   await updateUserNotification(updateType, notificationId);

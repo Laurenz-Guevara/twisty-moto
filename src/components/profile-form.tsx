@@ -8,11 +8,6 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { User } from "@/db/types";
-import {
-  checkUsernameExists,
-  getPrivateUserNames,
-  updateProfileInfo,
-} from "@/db/database";
 
 import {
   Form,
@@ -28,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LoaderCircle } from "lucide-react";
+import { checkUsernameExists, getPrivateUserNames, updateProfileInfo } from "@/db/user/profile.service";
 
 const formSchema = z.object({
   username: z.string()
