@@ -64,6 +64,7 @@ import z from "zod";
 import { MarkerProps } from "@/types/types";
 import DeleteWaypoint from "@/components/route-editor-components/DeleteWaypoint";
 import MoveRoute from "@/components/route-editor-components/MoveRoute";
+import { useSidebar } from "@/components/ui/sidebar";
 
 export const schema = z.object({
   order: z.number(),
@@ -75,16 +76,24 @@ export const schema = z.object({
 
 function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
   const isMobile = useIsMobile();
+  const { toggleSidebar } = useSidebar()
+
+  function closeDrawerAndJumpToLocation(location: { latitude: number, longitude: number }) {
+    useMapStore.getState().setJumpToLocation({
+      latitude: location.latitude,
+      longitude: location.longitude,
+    })
+
+    if (isMobile) {
+      toggleSidebar()
+    }
+  }
 
   return (
     <Drawer direction={isMobile ? "bottom" : "right"}>
       <div className="flex justify-between">
         <div className="overflow-ellipsis overflow-hidden hover:cursor-pointer h-full">
-          <span onClick={() =>
-            useMapStore.getState().setJumpToLocation({
-              latitude: item.latitude,
-              longitude: item.longitude,
-            })}>
+          <span onClick={() => closeDrawerAndJumpToLocation(item)}>
             {item.streetName}
           </span>
         </div>
