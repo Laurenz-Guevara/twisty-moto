@@ -2,7 +2,8 @@ import { RouteType } from '@/db/enums';
 import { MarkerProps } from '@/db/types';
 import { DirectionsResponse } from '@mapbox/mapbox-sdk/services/directions';
 import { Coordinates } from "@mapbox/mapbox-sdk/services/geocoding-v6";
-import { GeocodingResponse } from '@mapbox/search-js-core';
+import { GeocodingResponse, SearchBoxSuggestionResponse } from '@mapbox/search-js-core';
+import type { FeatureCollection, Point } from "geojson";
 
 interface GetDirectionRouteParams {
   coordinates: MarkerProps[] | Coordinates[];
@@ -74,4 +75,18 @@ export async function getRegionFromCoordinates({
   ])
 
   return [startRegion, destinationRegion]
+}
+
+
+export async function getFeatureCollection(mapbox_id: string, sessionTokenRef: string): Promise<FeatureCollection<Point>> {
+  const response = await fetch(`https://api.mapbox.com/search/searchbox/v1/retrieve/${mapbox_id}?&access_token=${process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}&session_token=${sessionTokenRef}`)
+  return await response.json()
+}
+
+export async function getSuggestedLocations(searchInput: string, sessionTokenRef: string): Promise<SearchBoxSuggestionResponse> {
+  const response = await fetch(`https://api.mapbox.com/search/searchbox/v1/suggest?q=${searchInput}&access_token=${process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}&session_token=${sessionTokenRef}&language=en&limit=10`)
+  if (!response.ok) {
+    throw new Error("Request failed")
+  }
+  return await response.json()
 }
