@@ -21,7 +21,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <RouteActionSidebarContent />
       </SidebarContent>
-      <SidebarFooter>
+      <SidebarFooter className="border-t">
         <NavUser />
       </SidebarFooter>
       <SidebarRail />

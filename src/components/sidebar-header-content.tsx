@@ -1,12 +1,13 @@
-import { SidebarMenu, SidebarMenuItem } from "@/components/ui/sidebar";
+import { SidebarMenu, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 
 import Link from "next/link";
 import Image from "next/image";
+import { IconLayoutSidebarLeftCollapse } from "@tabler/icons-react";
 // TODO: Check if member from database
 
 export function SidebarHeaderContent() {
   return (
-    <SidebarMenu>
+    <SidebarMenu className="flex flex-row justify-between">
       <SidebarMenuItem className="flex space-x-2 p-2 items-center">
         <div className="size-12">
           <Link className="" href="/">
@@ -30,6 +31,17 @@ export function SidebarHeaderContent() {
           </Link>
         </div>
       </SidebarMenuItem>
+      <CloseSidebar />
     </SidebarMenu>
   );
+}
+
+function CloseSidebar() {
+  const { toggleSidebar } = useSidebar()
+
+  return (
+    <button className="sm:hidden mr-2" onClick={toggleSidebar}>
+      <IconLayoutSidebarLeftCollapse size="24" />
+    </button>
+  )
 }
