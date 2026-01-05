@@ -146,7 +146,7 @@ export default function RouteActions() {
             <SidebarMenuSubItem>
               <SidebarMenuSubButton asChild>
                 <button
-                  className="w-full"
+                  className="w-full hover:cursor-pointer"
                   onClick={handleSaveRoute}
                   disabled={isSaving}
                 >
