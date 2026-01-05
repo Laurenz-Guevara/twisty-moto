@@ -11,7 +11,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
+import { restrictToParentElement } from "@dnd-kit/modifiers";
 import {
   arrayMove,
   SortableContext,
@@ -296,12 +296,12 @@ export function DataTable({ storedRouteJson }: DataTableProps) {
         <div className="overflow-hidden rounded-lg border">
           <DndContext
             collisionDetection={closestCenter}
-            modifiers={[restrictToVerticalAxis]}
+            modifiers={[restrictToParentElement]}
             onDragEnd={handleDragEnd}
             sensors={sensors}
             id={sortableId}
           >
-            <Table>
+            <Table className="overflow-hidden">
               <TableBody className="**:data-[slot=table-cell]:first:w-8">
                 {table.getRowModel().rows?.length >= 2
                   ? (
