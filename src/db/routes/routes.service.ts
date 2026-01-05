@@ -193,7 +193,9 @@ export const saveRoute = async (
       const routeStateRecord = routeState as unknown as MarkerProps[]
       let thumbnailUploadResponse = null
 
-      if (!areBothRoutesEqual(routeStateRecord, route.routeJson)) {
+      const routesAreEqual = areBothRoutesEqual(routeStateRecord, route.routeJson)
+
+      if (!routesAreEqual) {
         thumbnailUploadResponse = await UploadRouteThumbnail(route)
         if (thumbnailUploadResponse.uploadSuccess === null) {
           return {
@@ -221,27 +223,49 @@ export const saveRoute = async (
         await utapi.deleteFiles(previousRouteThumbnail[0].fileKey);
       }
 
-      await db
-        .update(routes)
-        .set({
-          routeName: route.routeName,
-          routeLocation: {
-            routeStartPlace: routeLocation[0],
-            routeDestinationPlace: routeLocation[1],
-          },
-          routeDescription: route.routeDescription,
-          routeState: route.routeJson,
-          routeImageUrl: thumbnailUploadResponse?.fileUrl ?? "",
-          routeImageFileKey: thumbnailUploadResponse?.fileKey ?? "",
-          routeCompletionTime: routeCompletionTime,
-          routeDistance: routeDistance,
-        })
-        .where(
-          and(
-            eq(routes.routeId, routeId),
-            eq(routes.routeCreator, userId),
-          ),
-        );
+      if (routesAreEqual) {
+        await db
+          .update(routes)
+          .set({
+            routeName: route.routeName,
+            routeLocation: {
+              routeStartPlace: routeLocation[0],
+              routeDestinationPlace: routeLocation[1],
+            },
+            routeDescription: route.routeDescription,
+            routeState: route.routeJson,
+            routeCompletionTime: routeCompletionTime,
+            routeDistance: routeDistance,
+          })
+          .where(
+            and(
+              eq(routes.routeId, routeId),
+              eq(routes.routeCreator, userId),
+            ),
+          );
+      } else {
+        await db
+          .update(routes)
+          .set({
+            routeName: route.routeName,
+            routeLocation: {
+              routeStartPlace: routeLocation[0],
+              routeDestinationPlace: routeLocation[1],
+            },
+            routeDescription: route.routeDescription,
+            routeState: route.routeJson,
+            routeImageUrl: thumbnailUploadResponse?.fileUrl ?? "",
+            routeImageFileKey: thumbnailUploadResponse?.fileKey ?? "",
+            routeCompletionTime: routeCompletionTime,
+            routeDistance: routeDistance,
+          })
+          .where(
+            and(
+              eq(routes.routeId, routeId),
+              eq(routes.routeCreator, userId),
+            ),
+          );
+      }
 
       return {
         title: "Route Updated",
