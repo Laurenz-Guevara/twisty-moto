@@ -8,7 +8,7 @@ import Link from "next/link";
 export default function Home() {
   return (
     <main className="flex-1">
-      <section className="container mx-auto md:pt-24 px-6 space-y-40">
+      <section className="container mx-auto pt-12 md:pt-24 px-6 space-y-20 md:space-y-40">
         <div className="flex flex-col items-center justify-center space-y-4 text-center">
           <h1 className="text-3xl tracking-tighter sm:text-5xl">
             Discover Amazing Motorbike Routes
@@ -94,7 +94,7 @@ export default function Home() {
             className="dark:hidden rounded-2xl shadow"
           />
         </div>
-        <div className="flex flex-col items-center justify-center space-y-4 text-center pb-40">
+        <div className="flex flex-col items-center justify-center space-y-4 text-center pb-20 md:pb-40">
           <h4 className="text-3xl tracking-tighter sm:text-5xl">Ready To Hit The Road?</h4>
           <p className="max-w-[700px] text-muted-foreground md:text-xl">
             Start planning your next adventure today. Create, share, and ride the routes that matter.
