@@ -39,7 +39,6 @@ export default function CommunityRoutes() {
     }
   }
 
-
   const controls = {
     handleViewRoute,
   };

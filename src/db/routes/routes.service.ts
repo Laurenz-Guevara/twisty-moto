@@ -201,6 +201,10 @@ export const saveRoute = async (
   const routeDistance = serverSideRoute.routes[0].distance
   const routeCompletionTime = serverSideRoute.routes[0].duration
 
+  if (clientRouteId !== undefined && await isForkedRoute(clientRouteId, userId) === true) {
+    clientRouteId = undefined
+  }
+
   if (clientRouteId !== undefined) {
     try {
       const [{ routeId, routeState }] = await db
@@ -405,4 +409,24 @@ function areBothRoutesEqual(routeStateRecord: MarkerProps[], routeJson: MarkerPr
     }
   }
   return true
+}
+
+async function isForkedRoute(clientRouteId: string, userId: string): Promise<boolean> {
+  const [{ routeCreator }] = await db
+    .select({
+      routeCreator: routes.routeCreator
+    })
+    .from(routes)
+    .where(
+      and(
+        eq(routes.routeId, clientRouteId),
+      ),
+    )
+    .limit(1);
+
+  if (userId === routeCreator) {
+    return false
+  } else {
+    return true
+  }
 }
