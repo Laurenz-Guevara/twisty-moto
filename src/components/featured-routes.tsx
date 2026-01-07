@@ -13,7 +13,7 @@ export default function FeaturedRoutes() {
   const updateRouteState = useRouteStore((s) => s.updateRouteData);
 
   const { data: routes, isLoading } = useQuery({
-    queryKey: ["communityRoutes"],
+    queryKey: ["featuredRoutes"],
     queryFn: async (): Promise<FeaturedRoute[] | undefined> => {
       const response = await getFeaturedRoutes();
 
@@ -44,7 +44,7 @@ export default function FeaturedRoutes() {
   };
 
   return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 [&:nth-child(n+3)]:hidden">
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 [&>*:nth-child(n+4)]:hidden sm:[&>*:nth-child(n+4)]:flex sm:[&>*:nth-child(n+5)]:hidden md:[&>*:nth-child(n+5)]:flex md:[&>*:nth-child(n+7)]:hidden lg:[&>*:nth-child(n+7)]:flex lg:[&>*:nth-child(n+7)]:hidden xl:[&>*:nth-child(n+7)]:flex xl:[&>*:nth-child(n+9)]:hidden 2xl:[&>*:nth-child(n+9)]:flex">
       {!isLoading
         ? (
           <>
@@ -71,17 +71,6 @@ export default function FeaturedRoutes() {
     </div>
   )
 }
-
-// const featuredRoutes = [
-//   {
-//     id: 1,
-//     title: "Pacific Coast Highway",
-//     description:
-//       "A stunning coastal ride along California's rugged shoreline with breathtaking ocean views.",
-//     location: "California, USA",
-//     image: "/placeholder-map.png",
-//   },
-// ];
 
 function SkeletonForm() {
   return (
