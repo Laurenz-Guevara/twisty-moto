@@ -13,7 +13,7 @@ import Map, {
 } from "react-map-gl/mapbox";
 import type { Feature, LineString } from "geojson";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { IconFlagFilled, IconMapPinFilled } from "@tabler/icons-react";
+import { IconFlagFilled, IconMapPinFilled, IconNavigationFilled } from "@tabler/icons-react";
 import { RouteBuilderVariant, RouteType } from "@/enums/enums";
 import { useDebounce } from "use-debounce";
 import { Search, X } from "lucide-react"
@@ -357,7 +357,7 @@ export default function MapContainer() {
           anchor="bottom"
         >
           {marker.order === 0 && (
-            <IconMapPinFilled size={40} className="text-red-500" />
+            <IconNavigationFilled size={40} className="text-red-500 rotate-180 -my-1 -ml-1" />
           )}
 
           {marker.order === storedRouteJson.length - 1 &&
@@ -370,7 +370,7 @@ export default function MapContainer() {
 
           {marker.order !== 0 &&
             marker.order !== storedRouteJson.length - 1 && (
-              <IconMapPinFilled size={30} className="text-blue-500" />
+              <IconMapPinFilled size={30} className="text-red-500" />
             )}
         </Marker>
       )),
