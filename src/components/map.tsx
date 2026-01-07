@@ -36,6 +36,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Bookmark, MapPin, Navigation, Plus } from "lucide-react";
 import { useMapStore } from "@/app/stores/useMapStore";
 import { getDirections, getFeatureCollection, getSuggestedLocations } from "@/lib/map-service";
+import { toast } from "sonner";
 
 
 const routeStyle: LayerProps = {
@@ -111,7 +112,7 @@ export default function MapContainer() {
     return Math.hypot(px - closestX, py - closestY);
   }
 
-  const { data: routeState } = useQuery({
+  const { data: routeState, isError } = useQuery({
     queryKey: ["route", storedRouteJson],
     queryFn: async () => {
       const directions = await getDirections({ coordinates: storedRouteJson, routeType: RouteType.MarkerProps });
@@ -151,6 +152,19 @@ export default function MapContainer() {
     refetchOnMount: true,
     enabled: storedRouteJson.length >= 2,
   });
+
+  useEffect(() => {
+    if (isError) {
+      const toastId = toast.error("Error", {
+        description: `The route you are attempting to plot may be too long. Please try shortening it.`,
+        duration: Infinity,
+      });
+
+      return () => {
+        toast.dismiss(toastId);
+      };
+    }
+  }, [isError]);
 
   const handleMapClick = (type: string, lng: number, lat: number) => {
     switch (type) {
