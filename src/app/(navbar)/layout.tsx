@@ -1,4 +1,5 @@
 import NavigationBar from "@/components/navigation-bar";
+import Footer from "@/components/footer";
 
 export default async function RootLayout({
   children,
@@ -10,6 +11,7 @@ export default async function RootLayout({
       <NavigationBar />
       <div className="pt-[65px]"></div>
       {children}
+      <Footer />
     </>
   );
 }
