@@ -58,3 +58,4 @@ export interface Route extends BaseRoute {
 }
 
 export type CommunityRoute = BaseRoute;
+export type FeaturedRoute = BaseRoute;

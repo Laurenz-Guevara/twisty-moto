@@ -5,7 +5,7 @@ import { routes } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { utapi } from "@/app/api/uploadthing/core";
 import { RouteData } from "@/app/stores/useRouteStore";
-import { CommunityRoute, MarkerProps, Route, RouteLocation } from "@/types/types";
+import { CommunityRoute, FeaturedRoute, MarkerProps, Route, RouteLocation } from "@/types/types";
 import { ToastVariant, RouteType } from "@/enums/enums";
 import { getDirections, getRegionFromCoordinates } from "@/lib/map-service";
 import { UploadRouteThumbnail } from "@/lib/upload-image-service";
@@ -72,6 +72,33 @@ export const getCommunityRoutes = async (): Promise<Array<CommunityRoute>> => {
     routeLocation: route.routeLocation as RouteLocation,
   }));
 };
+
+export const getFeaturedRoutes = async (): Promise<Array<FeaturedRoute>> => {
+  const featuredRoute = await db
+    .select({
+      routeId: routes.routeId,
+      routeName: routes.routeName,
+      routeAuthor: routes.routeAuthor,
+      routeLocation: routes.routeLocation,
+      routeDescription: routes.routeDescription,
+      routeImage: routes.routeImageUrl,
+      routeCompletionTime: routes.routeCompletionTime,
+      routeDistance: routes.routeDistance,
+    })
+    .from(routes)
+    .where(
+      and(
+        eq(routes.isFeatured, true),
+        eq(routes.isPublic, true)
+      )
+    ).limit(8);
+
+  return featuredRoute.map(route => ({
+    ...route,
+    routeLocation: route.routeLocation as RouteLocation,
+  }));
+};
+
 
 export const getUserRouteFromId = async (clientRouteId: string) => {
   const userId = await getUserId();

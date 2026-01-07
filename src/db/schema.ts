@@ -135,6 +135,8 @@ export const routes = createTable("routes", {
   routeViews: integer("route_views").notNull().default(0),
 
   routeFavouriteCount: integer("route_favourite_count").notNull().default(0),
+
+  isFeatured: boolean("is_featured").default(false).notNull(),
 });
 
 export const routesRelations = relations(routes, ({ one }) => ({

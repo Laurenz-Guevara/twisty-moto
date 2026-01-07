@@ -190,7 +190,6 @@ export default function NavigationBar() {
                     >
                       Login
                     </Link>
-
                     <Link
                       prefetch={false}
                       href={"/api/auth/register"}

@@ -1,136 +1,116 @@
-import Image from "next/image";
-import { MapPin, Star } from "lucide-react";
+import FeaturedRoutes from "@/components/featured-routes";
 import { Button } from "@/components/ui/button";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { IconEyeOff, IconFileExport, IconHeartPlus, IconMapPin, IconRoute, IconShare2 } from "@tabler/icons-react";
+import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   return (
     <main className="flex-1">
-      <section className="container mx-auto py-8 md:py-12 px-6">
+      <section className="container mx-auto md:pt-24 px-6 space-y-40">
         <div className="flex flex-col items-center justify-center space-y-4 text-center">
-          <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl">
+          <h1 className="text-3xl tracking-tighter sm:text-5xl">
             Discover Amazing Motorbike Routes
           </h1>
           <p className="max-w-[700px] text-muted-foreground md:text-xl">
             Explore the world&apos;s most scenic roads and share your own
             adventures with fellow riders.
           </p>
+          <div className="space-x-4 pt-4">
+            <Button className="hover:cursor-pointer" asChild>
+              <Link
+                prefetch={false}
+                href={"/api/auth/register"}
+              >
+                Create Free Account
+              </Link>
+            </Button>
+            <Button variant="secondary" className="hover:cursor-pointer" asChild>
+              <Link href="/community-routes">
+                View Community Routes
+              </Link>
+            </Button>
+          </div>
         </div>
-      </section>
-      <section className="mx-auto container py-8 px-6">
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {routes.map((route) => (
-            <div
-              key={route.id}
-              className="group relative overflow-hidden rounded-lg border bg-background shadow-sm transition-all hover:shadow-md"
-            >
-              <div className="aspect-video overflow-hidden">
-                <Image
-                  src={route.image || "/placeholder-map.png"}
-                  alt={route.title}
-                  width={400}
-                  height={300}
-                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-              </div>
-              <div className="p-4">
-                <h3 className="font-semibold">{route.title}</h3>
-                <div className="mt-1 flex items-center text-sm text-muted-foreground">
-                  <MapPin className="mr-1 h-4 w-4" />
-                  {route.location}
-                </div>
-                <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
-                  {route.description}
-                </p>
-                <div className="flex justify-between items-center mt-2">
-                  <div className="flex gap-0.5">
-                    <Star className="h-5 w-5 text-green-600 fill-green-600" />
-                    <Star className="h-5 w-5 text-green-600 fill-green-600" />
-                    <Star className="h-5 w-5 text-green-600 fill-green-600" />
-                    <Star className="h-5 w-5 text-green-600 fill-green-600" />
-                    <Star className="h-5 w-5 text-green-600 fill-green-600" />
-                  </div>
-                  <div className="flex justify-end">
-                    <Button
-                      className="hover:cursor-pointer"
-                      variant="outline"
-                      size="sm"
-                    >
-                      View Route
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
+        <FeaturedRoutes />
+        <div>
+          <h2 className="text-3xl tracking-tighter sm:text-5xl pb-10 text-center">Our Features</h2>
+          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+            <Card className="w-full">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2"><IconRoute /><span>Route Editor</span></CardTitle>
+                <CardDescription>Create, customize, and fine-tune your rides with our intuitive route editor. Adjust paths, add waypoints, and design the perfect journey before you hit the road.</CardDescription>
+              </CardHeader>
+            </Card>
+            <Card className="w-full">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2"><IconShare2 /><span>Community Sharing</span></CardTitle>
+                <CardDescription>Share your favorite routes with the community or keep them private. Discover hidden gems from riders around the world.</CardDescription>
+              </CardHeader>
+            </Card>
+            <Card className="w-full">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2"><IconEyeOff /><span>Privacy Controls</span></CardTitle>
+                <CardDescription>Full control over your routes. Choose what to share publicly and what to keep for yourself and your riding crew.</CardDescription>
+              </CardHeader>
+            </Card>
+            <Card className="w-full">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2"><IconMapPin /><span>Interactive Maps</span></CardTitle>
+                <CardDescription>High-quality maps with satellite and terrain views. See every curve, elevation change, and point of interest along your route.</CardDescription>
+              </CardHeader>
+            </Card>
+            <Card className="w-full">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2"><IconFileExport /><span>GPS Export</span></CardTitle>
+                <CardDescription>Use our GPX export feature to easily transfer and load your route onto your GPS device.</CardDescription>
+              </CardHeader>
+            </Card>
+            <Card className="w-full">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2"><IconHeartPlus /><span>Quick Access</span></CardTitle>
+                <CardDescription>Favorite your best routes for instant access to find your perfect ride.</CardDescription>
+              </CardHeader>
+            </Card>
+          </div>
+        </div>
+        <div>
+          <h3 className="text-3xl tracking-tighter sm:text-5xl pb-10 text-center">
+            Everything You Need To Plan Your Ride
+          </h3>
+          <Image
+            src={"/splash-route-editor-dark.png"}
+            alt={"Route Editor Preview"}
+            width={1480}
+            height={910}
+            className="hidden dark:block rounded-2xl"
+          />
+          <Image
+            src={"/splash-route-editor-light.png"}
+            alt={"Route Editor Preview"}
+            width={1480}
+            height={910}
+            className="dark:hidden rounded-2xl shadow"
+          />
+        </div>
+        <div className="flex flex-col items-center justify-center space-y-4 text-center pb-40">
+          <h4 className="text-3xl tracking-tighter sm:text-5xl">Ready To Hit The Road?</h4>
+          <p className="max-w-[700px] text-muted-foreground md:text-xl">
+            Start planning your next adventure today. Create, share, and ride the routes that matter.
+          </p>
+          <div className="space-x-4 pt-4">
+            <Button className="hover:cursor-pointer" asChild>
+              <Link
+                prefetch={false}
+                href={"/api/auth/register"}
+              >
+                Create Free Account
+              </Link>
+            </Button>
+          </div>
         </div>
       </section>
     </main>
   );
 }
-
-const routes = [
-  {
-    id: 1,
-    title: "Pacific Coast Highway",
-    description:
-      "A stunning coastal ride along California's rugged shoreline with breathtaking ocean views.",
-    location: "California, USA",
-    image: "/placeholder-map.png",
-  },
-  {
-    id: 2,
-    title: "Transfăgărășan Highway",
-    description:
-      "One of the most spectacular mountain roads with hairpin turns and alpine scenery.",
-    location: "Carpathian Mountains, Romania",
-    image: "/placeholder-map.png",
-  },
-  {
-    id: 3,
-    title: "Great Ocean Road",
-    description:
-      "Coastal journey featuring the famous Twelve Apostles limestone formations.",
-    location: "Victoria, Australia",
-    image: "/placeholder-map.png",
-  },
-  {
-    id: 4,
-    title: "Amalfi Coast",
-    description:
-      "Winding coastal roads with picturesque villages and Mediterranean views.",
-    location: "Campania, Italy",
-    image: "/placeholder-map.png",
-  },
-  {
-    id: 5,
-    title: "Route 66",
-    description:
-      "The historic Mother Road crossing through the heart of America.",
-    location: "Chicago to Santa Monica, USA",
-    image: "/placeholder-map.png",
-  },
-  {
-    id: 6,
-    title: "North Coast 500",
-    description:
-      "Scotland's ultimate road trip through the stunning Highlands.",
-    location: "Scottish Highlands, UK",
-    image: "/placeholder-map.png",
-  },
-  {
-    id: 7,
-    title: "Trollstigen",
-    description:
-      "Serpentine mountain road with 11 hairpin bends and waterfalls.",
-    location: "Rauma, Norway",
-    image: "/placeholder-map.png",
-  },
-  {
-    id: 8,
-    title: "Hai Van Pass",
-    description:
-      "Mountain pass with panoramic views of the coastline made famous by Top Gear.",
-    location: "Central Vietnam",
-    image: "/placeholder-map.png",
-  },
-];
