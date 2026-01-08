@@ -1,7 +1,7 @@
 "use server"
 
 import { db } from "@/db";
-import { favourites, routes } from "@/db/schema";
+import { avatars, favourites, routes, users } from "@/db/schema";
 import { and, AnyColumn, eq, sql } from "drizzle-orm";
 import { utapi } from "@/app/api/uploadthing/core";
 import { RouteData } from "@/app/stores/useRouteStore";
@@ -28,7 +28,6 @@ export async function getRouteFileKeys(userId: string) {
 
 export const getUserRoutes = async (): Promise<Array<Route>> => {
   const userId = await getUserId();
-
   if (!userId) throw new Error("No userid");
 
   const userRoutes = await db
@@ -45,8 +44,11 @@ export const getUserRoutes = async (): Promise<Array<Route>> => {
       routeFavourites: routes.routeFavouriteCount,
       routeViews: routes.routeViews,
       routeCreatedAt: routes.createdAt,
+      routeAuthorAvatar: avatars.avatarUrl,
     })
     .from(routes)
+    .leftJoin(users, eq(routes.routeCreator, users.userId))
+    .leftJoin(avatars, eq(users.userId, avatars.userId))
     .where(eq(routes.routeCreator, userId));
 
   return userRoutes.map(route => ({
@@ -69,8 +71,11 @@ export const getCommunityRoutes = async (): Promise<Array<CommunityRoute>> => {
       routeFavourites: routes.routeFavouriteCount,
       routeViews: routes.routeViews,
       routeCreatedAt: routes.createdAt,
+      routeAuthorAvatar: avatars.avatarUrl,
     })
     .from(routes)
+    .leftJoin(users, eq(routes.routeCreator, users.userId))
+    .leftJoin(avatars, eq(users.userId, avatars.userId))
     .where(eq(routes.isPublic, true));
 
   return communityRoutes.map(route => ({
@@ -84,15 +89,11 @@ export const getFeaturedRoutes = async (): Promise<Array<FeaturedRoute>> => {
     .select({
       routeId: routes.routeId,
       routeName: routes.routeName,
-      routeAuthor: routes.routeAuthor,
       routeLocation: routes.routeLocation,
-      routeDescription: routes.routeDescription,
       routeImage: routes.routeImageUrl,
+      routeDescription: routes.routeDescription,
       routeCompletionTime: routes.routeCompletionTime,
       routeDistance: routes.routeDistance,
-      routeFavourites: routes.routeFavouriteCount,
-      routeViews: routes.routeViews,
-      routeCreatedAt: routes.createdAt,
     })
     .from(routes)
     .where(

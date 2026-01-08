@@ -16,7 +16,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Separator } from "@/components/ui/separator";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { convertToMiles } from "@/utils/convertToMiles";
 import { formatDurationHoursMinutes } from "@/utils/formatDurationHoursMinutes";
 
@@ -82,6 +82,7 @@ export default function MyRouteCard({ route, controls }: MyRouteCardProps) {
         <Separator className="my-4" />
         <div className="flex items-center gap-3">
           <Avatar className="h-8 w-8 border border-border">
+            <AvatarImage src={route.routeAuthorAvatar || ""} alt={`@${route.routeAuthor}`} />
             <AvatarFallback className="bg-primary/10 text-primary text-xs">
               {route.routeAuthor[0]}
             </AvatarFallback>

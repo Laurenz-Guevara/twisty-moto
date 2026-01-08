@@ -58,7 +58,19 @@ export interface BaseRoute {
 
 export interface Route extends BaseRoute {
   isPublic: boolean;
+  routeAuthorAvatar: string | null;
 }
 
-export type CommunityRoute = BaseRoute;
-export type FeaturedRoute = BaseRoute;
+export interface CommunityRoute extends BaseRoute {
+  routeAuthorAvatar: string | null;
+}
+
+export interface FeaturedRoute {
+  routeId: string;
+  routeName: string;
+  routeLocation: RouteLocation;
+  routeImage?: string;
+  routeDescription?: string;
+  routeCompletionTime: number;
+  routeDistance: number;
+}
