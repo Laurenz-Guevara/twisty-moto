@@ -4,9 +4,9 @@ import { useRouteStore } from "@/app/stores/useRouteStore";
 import { getFeaturedRoutes, getPublicUserRouteFromId } from "@/db/routes/routes.service";
 import { FeaturedRoute, MarkerProps } from "@/types/types";
 import { useRouter } from "next/navigation";
-import CommunityRouteCard from "@/components/community-route-card";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "./ui/skeleton";
+import FeaturedRouteCard from "@/components/featured-route-card";
 
 export default function FeaturedRoutes() {
   const router = useRouter();
@@ -49,7 +49,7 @@ export default function FeaturedRoutes() {
         ? (
           <>
             {routes?.map((route) => (
-              <CommunityRouteCard key={route.routeId} route={route} controls={controls} />
+              <FeaturedRouteCard key={route.routeId} route={route} controls={controls} />
             ))}
           </>
         )

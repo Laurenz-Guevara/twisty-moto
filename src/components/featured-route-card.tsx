@@ -2,15 +2,12 @@ import { Button } from "@/components/ui/button";
 import { BaseRoute } from "@/types/types";
 import { convertToMiles } from "@/utils/convertToMiles";
 import { formatDurationHoursMinutes } from "@/utils/formatDurationHoursMinutes";
-import { IconCalendar, IconClock, IconRuler2 } from "@tabler/icons-react";
-import { Eye, Heart, MapPin } from "lucide-react";
+import { IconClock, IconRuler2 } from "@tabler/icons-react";
+import { MapPin } from "lucide-react";
 import Image from "next/image";
-import { Separator } from "@/components/ui/separator";
-import { Avatar, AvatarFallback } from "./ui/avatar";
 
 interface MyRouteCardControls {
   handleViewRoute: (routeId: string) => void;
-  handleFavouriteRoute: (routeId: string) => void;
 };
 
 interface MyRouteCardProps {
@@ -18,10 +15,7 @@ interface MyRouteCardProps {
   controls: MyRouteCardControls;
 };
 
-export default function CommunityRouteCard({ route, controls }: MyRouteCardProps) {
-  function getInitials(author: string) {
-    return author[0]
-  }
+export default function FeaturedRouteCard({ route, controls }: MyRouteCardProps) {
 
   return (
     <div
@@ -69,36 +63,6 @@ export default function CommunityRouteCard({ route, controls }: MyRouteCardProps
             </div>
           </div>
         </div>
-        <Separator className="my-4" />
-        <div className="flex items-center gap-3">
-          <Avatar className="h-8 w-8 border border-border">
-            <AvatarFallback className="bg-primary/10 text-primary text-xs">
-              {getInitials(route.routeAuthor)}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium leading-none">{route.routeAuthor}</p>
-            <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-              <IconCalendar className="h-3 w-3" />
-              Feb 28, 2024
-            </p>
-          </div>
-          <div className="flex items-center justify-between gap-4 pt-4">
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <div className="flex items-center gap-1.5">
-                <Eye className="h-4 w-4" />
-                <span>{route.routeViews}</span>
-              </div>
-              <button
-                onClick={() => controls.handleFavouriteRoute(route.routeId)}
-                className="flex items-center gap-1.5 hover:text-destructive transition-colors hover:cursor-pointer"
-              >
-                <Heart className={`h-4 w-4 ${route.routeFavourites ? "fill-destructive text-destructive" : ""}`} />
-                <span>{route.routeFavourites}</span>
-              </button>
-            </div>
-          </div>
-        </div>
         <div className="flex flex-wrap gap-2 w-full mt-3">
           <Button
             variant="outline"
@@ -113,3 +77,4 @@ export default function CommunityRouteCard({ route, controls }: MyRouteCardProps
     </div>
   )
 }
+

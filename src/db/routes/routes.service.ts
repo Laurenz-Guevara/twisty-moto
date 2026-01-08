@@ -1,8 +1,8 @@
 "use server"
 
 import { db } from "@/db";
-import { routes } from "@/db/schema";
-import { and, eq } from "drizzle-orm";
+import { favourites, routes } from "@/db/schema";
+import { and, AnyColumn, eq, sql } from "drizzle-orm";
 import { utapi } from "@/app/api/uploadthing/core";
 import { RouteData } from "@/app/stores/useRouteStore";
 import { CommunityRoute, FeaturedRoute, MarkerProps, Route, RouteLocation } from "@/types/types";
@@ -42,6 +42,8 @@ export const getUserRoutes = async (): Promise<Array<Route>> => {
       routeCompletionTime: routes.routeCompletionTime,
       routeDistance: routes.routeDistance,
       isPublic: routes.isPublic,
+      routeFavourites: routes.routeFavouriteCount,
+      routeViews: routes.routeViews
     })
     .from(routes)
     .where(eq(routes.routeCreator, userId));
@@ -63,6 +65,8 @@ export const getCommunityRoutes = async (): Promise<Array<CommunityRoute>> => {
       routeImage: routes.routeImageUrl,
       routeCompletionTime: routes.routeCompletionTime,
       routeDistance: routes.routeDistance,
+      routeFavourites: routes.routeFavouriteCount,
+      routeViews: routes.routeViews
     })
     .from(routes)
     .where(eq(routes.isPublic, true));
@@ -84,6 +88,8 @@ export const getFeaturedRoutes = async (): Promise<Array<FeaturedRoute>> => {
       routeImage: routes.routeImageUrl,
       routeCompletionTime: routes.routeCompletionTime,
       routeDistance: routes.routeDistance,
+      routeFavourites: routes.routeFavouriteCount,
+      routeViews: routes.routeViews
     })
     .from(routes)
     .where(
@@ -155,6 +161,106 @@ export const getPublicUserRouteFromId = async (clientRouteId: string) => {
   return {
     publicUserRoute,
   };
+};
+
+export const getPublicRouteId = async (clientRouteId: string): Promise<string> => {
+  const publicRouteId = await db
+    .select({
+      routeId: routes.routeId,
+    })
+    .from(routes)
+    .where(
+      and(
+        eq(routes.routeId, clientRouteId),
+        eq(routes.isPublic, true),
+      ),
+    )
+    .limit(1);
+
+  return publicRouteId[0].routeId
+};
+
+export const incrementPublicRouteView = async (clientRouteId: string) => {
+  await db
+    .update(routes)
+    .set({
+      routeViews: increment(routes.routeViews)
+    })
+    .where(
+      eq(routes.routeId, clientRouteId),
+    );
+}
+
+export const favouriteRoute = async (clientRouteId: string) => {
+  const userId = await getUserId();
+  if (!userId) {
+    throw new Error("Cannot get userId inside favouriteRoute.");
+  }
+
+  const publicRouteId: string = await getPublicRouteId(clientRouteId);
+
+  const existingFavourite = await db
+    .select()
+    .from(favourites)
+    .where(
+      and(
+        eq(favourites.routeId, publicRouteId),
+        eq(favourites.userId, userId),
+      ),
+    )
+    .limit(1);
+
+  if (existingFavourite.length < 1) {
+    await db.transaction(async (tx) => {
+      await tx.insert(favourites).values({
+        routeId: publicRouteId,
+        userId: userId,
+      });
+
+      await tx
+        .update(routes)
+        .set({
+          routeFavouriteCount: sql`${routes.routeFavouriteCount} + 1`,
+        })
+        .where(eq(routes.routeId, publicRouteId));
+    });
+  } else {
+    await db.transaction(async (tx) => {
+      await tx
+        .delete(favourites)
+        .where(
+          and(
+            eq(favourites.routeId, publicRouteId),
+            eq(favourites.userId, userId),
+          )
+        );
+
+      await tx
+        .update(routes)
+        .set({
+          routeFavouriteCount: sql`GREATEST(${routes.routeFavouriteCount} - 1, 0)`,
+        })
+        .where(eq(routes.routeId, publicRouteId));
+    });
+  }
+};
+
+export const incrementPublicRouteFavouriteCount = async (clientRouteId: string) => {
+  await db
+    .update(routes)
+    .set({
+      routeFavouriteCount: sql`${routes.routeFavouriteCount} + 1`
+    })
+    .where(eq(routes.routeId, clientRouteId));
+};
+
+export const decrementPublicRouteFavouriteCount = async (clientRouteId: string) => {
+  await db
+    .update(routes)
+    .set({
+      routeFavouriteCount: sql`GREATEST(${routes.routeFavouriteCount} - 1, 0)`
+    })
+    .where(eq(routes.routeId, clientRouteId));
 };
 
 export const saveRoute = async (
@@ -430,3 +536,7 @@ async function isForkedRoute(clientRouteId: string, userId: string): Promise<boo
     return true
   }
 }
+
+const increment = (column: AnyColumn, value = 1) => {
+  return sql`${column} + ${value}`;
+};

@@ -7,7 +7,7 @@ import { CommunityRoute, MarkerProps } from "@/types/types";
 import { useRouter } from "next/navigation";
 import { useRouteStore } from "@/app/stores/useRouteStore";
 import CommunityRouteCard from "@/components/community-route-card"
-import { getCommunityRoutes, getPublicUserRouteFromId } from "@/db/routes/routes.service";
+import { favouriteRoute, getCommunityRoutes, getPublicUserRouteFromId, incrementPublicRouteView } from "@/db/routes/routes.service";
 
 export default function CommunityRoutes() {
   const router = useRouter();
@@ -24,9 +24,9 @@ export default function CommunityRoutes() {
   });
 
   async function handleViewRoute(routeId: string) {
-    const request = await getPublicUserRouteFromId(routeId);
-
+    const request = await getPublicUserRouteFromId(routeId)
     if (request.publicUserRoute) {
+      await incrementPublicRouteView(routeId)
       const userRoute = request.publicUserRoute[0];
       updateRouteState({
         routeId: userRoute.routeId,
@@ -39,8 +39,13 @@ export default function CommunityRoutes() {
     }
   }
 
+  async function handleFavouriteRoute(routeId: string) {
+    await favouriteRoute(routeId)
+  }
+
   const controls = {
     handleViewRoute,
+    handleFavouriteRoute,
   };
 
   return (

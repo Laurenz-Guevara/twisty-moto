@@ -85,7 +85,8 @@ export const userRelations = relations(users, ({ one, many }) => ({
     references: [avatars.userId],
   }),
   notifications: many(notifications),
-  rotues: many(routes),
+  routes: many(routes),
+  favourites: many(favourites),
 }));
 
 export const notificationRelations = relations(notifications, ({ one }) => ({
@@ -139,9 +140,39 @@ export const routes = createTable("routes", {
   isFeatured: boolean("is_featured").default(false).notNull(),
 });
 
-export const routesRelations = relations(routes, ({ one }) => ({
+export const routesRelations = relations(routes, ({ one, many }) => ({
   user: one(users, {
     fields: [routes.routeCreator],
     references: [users.userId],
   }),
+  favourites: many(favourites),
 }));
+
+export const favourites = createTable("favourites", {
+  favouriteId: uuid("favourite_id")
+    .default(sql`gen_random_uuid()`)
+    .notNull()
+    .primaryKey(),
+
+  routeId: uuid("route_id")
+    .notNull()
+    .references(() => routes.routeId, { onDelete: "cascade" }),
+
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.userId, { onDelete: "cascade" }),
+
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const favouritesRelations = relations(favourites, ({ one }) => ({
+  route: one(routes, {
+    fields: [favourites.routeId],
+    references: [routes.routeId],
+  }),
+  user: one(users, {
+    fields: [favourites.userId],
+    references: [users.userId],
+  }),
+}));
+

@@ -51,6 +51,8 @@ export interface BaseRoute {
   routeDescription?: string;
   routeCompletionTime: number;
   routeDistance: number;
+  routeFavourites: number;
+  routeViews: number;
 }
 
 export interface Route extends BaseRoute {
