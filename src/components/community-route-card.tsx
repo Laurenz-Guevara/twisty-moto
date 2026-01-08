@@ -6,7 +6,7 @@ import { IconCalendar, IconClock, IconRuler2 } from "@tabler/icons-react";
 import { Eye, Heart, MapPin } from "lucide-react";
 import Image from "next/image";
 import { Separator } from "@/components/ui/separator";
-import { Avatar, AvatarFallback } from "./ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 interface MyRouteCardControls {
   handleViewRoute: (routeId: string) => void;
@@ -19,10 +19,6 @@ interface MyRouteCardProps {
 };
 
 export default function CommunityRouteCard({ route, controls }: MyRouteCardProps) {
-  function getInitials(author: string) {
-    return author[0]
-  }
-
   return (
     <div
       key={route.routeId}
@@ -73,14 +69,19 @@ export default function CommunityRouteCard({ route, controls }: MyRouteCardProps
         <div className="flex items-center gap-3">
           <Avatar className="h-8 w-8 border border-border">
             <AvatarFallback className="bg-primary/10 text-primary text-xs">
-              {getInitials(route.routeAuthor)}
+              {route.routeAuthor[0]}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium leading-none">{route.routeAuthor}</p>
             <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
               <IconCalendar className="h-3 w-3" />
-              Feb 28, 2024
+              {route.routeCreatedAt.toLocaleDateString("en-GB", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+                timeZone: "Europe/London",
+              })}
             </p>
           </div>
           <div className="flex items-center justify-between gap-4 pt-4">

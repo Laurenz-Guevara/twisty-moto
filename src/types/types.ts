@@ -53,6 +53,7 @@ export interface BaseRoute {
   routeDistance: number;
   routeFavourites: number;
   routeViews: number;
+  routeCreatedAt: Date
 }
 
 export interface Route extends BaseRoute {

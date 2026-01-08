@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Separator } from "@radix-ui/react-dropdown-menu";
+import { Separator } from "@/components/ui/separator";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { MarkerProps, Route } from "@/types/types";
@@ -11,7 +11,7 @@ import Link from "next/link";
 import { defaultRoute, useRouteStore } from "@/app/stores/useRouteStore";
 import { toast } from "sonner";
 import MyRouteCard from "@/components/my-route-card"
-import { deleteRoute, getUserRouteFromId, getUserRoutes, updateRoutePrivacy } from "@/db/routes/routes.service";
+import { deleteRoute, favouriteRoute, getUserRouteFromId, getUserRoutes, updateRoutePrivacy } from "@/db/routes/routes.service";
 
 export default function MyRoutes() {
   const router = useRouter();
@@ -67,7 +67,13 @@ export default function MyRoutes() {
     handleUpdateRoutePrivacy,
     handleDeleteRoute,
     handleEditRoute,
+    handleFavouriteRoute,
   };
+
+  async function handleFavouriteRoute(routeId: string) {
+    await favouriteRoute(routeId)
+    queryClient.invalidateQueries({ queryKey: ["userRoutes"] });
+  }
 
   function createNewRoute() {
     updateRouteState(defaultRoute);

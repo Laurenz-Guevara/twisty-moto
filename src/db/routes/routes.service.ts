@@ -43,7 +43,8 @@ export const getUserRoutes = async (): Promise<Array<Route>> => {
       routeDistance: routes.routeDistance,
       isPublic: routes.isPublic,
       routeFavourites: routes.routeFavouriteCount,
-      routeViews: routes.routeViews
+      routeViews: routes.routeViews,
+      routeCreatedAt: routes.createdAt,
     })
     .from(routes)
     .where(eq(routes.routeCreator, userId));
@@ -66,7 +67,8 @@ export const getCommunityRoutes = async (): Promise<Array<CommunityRoute>> => {
       routeCompletionTime: routes.routeCompletionTime,
       routeDistance: routes.routeDistance,
       routeFavourites: routes.routeFavouriteCount,
-      routeViews: routes.routeViews
+      routeViews: routes.routeViews,
+      routeCreatedAt: routes.createdAt,
     })
     .from(routes)
     .where(eq(routes.isPublic, true));
@@ -89,7 +91,8 @@ export const getFeaturedRoutes = async (): Promise<Array<FeaturedRoute>> => {
       routeCompletionTime: routes.routeCompletionTime,
       routeDistance: routes.routeDistance,
       routeFavourites: routes.routeFavouriteCount,
-      routeViews: routes.routeViews
+      routeViews: routes.routeViews,
+      routeCreatedAt: routes.createdAt,
     })
     .from(routes)
     .where(
