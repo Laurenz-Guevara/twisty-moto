@@ -2,7 +2,7 @@
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@radix-ui/react-dropdown-menu";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { CommunityRoute, MarkerProps } from "@/types/types";
 import { useRouter } from "next/navigation";
 import { useRouteStore } from "@/app/stores/useRouteStore";
@@ -39,8 +39,11 @@ export default function CommunityRoutes() {
     }
   }
 
+  const queryClient = useQueryClient();
+
   async function handleFavouriteRoute(routeId: string) {
     await favouriteRoute(routeId)
+    queryClient.invalidateQueries({ queryKey: ["communityRoutes"] });
   }
 
   const controls = {
