@@ -2,7 +2,7 @@
 
 import { db } from "@/db";
 import { avatars, favourites, routes, users } from "@/db/schema";
-import { and, eq, lt, desc, asc, gte, lte, ilike, or, sql, AnyColumn } from "drizzle-orm";
+import { and, eq, desc, asc, gte, lte, ilike, or, sql, AnyColumn } from "drizzle-orm";
 import { utapi } from "@/app/api/uploadthing/core";
 import { RouteData } from "@/app/stores/useRouteStore";
 import { CommunityRoutes, FeaturedRoute, MarkerProps, RouteLocation, UserRoutes } from "@/types/types";
@@ -27,9 +27,77 @@ export async function getRouteFileKeys(userId: string) {
   return routeImageFileKeysCollection;
 }
 
-export const getUserRoutes = async (cursor?: Date, pageSize: number = 8): Promise<UserRoutes> => {
+export const getUserRoutes = async (
+  offset: number = 0,
+  pageSize: number = 8,
+  filter?: string,
+  sort?: string,
+  range?: [number, number],
+  search?: string
+): Promise<UserRoutes> => {
   const userId = await getUserId();
   if (!userId) throw new Error("No userid");
+
+  const conditions = [eq(routes.routeCreator, userId)];
+
+  let orderByClause;
+
+  const isAscending = sort === SortVariant.Ascending;
+  const sortFn = isAscending ? desc : asc;
+
+  switch (filter) {
+    case FilterVariant.Favourites:
+      orderByClause = [sortFn(routes.routeFavouriteCount), desc(routes.createdAt)];
+      break;
+    case FilterVariant.TotalViews:
+      orderByClause = [sortFn(routes.routeViews), desc(routes.createdAt)];
+      break;
+    case FilterVariant.Distance:
+      orderByClause = [sortFn(routes.routeDistance), desc(routes.createdAt)];
+      break;
+    case FilterVariant.Duration:
+      orderByClause = [sortFn(routes.routeCompletionTime), desc(routes.createdAt)];
+      break;
+    case FilterVariant.DateCreated:
+    default:
+      orderByClause = [sortFn(routes.createdAt)];
+      break;
+  }
+
+  const MAX_DISTANCE_MILES = 1000
+
+  if (range && range.length === 2) {
+    const [min, max] = range;
+
+    const minMeters = convertMilesToMeters(min);
+    const maxMeters = convertMilesToMeters(max);
+    let rangeCondition;
+
+    if (max === MAX_DISTANCE_MILES) {
+      gte(routes.routeDistance, minMeters)
+
+    } else {
+      rangeCondition = and(
+        gte(routes.routeDistance, minMeters),
+        lte(routes.routeDistance, maxMeters),
+      );
+    }
+
+    if (rangeCondition) {
+      conditions.push(rangeCondition)
+    }
+  }
+
+  if (search && search.trim() !== '') {
+    const searchCondition = or(
+      ilike(routes.routeName, `%${search}%`),
+      ilike(routes.routeDescription, `%${search}%`),
+      ilike(routes.routeAuthor, `%${search}%`)
+    );
+    if (searchCondition) {
+      conditions.push(searchCondition);
+    }
+  }
 
   const userRoutes = await db
     .select({
@@ -50,27 +118,21 @@ export const getUserRoutes = async (cursor?: Date, pageSize: number = 8): Promis
     .from(routes)
     .leftJoin(users, eq(routes.routeCreator, users.userId))
     .leftJoin(avatars, eq(users.userId, avatars.userId))
-    .where(
-      and(
-        eq(routes.routeCreator, userId),
-        cursor ? lt(routes.createdAt, cursor) : undefined
-      )
-    )
-    .orderBy(desc(routes.createdAt))
-    .limit(pageSize);
+    .where(and(...conditions))
+    .orderBy(...orderByClause)
+    .limit(pageSize)
+    .offset(offset);
 
   const userRoutesCollection = userRoutes.map(route => ({
     ...route,
     routeLocation: route.routeLocation as RouteLocation,
   }));
 
-  const nextCursor = userRoutesCollection.length === pageSize
-    ? userRoutesCollection[userRoutesCollection.length - 1].routeCreatedAt
-    : undefined;
+  const hasMore = userRoutesCollection.length === pageSize;
 
   return {
     routes: userRoutesCollection,
-    cursor: nextCursor
+    hasMore
   };
 };
 
