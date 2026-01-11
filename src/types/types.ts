@@ -74,3 +74,8 @@ export interface FeaturedRoute {
   routeCompletionTime: number;
   routeDistance: number;
 }
+
+export interface CommunityRoutes {
+  routes: CommunityRoute[]
+  cursor: Date | undefined
+}

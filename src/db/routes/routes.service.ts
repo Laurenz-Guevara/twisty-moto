@@ -2,10 +2,10 @@
 
 import { db } from "@/db";
 import { avatars, favourites, routes, users } from "@/db/schema";
-import { and, AnyColumn, eq, sql } from "drizzle-orm";
+import { and, AnyColumn, eq, sql, desc, lt } from "drizzle-orm";
 import { utapi } from "@/app/api/uploadthing/core";
 import { RouteData } from "@/app/stores/useRouteStore";
-import { CommunityRoute, FeaturedRoute, MarkerProps, Route, RouteLocation } from "@/types/types";
+import { CommunityRoutes, FeaturedRoute, MarkerProps, Route, RouteLocation } from "@/types/types";
 import { ToastVariant, RouteType } from "@/enums/enums";
 import { getDirections, getRegionFromCoordinates } from "@/lib/map-service";
 import { UploadRouteThumbnail } from "@/lib/upload-image-service";
@@ -57,7 +57,7 @@ export const getUserRoutes = async (): Promise<Array<Route>> => {
   }));
 };
 
-export const getCommunityRoutes = async (): Promise<Array<CommunityRoute>> => {
+export const getCommunityRoutesOnScroll = async (cursor?: Date, pageSize: number = 8): Promise<CommunityRoutes> => {
   const communityRoutes = await db
     .select({
       routeId: routes.routeId,
@@ -76,12 +76,28 @@ export const getCommunityRoutes = async (): Promise<Array<CommunityRoute>> => {
     .from(routes)
     .leftJoin(users, eq(routes.routeCreator, users.userId))
     .leftJoin(avatars, eq(users.userId, avatars.userId))
-    .where(eq(routes.isPublic, true));
+    .where(
+      and(
+        eq(routes.isPublic, true),
+        cursor ? lt(routes.createdAt, cursor) : undefined
+      )
+    )
+    .orderBy(desc(routes.createdAt))
+    .limit(pageSize);
 
-  return communityRoutes.map(route => ({
+  const communityRoutesCollection = communityRoutes.map(route => ({
     ...route,
     routeLocation: route.routeLocation as RouteLocation,
   }));
+
+  const nextCursor = communityRoutesCollection.length === pageSize
+    ? communityRoutesCollection[communityRoutesCollection.length - 1].routeCreatedAt
+    : undefined;
+
+  return {
+    routes: communityRoutesCollection,
+    cursor: nextCursor
+  };
 };
 
 export const getFeaturedRoutes = async (): Promise<Array<FeaturedRoute>> => {
