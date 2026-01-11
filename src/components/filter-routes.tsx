@@ -24,6 +24,8 @@ import { useDebounce } from "use-debounce";
 
 const DISTANCE_MAX = 1000
 const DISTANCE_MIN = 0
+const DISTANCE_MIN_ALLOWED = 0
+const MIN_GAP = 10;
 
 interface FilterRoutesProps {
   onFilterChange?: (filter: string) => void;
@@ -32,7 +34,7 @@ interface FilterRoutesProps {
   onSearchChange?: (search: string) => void;
 }
 
-const DEBOUNCE_DELAY = 500
+const DEBOUNCE_DELAY = 750
 
 export default function FilterRoutes({
   onFilterChange,
@@ -57,9 +59,16 @@ export default function FilterRoutes({
     onSortChange?.(value);
   };
 
-  const handleDistanceChange = (range: [number, number]) => {
-    setDistanceRange(range);
+  const handleDistanceChange = ([min, max]: [number, number]) => {
+    const clampedMin = Math.max(min, DISTANCE_MIN_ALLOWED);
+    const clampedMax = Math.max(
+      max,
+      clampedMin + MIN_GAP
+    );
+
+    setDistanceRange([clampedMin, Math.min(clampedMax, DISTANCE_MAX)]);
   };
+
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);

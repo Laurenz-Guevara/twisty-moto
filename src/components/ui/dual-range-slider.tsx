@@ -23,7 +23,7 @@ const DualRangeSlider = React.forwardRef<
       {...props}
     >
       <SliderPrimitive.Track className="relative h-2 w-full grow overflow-hidden rounded-full bg-secondary">
-        <SliderPrimitive.Range className="absolute h-full bg-primary" />
+        <SliderPrimitive.Range className="absolute h-full bg-green-400/60" />
       </SliderPrimitive.Track>
       {initialValue.map((value, index) => (
         <React.Fragment key={index}>
