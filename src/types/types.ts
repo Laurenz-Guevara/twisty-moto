@@ -82,5 +82,5 @@ export interface CommunityRoutes {
 
 export type UserRoutes = {
   routes: Route[];
-  cursor?: Date;
+  hasMore?: boolean;
 };
