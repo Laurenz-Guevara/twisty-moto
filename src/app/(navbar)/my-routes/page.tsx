@@ -11,24 +11,35 @@ import { defaultRoute, useRouteStore } from "@/app/stores/useRouteStore";
 import { toast } from "sonner";
 import MyRouteCard from "@/components/my-route-card"
 import { deleteRoute, favouriteRoute, getUserRouteFromId, getUserRoutes, updateRoutePrivacy } from "@/db/routes/routes.service";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import SkeletonForm from "@/components/skeleton-form";
+import FilterRoutes from "@/components/filter-routes";
+import { FilterVariant, SortVariant } from "@/enums/enums";
 
 export default function MyRoutes() {
+  const [distanceRange, setDistanceRange] = useState<[number, number]>([0, 1000]);
+  const [filter, setFilter] = useState<string>(FilterVariant.DateCreated);
+  const [sort, setSort] = useState<string>(SortVariant.Ascending);
+  const [search, setSearch] = useState<string>("");
   const router = useRouter();
   const updateRouteState = useRouteStore((s) => s.updateRouteData);
   const queryClient = useQueryClient();
   const observerTarget = useRef<HTMLDivElement>(null);
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
-    queryKey: ["userRoutes"],
+    queryKey: ["userRoutes", filter, sort, distanceRange, search],
     queryFn: async ({ pageParam }): Promise<UserRoutesResponse> => {
-      const response = await getUserRoutes(pageParam, 8);
+      const offset = pageParam ?? 0;
+      const response = await getUserRoutes(offset, 8, filter, sort, distanceRange, search);
       return response;
     },
-    initialPageParam: undefined as Date | undefined,
-    getNextPageParam: (lastPage) => lastPage.cursor,
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      if (!lastPage.hasMore) return undefined;
+      return allPages.length * 8;
+    },
   });
+
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -104,6 +115,23 @@ export default function MyRoutes() {
 
   const allRoutes = data?.pages.flatMap(page => page.routes) ?? [];
 
+  const handleFilterChange = (newFilter: string) => {
+    setFilter(newFilter);
+  };
+
+  const handleSortChange = (newSort: string) => {
+    setSort(newSort);
+  };
+
+  const handleDistanceChange = (newRange: [number, number]) => {
+    setDistanceRange(newRange);
+  };
+
+  const handleSearchChange = (newSearch: string) => {
+    setSearch(newSearch);
+  };
+
+
   return (
     <div className="container mx-auto">
       <div className="space-y-6 py-10 px-7 pb-16">
@@ -125,6 +153,12 @@ export default function MyRoutes() {
             <span>Create New Route</span>
           </Button>
         </div>
+        <FilterRoutes
+          onFilterChange={handleFilterChange}
+          onSortChange={handleSortChange}
+          onDistanceRangeChange={handleDistanceChange}
+          onSearchChange={handleSearchChange}
+        />
         <Separator className="my-6" />
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {isLoading &&
@@ -144,7 +178,7 @@ export default function MyRoutes() {
               className="aspect-square w-full h-full rounded-md hover:cursor-pointer"
             >
               <Link href="route-editor">
-                Create your first route.
+                Create a new route.
               </Link>
             </Button>
           )}
