@@ -9,7 +9,8 @@ const MEDIUM_ACCURACY_ROUTE_THRESHOLD = 6000
 const LOW_ACCURACY_ROUTE_THRESHOLD = 8000
 const HIGH_ACCURACY_ROUTE = 0.001
 const MEDIUM_ACCURACY_ROUTE = 0.005
-const LOW_ACCURACY_ROUTE = 0.010
+const LOW_ACCURACY_ROUTE = 0.10
+const ULTRA_LOW_ACCURACY_ROUTE = 0.100
 
 function determineThumbnailAccuracy(routeLength: number): number {
   if (routeLength < HIGH_ACCURACY_ROUTE_THRESHOLD) {
@@ -19,7 +20,7 @@ function determineThumbnailAccuracy(routeLength: number): number {
   } else if (routeLength < LOW_ACCURACY_ROUTE_THRESHOLD) {
     return LOW_ACCURACY_ROUTE
   } else {
-    return LOW_ACCURACY_ROUTE
+    return ULTRA_LOW_ACCURACY_ROUTE
   }
 }
 
