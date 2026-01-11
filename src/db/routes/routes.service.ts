@@ -2,14 +2,15 @@
 
 import { db } from "@/db";
 import { avatars, favourites, routes, users } from "@/db/schema";
-import { and, AnyColumn, eq, sql, desc, lt } from "drizzle-orm";
+import { and, eq, lt, desc, asc, gte, lte, ilike, or, sql, AnyColumn } from "drizzle-orm";
 import { utapi } from "@/app/api/uploadthing/core";
 import { RouteData } from "@/app/stores/useRouteStore";
 import { CommunityRoutes, FeaturedRoute, MarkerProps, RouteLocation, UserRoutes } from "@/types/types";
-import { ToastVariant, RouteType } from "@/enums/enums";
+import { ToastVariant, RouteType, FilterVariant, SortVariant } from "@/enums/enums";
 import { getDirections, getRegionFromCoordinates } from "@/lib/map-service";
 import { UploadRouteThumbnail } from "@/lib/upload-image-service";
 import { getUserId, getUsername } from "@/db/auth/session";
+import { convertMilesToMeters } from "@/utils/convertToMeters";
 
 export async function getRouteFileKeys(userId: string) {
   const routeImageFileKeys = await db
@@ -73,7 +74,64 @@ export const getUserRoutes = async (cursor?: Date, pageSize: number = 8): Promis
   };
 };
 
-export const getCommunityRoutesOnScroll = async (cursor?: Date, pageSize: number = 8): Promise<CommunityRoutes> => {
+export const getCommunityRoutesOnScroll = async (
+  offset: number = 0,
+  pageSize: number = 8,
+  filter?: string,
+  sort?: string,
+  range?: [number, number],
+  search?: string
+): Promise<CommunityRoutes> => {
+  const conditions = [eq(routes.isPublic, true)];
+
+  let orderByClause;
+
+  const isAscending = sort === SortVariant.Ascending;
+  const sortFn = isAscending ? desc : asc;
+
+  switch (filter) {
+    case FilterVariant.Favourites:
+      orderByClause = [sortFn(routes.routeFavouriteCount), desc(routes.createdAt)];
+      break;
+    case FilterVariant.TotalViews:
+      orderByClause = [sortFn(routes.routeViews), desc(routes.createdAt)];
+      break;
+    case FilterVariant.Distance:
+      orderByClause = [sortFn(routes.routeDistance), desc(routes.createdAt)];
+      break;
+    case FilterVariant.Duration:
+      orderByClause = [sortFn(routes.routeCompletionTime), desc(routes.createdAt)];
+      break;
+    case FilterVariant.DateCreated:
+    default:
+      orderByClause = [sortFn(routes.createdAt)];
+      break;
+  }
+
+  if (range && range.length === 2) {
+    const [min, max] = range;
+
+    const rangeCondition = and(
+      gte(routes.routeDistance, convertMilesToMeters(min)),
+      lte(routes.routeDistance, convertMilesToMeters(max)),
+    );
+
+    if (rangeCondition) {
+      conditions.push(rangeCondition)
+    }
+  }
+
+  if (search && search.trim() !== '') {
+    const searchCondition = or(
+      ilike(routes.routeName, `%${search}%`),
+      ilike(routes.routeDescription, `%${search}%`),
+      ilike(routes.routeAuthor, `%${search}%`)
+    );
+    if (searchCondition) {
+      conditions.push(searchCondition);
+    }
+  }
+
   const communityRoutes = await db
     .select({
       routeId: routes.routeId,
@@ -92,27 +150,21 @@ export const getCommunityRoutesOnScroll = async (cursor?: Date, pageSize: number
     .from(routes)
     .leftJoin(users, eq(routes.routeCreator, users.userId))
     .leftJoin(avatars, eq(users.userId, avatars.userId))
-    .where(
-      and(
-        eq(routes.isPublic, true),
-        cursor ? lt(routes.createdAt, cursor) : undefined
-      )
-    )
-    .orderBy(desc(routes.createdAt))
-    .limit(pageSize);
+    .where(and(...conditions))
+    .orderBy(...orderByClause)
+    .limit(pageSize)
+    .offset(offset);
 
   const communityRoutesCollection = communityRoutes.map(route => ({
     ...route,
     routeLocation: route.routeLocation as RouteLocation,
   }));
 
-  const nextCursor = communityRoutesCollection.length === pageSize
-    ? communityRoutesCollection[communityRoutesCollection.length - 1].routeCreatedAt
-    : undefined;
+  const hasMore = communityRoutesCollection.length === pageSize;
 
   return {
     routes: communityRoutesCollection,
-    cursor: nextCursor
+    hasMore
   };
 };
 

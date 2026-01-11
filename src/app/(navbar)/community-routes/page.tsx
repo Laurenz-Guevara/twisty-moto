@@ -12,23 +12,33 @@ import {
   getPublicUserRouteFromId,
   incrementPublicRouteView,
 } from "@/db/routes/routes.service";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import SkeletonForm from "@/components/skeleton-form";
+import FilterRoutes from "@/components/filter-routes";
+import { FilterVariant, SortVariant } from "@/enums/enums";
 
 export default function CommunityRoutes() {
   const router = useRouter();
   const updateRouteState = useRouteStore((s) => s.updateRouteData);
   const queryClient = useQueryClient();
   const observerTarget = useRef<HTMLDivElement>(null);
+  const [distanceRange, setDistanceRange] = useState<[number, number]>([0, 1000]);
+  const [filter, setFilter] = useState<string>(FilterVariant.DateCreated);
+  const [sort, setSort] = useState<string>(SortVariant.Ascending);
+  const [search, setSearch] = useState<string>("");
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
-    queryKey: ["communityRoutes"],
+    queryKey: ["communityRoutes", filter, sort, distanceRange, search],
     queryFn: async ({ pageParam }): Promise<CommunityRoutesResponse> => {
-      const response = await getCommunityRoutesOnScroll(pageParam, 8);
+      const offset = pageParam ?? 0;
+      const response = await getCommunityRoutesOnScroll(offset, 8, filter, sort, distanceRange, search);
       return response;
     },
-    initialPageParam: undefined as Date | undefined,
-    getNextPageParam: (lastPage) => lastPage.cursor,
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      if (!lastPage.hasMore) return undefined;
+      return allPages.length * 8;
+    },
   });
 
   useEffect(() => {
@@ -81,6 +91,22 @@ export default function CommunityRoutes() {
 
   const allRoutes = data?.pages.flatMap(page => page.routes) ?? [];
 
+  const handleFilterChange = (newFilter: string) => {
+    setFilter(newFilter);
+  };
+
+  const handleSortChange = (newSort: string) => {
+    setSort(newSort);
+  };
+
+  const handleDistanceChange = (newRange: [number, number]) => {
+    setDistanceRange(newRange);
+  };
+
+  const handleSearchChange = (newSearch: string) => {
+    setSearch(newSearch);
+  };
+
   return (
     <div className="container mx-auto">
       <div className="space-y-6 py-10 px-7 pb-16">
@@ -92,6 +118,12 @@ export default function CommunityRoutes() {
             A collection of all the routes built by the community.
           </p>
         </div>
+        <FilterRoutes
+          onFilterChange={handleFilterChange}
+          onSortChange={handleSortChange}
+          onDistanceRangeChange={handleDistanceChange}
+          onSearchChange={handleSearchChange}
+        />
         <Separator className="my-6" />
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {isLoading &&
