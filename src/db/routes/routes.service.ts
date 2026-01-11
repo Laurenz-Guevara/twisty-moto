@@ -5,7 +5,7 @@ import { avatars, favourites, routes, users } from "@/db/schema";
 import { and, AnyColumn, eq, sql, desc, lt } from "drizzle-orm";
 import { utapi } from "@/app/api/uploadthing/core";
 import { RouteData } from "@/app/stores/useRouteStore";
-import { CommunityRoutes, FeaturedRoute, MarkerProps, Route, RouteLocation } from "@/types/types";
+import { CommunityRoutes, FeaturedRoute, MarkerProps, RouteLocation, UserRoutes } from "@/types/types";
 import { ToastVariant, RouteType } from "@/enums/enums";
 import { getDirections, getRegionFromCoordinates } from "@/lib/map-service";
 import { UploadRouteThumbnail } from "@/lib/upload-image-service";
@@ -26,7 +26,7 @@ export async function getRouteFileKeys(userId: string) {
   return routeImageFileKeysCollection;
 }
 
-export const getUserRoutes = async (): Promise<Array<Route>> => {
+export const getUserRoutes = async (cursor?: Date, pageSize: number = 8): Promise<UserRoutes> => {
   const userId = await getUserId();
   if (!userId) throw new Error("No userid");
 
@@ -49,12 +49,28 @@ export const getUserRoutes = async (): Promise<Array<Route>> => {
     .from(routes)
     .leftJoin(users, eq(routes.routeCreator, users.userId))
     .leftJoin(avatars, eq(users.userId, avatars.userId))
-    .where(eq(routes.routeCreator, userId));
+    .where(
+      and(
+        eq(routes.routeCreator, userId),
+        cursor ? lt(routes.createdAt, cursor) : undefined
+      )
+    )
+    .orderBy(desc(routes.createdAt))
+    .limit(pageSize);
 
-  return userRoutes.map(route => ({
+  const userRoutesCollection = userRoutes.map(route => ({
     ...route,
-    routeLocation: route.routeLocation as RouteLocation
+    routeLocation: route.routeLocation as RouteLocation,
   }));
+
+  const nextCursor = userRoutesCollection.length === pageSize
+    ? userRoutesCollection[userRoutesCollection.length - 1].routeCreatedAt
+    : undefined;
+
+  return {
+    routes: userRoutesCollection,
+    cursor: nextCursor
+  };
 };
 
 export const getCommunityRoutesOnScroll = async (cursor?: Date, pageSize: number = 8): Promise<CommunityRoutes> => {

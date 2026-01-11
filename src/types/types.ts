@@ -77,5 +77,10 @@ export interface FeaturedRoute {
 
 export interface CommunityRoutes {
   routes: CommunityRoute[]
-  cursor: Date | undefined
+  cursor?: Date;
 }
+
+export type UserRoutes = {
+  routes: Route[];
+  cursor?: Date;
+};

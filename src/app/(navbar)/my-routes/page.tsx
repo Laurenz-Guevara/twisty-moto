@@ -1,34 +1,56 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
-import { MarkerProps, Route } from "@/types/types";
+import { MarkerProps, UserRoutes as UserRoutesResponse } from "@/types/types";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { defaultRoute, useRouteStore } from "@/app/stores/useRouteStore";
 import { toast } from "sonner";
 import MyRouteCard from "@/components/my-route-card"
 import { deleteRoute, favouriteRoute, getUserRouteFromId, getUserRoutes, updateRoutePrivacy } from "@/db/routes/routes.service";
+import { useEffect, useRef } from "react";
+import SkeletonForm from "@/components/skeleton-form";
 
 export default function MyRoutes() {
   const router = useRouter();
   const updateRouteState = useRouteStore((s) => s.updateRouteData);
+  const queryClient = useQueryClient();
+  const observerTarget = useRef<HTMLDivElement>(null);
 
-  const { data: routes, isLoading } = useQuery({
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
     queryKey: ["userRoutes"],
-    queryFn: async (): Promise<Route[] | undefined> => {
-      const response = await getUserRoutes();
-
-      if (response) {
-        return response;
-      }
+    queryFn: async ({ pageParam }): Promise<UserRoutesResponse> => {
+      const response = await getUserRoutes(pageParam, 8);
+      return response;
     },
+    initialPageParam: undefined as Date | undefined,
+    getNextPageParam: (lastPage) => lastPage.cursor,
   });
 
-  const queryClient = useQueryClient();
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const currentTarget = observerTarget.current;
+    if (currentTarget) {
+      observer.observe(currentTarget);
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
+      }
+    };
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   async function handleUpdateRoutePrivacy(routeId: string, isPublic: boolean) {
     await updateRoutePrivacy(routeId, isPublic);
@@ -63,6 +85,11 @@ export default function MyRoutes() {
     }
   }
 
+  async function handleFavouriteRoute(routeId: string) {
+    await favouriteRoute(routeId)
+    queryClient.invalidateQueries({ queryKey: ["userRoutes"] });
+  }
+
   const controls = {
     handleUpdateRoutePrivacy,
     handleDeleteRoute,
@@ -70,15 +97,12 @@ export default function MyRoutes() {
     handleFavouriteRoute,
   };
 
-  async function handleFavouriteRoute(routeId: string) {
-    await favouriteRoute(routeId)
-    queryClient.invalidateQueries({ queryKey: ["userRoutes"] });
-  }
-
   function createNewRoute() {
     updateRouteState(defaultRoute);
     router.push("/route-editor");
   }
+
+  const allRoutes = data?.pages.flatMap(page => page.routes) ?? [];
 
   return (
     <div className="container mx-auto">
@@ -103,27 +127,18 @@ export default function MyRoutes() {
         </div>
         <Separator className="my-6" />
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {!isLoading
-            ? (
-              <>
-                {routes?.map((route) => (
-                  <MyRouteCard key={route.routeId} route={route} controls={controls} />
-                ))}
-              </>
-            )
-            : (
-              <>
-                <SkeletonForm />
-                <SkeletonForm />
-                <SkeletonForm />
-                <SkeletonForm />
-                <SkeletonForm />
-                <SkeletonForm />
-                <SkeletonForm />
-                <SkeletonForm />
-              </>
-            )}
-          {routes?.length === 0 && !isLoading && (
+          {isLoading &&
+            Array.from({ length: 8 }).map((_, i) => (
+              <SkeletonForm key={i} />
+            ))}
+          {!isLoading &&
+            allRoutes.map((route) => (
+              <MyRouteCard key={route.routeId} route={route} controls={controls} />
+            ))}
+          {isFetchingNextPage &&
+            <SkeletonForm />
+          }
+          {allRoutes.length === 0 && !isLoading && (
             <Button
               asChild
               className="aspect-square w-full h-full rounded-md hover:cursor-pointer"
@@ -134,15 +149,8 @@ export default function MyRoutes() {
             </Button>
           )}
         </div>
+        <div ref={observerTarget} className="h-10" />
       </div>
-    </div>
-  );
-}
-
-function SkeletonForm() {
-  return (
-    <div className="space-y-2">
-      <Skeleton className="aspect-square w-full h-full rounded-md" />
     </div>
   );
 }

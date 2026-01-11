@@ -1,6 +1,5 @@
 "use client";
 
-import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import { MarkerProps, CommunityRoutes as CommunityRoutesResponse } from "@/types/types";
@@ -14,6 +13,7 @@ import {
   incrementPublicRouteView,
 } from "@/db/routes/routes.service";
 import { useEffect, useRef } from "react";
+import SkeletonForm from "@/components/skeleton-form";
 
 export default function CommunityRoutes() {
   const router = useRouter();
@@ -96,7 +96,7 @@ export default function CommunityRoutes() {
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {isLoading &&
             Array.from({ length: 8 }).map((_, i) => (
-              <SkeletonForm key={`initial-skeleton-${i}`} />
+              <SkeletonForm key={i} />
             ))}
           {!isLoading &&
             allRoutes.map((route) => (
@@ -107,23 +107,14 @@ export default function CommunityRoutes() {
               />
             ))}
           {isFetchingNextPage &&
-            Array.from({ length: 8 }).map((_, i) => (
-              <SkeletonForm key={`next-skeleton-${i}`} />
-            ))}
+            <SkeletonForm />
+          }
         </div>
-        {!isLoading && allRoutes.length === 0 && (
+        {allRoutes.length === 0 && !isLoading && (
           <p className="mt-6">There are no community routes.</p>
         )}
         <div ref={observerTarget} className="h-10" />
       </div>
-    </div>
-  );
-}
-
-function SkeletonForm() {
-  return (
-    <div className="space-y-2">
-      <Skeleton className="aspect-square w-full h-full rounded-md" />
     </div>
   );
 }
