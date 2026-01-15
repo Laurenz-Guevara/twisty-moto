@@ -11,7 +11,7 @@ export default function SettingsProfilePage() {
       </div>
       <Separator />
       <div>
-        <p>Hello Payments</p>
+        <p>Payments</p>
       </div>
     </div>
   );

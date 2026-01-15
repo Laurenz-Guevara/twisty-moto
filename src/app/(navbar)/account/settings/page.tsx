@@ -1,18 +1,14 @@
 import { Separator } from "@/components/ui/separator";
+import DeleteProfile from "@/components/delete-profile";
 
 export default function SettingsProfilePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium">Profile</h3>
-        <p className="text-sm text-muted-foreground">
-          Update your settings to better improve your experience.
-        </p>
+        <h3 className="text-lg font-medium">Settings</h3>
       </div>
       <Separator />
-      <div>
-        <p>Hello Settings</p>
-      </div>
+      <DeleteProfile />
     </div>
   );
 }

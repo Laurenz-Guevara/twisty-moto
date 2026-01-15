@@ -10,10 +10,10 @@ const sidebarNavItems = [
     title: "Settings",
     href: "/account/settings",
   },
-  {
-    title: "Manage Payments",
-    href: "/account/manage-payments",
-  },
+  // {
+  //   title: "Manage Payments",
+  //   href: "/account/manage-payments",
+  // },
   {
     title: "Notifications",
     href: "/account/notifications",
@@ -32,7 +32,7 @@ export default async function SettingsLayout(
               Account Management
             </h2>
             <p className="text-muted-foreground">
-              Manage your account settings and payment preferences.
+              Manage your account settings and public profile.
             </p>
           </div>
           <Separator className="my-6" />
